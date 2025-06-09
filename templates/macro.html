@@ -405,14 +405,83 @@ function updateDetailedIndicatorsData(indicators) {
     document.getElementById('detailTradeBalance').textContent = indicators.trade_balance ? `${indicators.trade_balance.toFixed(1)}B USD` : 'N/A';
 }
 
+function calculateMonthlyChanges(allIndicators, currentIndicators) {
+    // Sort indicators by date to get previous month's data
+    const sortedData = allIndicators.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    if (sortedData.length < 2) return;
+    
+    const current = currentIndicators;
+    const previous = sortedData[1]; // Second most recent
+    
+    // Calculate percentage changes
+    function calculateChange(current, previous) {
+        if (!current || !previous || previous === 0) return 0;
+        return ((current - previous) / previous) * 100;
+    }
+    
+    // Update monthly change displays
+    const inflationChange = calculateChange(current.inflation_rate, previous.inflation_rate);
+    const interestChange = calculateChange(current.interest_rate, previous.interest_rate);
+    const usdFxChange = calculateChange(current.etb_usd, previous.etb_usd);
+    const fxReservesChange = calculateChange(current.fx_reserves, previous.fx_reserves);
+    const gdpChange = calculateChange(current.gdp_growth, previous.gdp_growth);
+    const unemploymentChange = calculateChange(current.unemployment_rate, previous.unemployment_rate);
+    
+    document.getElementById('changeInflation').textContent = formatChange(inflationChange, '%');
+    document.getElementById('changeInterestRate').textContent = formatChange(interestChange, '%');
+    document.getElementById('changeUsdFx').textContent = formatChange(usdFxChange, '%');
+    document.getElementById('changeFxReserves').textContent = formatChange(fxReservesChange, '%');
+    document.getElementById('changeGdpGrowth').textContent = formatChange(gdpChange, '%');
+    document.getElementById('changeUnemployment').textContent = formatChange(unemploymentChange, '%');
+}
+
 function refreshMacroData() {
     location.reload();
 }
-                borderWidth: 2,
-                fill: true,
-                tension: 0.1
-            }, {
-                label: 'Inflation Rate (%)',
+
+async function loadDetailedIndicators() {
+    try {
+        const [latestResponse, allResponse] = await Promise.all([
+            fetch('/api/macro/latest'),
+            fetch('/api/macro')
+        ]);
+        
+        const latestData = await latestResponse.json();
+        const allData = await allResponse.json();
+        
+        if (latestData.latest_indicators) {
+            updateDetailedIndicatorsData(latestData.latest_indicators);
+            
+            // Update "Data as of" date
+            if (latestData.as_of) {
+                const asOfDate = new Date(latestData.as_of).toLocaleDateString();
+                document.getElementById('dataAsOf').textContent = asOfDate;
+            }
+            
+            // Calculate monthly changes
+            if (allData.indicators && allData.indicators.length >= 2) {
+                calculateMonthlyChanges(allData.indicators, latestData.latest_indicators);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading detailed indicators:', error);
+    }
+}
+
+function formatNumber(num) {
+    if (num >= 1e9) {
+        return `${(num / 1e9).toFixed(1)}B ETB`;
+    } else if (num >= 1e6) {
+        return `${(num / 1e6).toFixed(1)}M ETB`;
+    }
+    return `${num.toLocaleString()} ETB`;
+}
+
+function formatChange(value, suffix = '') {
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}${value.toFixed(2)}${suffix}`;
+}
                 data: sortedData.map(d => d.inflation_rate),
                 borderColor: '#ffc107',
                 backgroundColor: 'rgba(255, 193, 7, 0.1)',
