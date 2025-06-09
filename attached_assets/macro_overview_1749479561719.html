@@ -1,0 +1,557 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Macro Economic Overview - Ethiopia Capital Market{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">
+                <i class="fas fa-chart-area me-2"></i>
+                Macroeconomic Indicators
+            </h1>
+            <p class="text-muted">
+                Key economic indicators and trends for Ethiopia's economy and financial markets
+            </p>
+        </div>
+    </div>
+
+    <div class="row mb-4" id="key-indicators">
+        <div class="col-md-3 mb-3">
+            <div class="card indicator-card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-2x mb-2"></i>
+                    <h4 id="gdp-growth">-</h4>
+                    <p class="mb-0">GDP Growth (%)</p>
+                    <small id="gdp-date" class="opacity-75">-</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card indicator-card bg-danger text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-fire fa-2x mb-2"></i>
+                    <h4 id="inflation-rate">-</h4>
+                    <p class="mb-0">Inflation Rate (%)</p>
+                    <small id="inflation-date" class="opacity-75">-</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card indicator-card bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-2x mb-2"></i>
+                    <h4 id="interest-rate">-</h4>
+                    <p class="mb-0">Interest Rate (%)</p>
+                    <small id="interest-date" class="opacity-75">-</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card indicator-card bg-warning text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-exchange-alt fa-2x mb-2"></i>
+                    <h4 id="exchange-rate">-</h4>
+                    <p class="mb-0">ETB/USD Rate</p>
+                    <small id="exchange-date" class="opacity-75">-</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Economic Growth Indicators
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height: 350px;">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                    <div id="growth-chart-loading" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="growth-chart-error" class="text-danger text-center" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-money-bill-wave me-2"></i>
+                        Exchange Rates Trend
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height: 350px;">
+                        <canvas id="exchangeChart"></canvas>
+                    </div>
+                    <div id="exchange-chart-loading" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="exchange-chart-error" class="text-danger text-center" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-ship me-2"></i>
+                        Trade Balance & Investment
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height: 350px;">
+                        <canvas id="tradeChart"></canvas>
+                    </div>
+                    <div id="trade-chart-loading" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="trade-chart-error" class="text-danger text-center" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Latest Updates
+                    </h5>
+                </div>
+                <div class="card-body" id="latest-updates">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>
+                        Historical Macro Data
+                    </h5>
+                </div>
+                <div class="col-auto">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" 
+                                onclick="exportMacroData('csv')">
+                            <i class="fas fa-file-csv me-1"></i>CSV
+                        </button>
+                        <button type="button" class="btn btn-outline-success btn-sm" 
+                                onclick="exportMacroData('excel')">
+                            <i class="fas fa-file-excel me-1"></i>Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="macro-table-loading" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-muted">Loading historical data...</p>
+            </div>
+            
+            <div id="macro-table-error" class="alert alert-danger" style="display: none;" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span id="macro-error-message"></span>
+            </div>
+            
+            <div id="macro-table-container" style="display: none;">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>GDP Growth (%)</th>
+                                <th>Inflation (%)</th>
+                                <th>Interest Rate (%)</th>
+                                <th>ETB/USD</th>
+                                <th>Exports (M USD)</th>
+                                <th>Imports (M USD)</th>
+                                <th>Trade Balance</th>
+                                <th>FX Reserves</th>
+                            </tr>
+                        </thead>
+                        <tbody id="macro-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadMacroData();
+});
+
+let macroData = [];
+
+async function loadMacroData() {
+    try {
+        // CORRECTED: Changed the API endpoint from /api/v1/market/macro-indicators to /api/v1/macro-indicators
+        const response = await fetch('/api/v1/macro-indicators?limit=24');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        macroData = data.macro_indicators;
+        
+        updateKeyIndicators(macroData);
+        createCharts(macroData);
+        displayMacroTable(macroData);
+        
+    } catch (error) {
+        console.error('Error loading macro data:', error);
+        showError('Failed to load macroeconomic data');
+    }
+}
+
+function updateKeyIndicators(data) {
+    if (data.length === 0) return;
+    
+    const latest = data[0]; // Most recent data
+    
+    document.getElementById('gdp-growth').textContent = formatPercent(latest.gdp_growth);
+    document.getElementById('gdp-date').textContent = latest.date;
+    
+    document.getElementById('inflation-rate').textContent = formatPercent(latest.inflation_rate);
+    document.getElementById('inflation-date').textContent = latest.date;
+    
+    document.getElementById('interest-rate').textContent = formatPercent(latest.interest_rate);
+    document.getElementById('interest-date').textContent = latest.date;
+    
+    document.getElementById('exchange-rate').textContent = formatNumber(latest.etb_usd, 2);
+    document.getElementById('exchange-date').textContent = latest.date;
+    
+    // Update latest updates section
+    updateLatestUpdates(latest);
+}
+
+function updateLatestUpdates(latest) {
+    const container = document.getElementById('latest-updates');
+    
+    container.innerHTML = `
+        <div class="update-item mb-3">
+            <h6 class="text-primary mb-1">
+                <i class="fas fa-chart-line me-2"></i>Economic Performance
+            </h6>
+            <p class="small mb-0">GDP Growth: ${formatPercent(latest.gdp_growth)}</p>
+            <p class="small mb-0">Inflation: ${formatPercent(latest.inflation_rate)}</p>
+            <p class="small text-muted">As of ${latest.date}</p>
+        </div>
+        
+        <div class="update-item mb-3">
+            <h6 class="text-success mb-1">
+                <i class="fas fa-exchange-alt me-2"></i>Exchange Rates
+            </h6>
+            <p class="small mb-0">ETB/USD: ${formatNumber(latest.etb_usd, 2)}</p>
+            <p class="small mb-0">ETB/EUR: ${formatNumber(latest.etb_eur, 2)}</p>
+            <p class="small text-muted">Latest rates</p>
+        </div>
+        
+        ${latest.exports && latest.imports ? `
+        <div class="update-item mb-3">
+            <h6 class="text-info mb-1">
+                <i class="fas fa-ship me-2"></i>Trade Balance
+            </h6>
+            <p class="small mb-0">Exports: $${formatNumber(latest.exports)}M</p>
+            <p class="small mb-0">Imports: $${formatNumber(latest.imports)}M</p>
+            <p class="small text-muted">Trade data</p>
+        </div>
+        ` : ''}
+        
+        ${latest.fx_reserves ? `
+        <div class="update-item">
+            <h6 class="text-warning mb-1">
+                <i class="fas fa-piggy-bank me-2"></i>Reserves
+            </h6>
+            <p class="small mb-0">FX Reserves: $${formatNumber(latest.fx_reserves)}M</p>
+            <p class="small text-muted">Foreign exchange</p>
+        </div>
+        ` : ''}
+    `;
+}
+
+function createCharts(data) {
+    if (data.length === 0) {
+        showChartError('growth-chart-error', 'No data available for growth indicators');
+        showChartError('exchange-chart-error', 'No data available for exchange rates');
+        showChartError('trade-chart-error', 'No data available for trade data');
+        return;
+    }
+    
+    // Reverse data for chronological order
+    const reversedData = [...data].reverse();
+    
+    createGrowthChart(reversedData);
+    createExchangeChart(reversedData);
+    createTradeChart(reversedData);
+}
+
+function createGrowthChart(data) {
+    hideChartLoading('growth-chart-loading');
+    
+    const ctx = document.getElementById('growthChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(item => item.date),
+            datasets: [
+                {
+                    label: 'GDP Growth (%)',
+                    data: data.map(item => item.gdp_growth),
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    tension: 0.1
+                },
+                {
+                    label: 'Inflation Rate (%)',
+                    data: data.map(item => item.inflation_rate),
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    tension: 0.1
+                },
+                {
+                    label: 'Interest Rate (%)',
+                    data: data.map(item => item.interest_rate),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Percentage (%)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createExchangeChart(data) {
+    hideChartLoading('exchange-chart-loading');
+    
+    const ctx = document.getElementById('exchangeChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(item => item.date),
+            datasets: [
+                {
+                    label: 'ETB/USD',
+                    data: data.map(item => item.etb_usd),
+                    borderColor: 'rgb(255, 206, 86)',
+                    backgroundColor: 'rgba(255, 206, 86, 0.1)',
+                    tension: 0.1,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'ETB/EUR',
+                    data: data.map(item => item.etb_eur),
+                    borderColor: 'rgb(153, 102, 255)',
+                    backgroundColor: 'rgba(153, 102, 255, 0.1)',
+                    tension: 0.1,
+                    yAxisID: 'y'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Exchange Rate'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createTradeChart(data) {
+    hideChartLoading('trade-chart-loading');
+    
+    const ctx = document.getElementById('tradeChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.map(item => item.date),
+            datasets: [
+                {
+                    label: 'Exports (Million USD)',
+                    data: data.map(item => item.exports || 0),
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Imports (Million USD)',
+                    data: data.map(item => item.imports || 0),
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Trade Balance',
+                    data: data.map(item => item.trade_balance || 0),
+                    type: 'line',
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    tension: 0.1,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Million USD'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Trade Balance'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                }
+            }
+        }
+    });
+}
+
+function displayMacroTable(data) {
+    document.getElementById('macro-table-loading').style.display = 'none';
+    document.getElementById('macro-table-error').style.display = 'none';
+    document.getElementById('macro-table-container').style.display = 'block';
+    
+    const tbody = document.getElementById('macro-table-body');
+    tbody.innerHTML = '';
+    
+    if (data.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" class="text-center py-4">
+                    <i class="fas fa-info-circle fa-2x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">No historical data available.</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>${item.date}</strong></td>
+            <td>${formatPercent(item.gdp_growth)}</td>
+            <td>${formatPercent(item.inflation_rate)}</td>
+            <td>${formatPercent(item.interest_rate)}</td>
+            <td>${formatNumber(item.etb_usd, 2)}</td>
+            <td>${item.exports ? formatNumber(item.exports) : 'N/A'}</td>
+            <td>${item.imports ? formatNumber(item.imports) : 'N/A'}</td>
+            <td class="${item.trade_balance >= 0 ? 'text-success' : 'text-danger'}">
+                ${item.trade_balance ? formatNumber(item.trade_balance) : 'N/A'}
+            </td>
+            <td>${item.fx_reserves ? formatNumber(item.fx_reserves) : 'N/A'}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function hideChartLoading(elementId) {
+    document.getElementById(elementId).style.display = 'none';
+}
+
+function showChartError(elementId, message) {
+    const element = document.getElementById(elementId);
+    element.textContent = message;
+    element.style.display = 'block';
+}
+
+function showError(message) {
+    document.getElementById('macro-table-loading').style.display = 'none';
+    document.getElementById('macro-table-error').style.display = 'block';
+    document.getElementById('macro-error-message').textContent = message;
+    document.getElementById('macro-table-container').style.display = 'none';
+}
+
+function exportMacroData(format) {
+    const url = `/api/v1/downloads/macro-indicators?format=${format}`;
+    window.open(url, '_blank');
+}
+</script>
+{% endblock %}

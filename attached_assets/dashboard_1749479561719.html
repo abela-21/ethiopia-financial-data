@@ -1,0 +1,403 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Downloads - Ethiopia Capital Market{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">
+                <i class="fas fa-download me-2"></i>
+                Data Downloads
+            </h1>
+            <p class="text-muted">
+                Download comprehensive financial and economic data in various formats
+            </p>
+        </div>
+    </div>
+
+    <!-- Download Categories -->
+    <div class="row mb-4">
+        <div class="col-lg-4 mb-4">
+            <div class="card download-category h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-building me-2"></i>
+                        Companies Data
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Complete company information including profiles, financial metrics, and market data.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Company profiles</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Market capitalization</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Latest stock prices</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Industry classifications</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" onclick="downloadData('companies', 'csv')">
+                            <i class="fas fa-file-csv me-2"></i>Download CSV
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="downloadData('companies', 'excel')">
+                            <i class="fas fa-file-excel me-2"></i>Download Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card download-category h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Financial Data
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Detailed financial statements including income statements, balance sheets, and ratios.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Revenue & profit data</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Balance sheet items</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Financial ratios</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Cash flow statements</li>
+                    </ul>
+                    
+                    <!-- Financial Data Filters -->
+                    <div class="mt-3">
+                        <div class="mb-2">
+                            <label for="financial-company" class="form-label small">Company (Optional)</label>
+                            <select class="form-select form-select-sm" id="financial-company">
+                                <option value="">All Companies</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label for="financial-year" class="form-label small">Year (Optional)</label>
+                            <select class="form-select form-select-sm" id="financial-year">
+                                <option value="">All Years</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success" onclick="downloadFinancialData('csv')">
+                            <i class="fas fa-file-csv me-2"></i>Download CSV
+                        </button>
+                        <button class="btn btn-outline-success" onclick="downloadFinancialData('excel')">
+                            <i class="fas fa-file-excel me-2"></i>Download Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card download-category h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Stock Prices
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Historical stock price data with daily open, high, low, close prices and volumes.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Daily OHLC prices</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Trading volumes</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Price changes</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Historical trends</li>
+                    </ul>
+                    
+                    <!-- Stock Data Filters -->
+                    <div class="mt-3">
+                        <div class="mb-2">
+                            <label for="stock-company" class="form-label small">Company (Optional)</label>
+                            <select class="form-select form-select-sm" id="stock-company">
+                                <option value="">All Companies</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label for="stock-days" class="form-label small">Time Period</label>
+                            <select class="form-select form-select-sm" id="stock-days">
+                                <option value="30">Last 30 days</option>
+                                <option value="90">Last 90 days</option>
+                                <option value="180">Last 180 days</option>
+                                <option value="365" selected>Last 1 year</option>
+                                <option value="730">Last 2 years</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-info" onclick="downloadStockData('csv')">
+                            <i class="fas fa-file-csv me-2"></i>Download CSV
+                        </button>
+                        <button class="btn btn-outline-info" onclick="downloadStockData('excel')">
+                            <i class="fas fa-file-excel me-2"></i>Download Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Macro Economic Data -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-globe me-2"></i>
+                        Macroeconomic Indicators
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="card-text">
+                                Comprehensive macroeconomic data including GDP growth, inflation rates, exchange rates, 
+                                trade balances, government finances, and banking sector indicators.
+                            </p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>GDP and growth rates</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Inflation indicators</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Interest rates</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Exchange rates</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Trade data</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Government finances</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Banking indicators</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Commodity prices</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-warning" onclick="downloadData('macro-indicators', 'csv')">
+                                    <i class="fas fa-file-csv me-2"></i>Download CSV
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="downloadData('macro-indicators', 'excel')">
+                                    <i class="fas fa-file-excel me-2"></i>Download Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download History -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Download Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">File Formats</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-file-csv text-primary me-2"></i><strong>CSV:</strong> Universal format, compatible with Excel, Google Sheets, and data analysis tools</li>
+                                <li><i class="fas fa-file-excel text-success me-2"></i><strong>Excel:</strong> Formatted spreadsheets with proper data types and styling</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-info">Data Quality</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-shield-alt text-success me-2"></i>Validated and cleaned data</li>
+                                <li><i class="fas fa-clock text-info me-2"></i>Regularly updated datasets</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Complete and accurate information</li>
+                                <li><i class="fas fa-database text-primary me-2"></i>Consistent data structure</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> All downloads are generated in real-time with the latest available data. 
+                        File sizes may vary depending on the amount of data requested.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Status Modal -->
+    <div class="modal fade" id="downloadModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-download me-2"></i>Preparing Download
+                    </h5>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p id="download-status">Preparing your file...</p>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadCompaniesForFilters();
+    loadFinancialYears();
+});
+
+async function loadCompaniesForFilters() {
+    try {
+        const response = await fetch('/api/v1/companies?per_page=100');
+        if (!response.ok) return;
+        
+        const data = await response.json();
+        
+        // Populate financial company filter
+        const financialSelect = document.getElementById('financial-company');
+        const stockSelect = document.getElementById('stock-company');
+        
+        data.companies.forEach(company => {
+            const option1 = document.createElement('option');
+            option1.value = company.id;
+            option1.textContent = `${company.name} (${company.ticker})`;
+            financialSelect.appendChild(option1);
+            
+            const option2 = document.createElement('option');
+            option2.value = company.id;
+            option2.textContent = `${company.name} (${company.ticker})`;
+            stockSelect.appendChild(option2);
+        });
+        
+    } catch (error) {
+        console.error('Error loading companies for filters:', error);
+    }
+}
+
+function loadFinancialYears() {
+    const currentYear = new Date().getFullYear();
+    const yearSelect = document.getElementById('financial-year');
+    
+    for (let year = currentYear; year >= currentYear - 10; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+    }
+}
+
+function downloadData(dataType, format) {
+    showDownloadModal('Preparing ' + dataType.replace('-', ' ') + ' data...');
+    
+    const url = `/api/v1/downloads/${dataType}?format=${format}`;
+    
+    // Create a temporary link and trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    
+    // Hide modal after a short delay
+    setTimeout(() => {
+        hideDownloadModal();
+        showToast(`${dataType.replace('-', ' ')} download started`, 'success');
+    }, 1500);
+    
+    link.click();
+}
+
+function downloadFinancialData(format) {
+    const companyId = document.getElementById('financial-company').value;
+    const year = document.getElementById('financial-year').value;
+    
+    showDownloadModal('Preparing financial data...');
+    
+    let url = `/api/v1/downloads/financials?format=${format}`;
+    
+    if (companyId) {
+        url += `&company_id=${companyId}`;
+    }
+    
+    if (year) {
+        url += `&year=${year}`;
+    }
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    
+    setTimeout(() => {
+        hideDownloadModal();
+        showToast('Financial data download started', 'success');
+    }, 1500);
+    
+    link.click();
+}
+
+function downloadStockData(format) {
+    const companyId = document.getElementById('stock-company').value;
+    const days = document.getElementById('stock-days').value;
+    
+    showDownloadModal('Preparing stock price data...');
+    
+    let url = `/api/v1/downloads/stocks?format=${format}&days=${days}`;
+    
+    if (companyId) {
+        url += `&company_id=${companyId}`;
+    }
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    
+    setTimeout(() => {
+        hideDownloadModal();
+        showToast('Stock data download started', 'success');
+    }, 1500);
+    
+    link.click();
+}
+
+function showDownloadModal(message) {
+    document.getElementById('download-status').textContent = message;
+    const modal = new bootstrap.Modal(document.getElementById('downloadModal'));
+    modal.show();
+}
+
+function hideDownloadModal() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('downloadModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+</script>
+{% endblock %}

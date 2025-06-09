@@ -1,0 +1,271 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Home - Ethiopia Capital Market Data Platform{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Hero Section -->
+    <div class="hero-section text-center py-5 mb-5">
+        <h1 class="display-4 fw-bold text-primary mb-3">
+            <i class="fas fa-chart-line me-3"></i>
+            Ethiopia Capital Market Data Hub
+        </h1>
+        <p class="lead text-muted mb-4">
+            Your premier source for reliable stock, financial, and macroeconomic insights in Ethiopia.
+        </p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="search-container">
+                    <div class="input-group input-group-lg shadow-sm">
+                        <input type="text" id="search-input" class="form-control" 
+                               placeholder="Search for companies or tickers..." 
+                               autocomplete="off">
+                        <button class="btn btn-primary" type="button" id="search-button">
+                            <i class="fas fa-search me-2"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Summary Cards -->
+    <div class="row mb-5" id="summary-cards">
+        <div class="col-md-4 mb-3">
+            <div class="card summary-card h-100">
+                <div class="card-body text-center">
+                    <div class="summary-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h5 class="card-title">Listed Companies</h5>
+                    <h2 class="summary-value" id="total-companies">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </h2>
+                    <p class="text-muted small">Active on the market</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card summary-card h-100">
+                <div class="card-body text-center">
+                    <div class="summary-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h5 class="card-title">Market Cap (ETB)</h5>
+                    <h2 class="summary-value" id="market-cap">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </h2>
+                    <p class="text-muted small">Estimated total value</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card summary-card h-100">
+                <div class="card-body text-center">
+                    <div class="summary-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h5 class="card-title">Last Updated</h5>
+                    <h2 class="summary-value" id="last-updated">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </h2>
+                    <p class="text-muted small">Data freshness</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="text-center mb-4">
+                <i class="fas fa-rocket me-2"></i>
+                Quick Access
+            </h3>
+            <div class="row justify-content-center">
+                <div class="col-md-3 mb-3">
+                    <a href="/dashboard" class="btn btn-outline-primary btn-lg w-100 quick-access-btn">
+                        <i class="fas fa-building me-2"></i>
+                        <div>Companies</div>
+                        <small class="d-block">Browse all listed companies</small>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a href="/macro-overview" class="btn btn-outline-success btn-lg w-100 quick-access-btn">
+                        <i class="fas fa-chart-area me-2"></i>
+                        <div>Macro Data</div>
+                        <small class="d-block">Economic indicators</small>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a href="/downloads" class="btn btn-outline-info btn-lg w-100 quick-access-btn">
+                        <i class="fas fa-download me-2"></i>
+                        <div>Downloads</div>
+                        <small class="d-block">Export data files</small>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a href="/search_results" class="btn btn-outline-warning btn-lg w-100 quick-access-btn">
+                        <i class="fas fa-search me-2"></i>
+                        <div>Advanced Search</div>
+                        <small class="d-block">Find specific data</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest News Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-newspaper me-2"></i>
+                        Latest Market News
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div id="news-feed">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading news...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Loading latest news...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize page
+    fetchMarketSummary();
+    fetchNewsFeed();
+    setupSearch();
+});
+
+async function fetchMarketSummary() {
+    try {
+        const response = await fetch('/api/v1/market/summary');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        const summary = data.summary;
+        
+        document.getElementById("total-companies").textContent = summary.total_companies.toLocaleString();
+        document.getElementById("market-cap").textContent = formatCurrency(summary.market_cap);
+        document.getElementById("last-updated").textContent = data.metadata.last_updated;
+        
+    } catch (error) {
+        console.error("Failed to fetch market summary:", error);
+        document.getElementById("total-companies").textContent = "N/A";
+        document.getElementById("market-cap").textContent = "N/A";
+        document.getElementById("last-updated").textContent = "Error";
+    }
+}
+
+async function fetchNewsFeed() {
+    const newsFeed = document.getElementById('news-feed');
+    
+    try {
+        const response = await fetch('/api/v1/news');
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                newsFeed.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No recent news available.
+                    </div>
+                `;
+                return;
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const newsData = await response.json();
+        
+        if (newsData.length === 0) {
+            newsFeed.innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No recent news available.
+                </div>
+            `;
+        } else {
+            newsFeed.innerHTML = '';
+            newsData.forEach((newsItem, index) => {
+                const newsElement = document.createElement('div');
+                newsElement.className = 'news-item mb-3';
+                newsElement.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${newsItem.title}</h6>
+                            <div class="d-flex gap-3">
+                                ${newsItem.source ? `<small class="text-muted"><i class="fas fa-building me-1"></i>${newsItem.source}</small>` : ''}
+                                ${newsItem.category ? `<small class="text-muted"><i class="fas fa-tag me-1"></i>${newsItem.category}</small>` : ''}
+                                <small class="text-muted"><i class="fas fa-calendar me-1"></i>${newsItem.published_date}</small>
+                            </div>
+                        </div>
+                        ${newsItem.url && newsItem.url !== '#' ? `
+                            <a href="${newsItem.url}" target="_blank" class="btn btn-sm btn-outline-primary ms-3">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        ` : ''}
+                    </div>
+                    ${index < newsData.length - 1 ? '<hr>' : ''}
+                `;
+                newsFeed.appendChild(newsElement);
+            });
+        }
+    } catch (error) {
+        console.error('Failed to fetch news feed:', error);
+        newsFeed.innerHTML = `
+            <div class="text-center text-danger py-4">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Failed to load news. Please try again later.
+            </div>
+        `;
+    }
+}
+
+function setupSearch() {
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+    
+    searchButton.addEventListener('click', performSearch);
+    searchInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            performSearch();
+        }
+    });
+    
+    // Add autocomplete suggestions
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            // Could implement autocomplete here
+        }, 300);
+    });
+}
+
+function performSearch() {
+    const searchInput = document.getElementById('search-input');
+    const query = searchInput.value.trim();
+    
+    if (query) {
+        window.location.href = `/search_results?q=${encodeURIComponent(query)}`;
+    } else {
+        searchInput.focus();
+        showToast('Please enter a search term', 'warning');
+    }
+}
+</script>
+{% endblock %}

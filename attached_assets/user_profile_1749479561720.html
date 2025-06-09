@@ -1,0 +1,216 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}User Profile - Ethiopia Capital Market{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card profile-card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>
+                        Your Profile
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="profile-content">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Loading your profile...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="d-grid gap-2">
+                        <button id="logout-button" class="btn btn-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </button>
+                        <a href="/dashboard" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetchUserProfile();
+    
+    document.getElementById('logout-button').addEventListener('click', function() {
+        logout();
+    });
+});
+
+async function fetchUserProfile() {
+    const profileContent = document.getElementById('profile-content');
+    
+    // Show loading state
+    profileContent.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading your profile...</p>
+        </div>
+    `;
+    
+    const accessToken = localStorage.getItem('access_token');
+    
+    if (!accessToken) {
+        profileContent.innerHTML = `
+            <div class="alert alert-warning text-center" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                You are not logged in. 
+                <a href="/login" class="alert-link">Please login here</a>.
+            </div>
+        `;
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/v1/auth/profile', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.status === 401) {
+            profileContent.innerHTML = `
+                <div class="alert alert-danger text-center" role="alert">
+                    <i class="fas fa-lock me-2"></i>
+                    Your session has expired. 
+                    <a href="/login" class="alert-link">Please login again</a>.
+                </div>
+            `;
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            return;
+        }
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Failed to fetch profile: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const user = data.user;
+        
+        // Format dates
+        const createdAt = user.created_at ? 
+            new Date(user.created_at).toLocaleString() : 'Unknown';
+        const lastLogin = user.last_login ? 
+            new Date(user.last_login).toLocaleString() : 'Never logged in';
+        
+        // Display profile information
+        profileContent.innerHTML = `
+            <div class="text-center mb-4">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-circle fa-5x text-primary"></i>
+                </div>
+                <h4 class="mt-3 mb-0">${user.username}</h4>
+                <p class="text-muted">${user.email}</p>
+                <span class="badge bg-${user.role === 'admin' ? 'danger' : 'primary'} fs-6">
+                    <i class="fas fa-${user.role === 'admin' ? 'crown' : 'user'} me-1"></i>
+                    ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                </span>
+            </div>
+            
+            <div class="profile-details">
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <strong><i class="fas fa-user me-2 text-primary"></i>Username:</strong>
+                    </div>
+                    <div class="col-8">${user.username}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <strong><i class="fas fa-envelope me-2 text-primary"></i>Email:</strong>
+                    </div>
+                    <div class="col-8">${user.email}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <strong><i class="fas fa-shield-alt me-2 text-primary"></i>Role:</strong>
+                    </div>
+                    <div class="col-8">
+                        <span class="badge bg-${user.role === 'admin' ? 'danger' : 'primary'}">
+                            ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <strong><i class="fas fa-calendar-plus me-2 text-primary"></i>Member Since:</strong>
+                    </div>
+                    <div class="col-8">${createdAt}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <strong><i class="fas fa-clock me-2 text-primary"></i>Last Login:</strong>
+                    </div>
+                    <div class="col-8">${lastLogin}</div>
+                </div>
+            </div>
+            
+            <div class="mt-4 p-3 bg-light rounded">
+                <h6 class="mb-2">
+                    <i class="fas fa-info-circle me-2 text-info"></i>
+                    Account Information
+                </h6>
+                <ul class="list-unstyled small mb-0">
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Account is active and verified</li>
+                    <li><i class="fas fa-shield-alt text-success me-2"></i>Your data is secure and protected</li>
+                    <li><i class="fas fa-download text-info me-2"></i>You can download market data in various formats</li>
+                    ${user.role === 'admin' ? '<li><i class="fas fa-crown text-warning me-2"></i>You have administrative privileges</li>' : ''}
+                </ul>
+            </div>
+        `;
+        
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        profileContent.innerHTML = `
+            <div class="alert alert-danger text-center" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Error:</strong> ${error.message}
+                <br><small>Please try refreshing the page or contact support if the problem persists.</small>
+            </div>
+        `;
+    }
+}
+
+function logout() {
+    // Show confirmation
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        
+        // Call logout API
+        fetch('/api/v1/auth/logout', {
+            method: 'POST'
+        }).then(() => {
+            showToast('Logged out successfully', 'success');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 1000);
+        }).catch(error => {
+            console.error('Logout error:', error);
+            window.location.href = '/login';
+        });
+    }
+}
+</script>
+{% endblock %}

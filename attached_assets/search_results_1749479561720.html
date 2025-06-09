@@ -1,0 +1,449 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Search Results - Ethiopia Capital Market{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Search Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item active">Search Results</li>
+                </ol>
+            </nav>
+            <h1 class="mb-3" id="search-results-heading">
+                <i class="fas fa-search me-2"></i>Search Results
+            </h1>
+            
+            <!-- Search Bar -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" id="search-input" class="form-control" 
+                               placeholder="Search for companies or tickers..." 
+                               value="{{ request.args.get('q', '') }}">
+                        <button class="btn btn-primary" type="button" id="search-button">
+                            <i class="fas fa-search me-2"></i> Search
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" id="sort-select">
+                        <option value="name">Sort by Name</option>
+                        <option value="industry">Sort by Industry</option>
+                        <option value="sector">Sort by Sector</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-filter me-2"></i>Filters
+                <button class="btn btn-sm btn-outline-secondary float-end" id="clear-filters">
+                    Clear All
+                </button>
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="industry-filter" class="form-label">Industry</label>
+                    <select class="form-select" id="industry-filter">
+                        <option value="">All Industries</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="sector-filter" class="form-label">Sector</label>
+                    <select class="form-select" id="sector-filter">
+                        <option value="">All Sectors</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="results-per-page" class="form-label">Results per page</label>
+                    <select class="form-select" id="results-per-page">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Container -->
+    <div id="results-container">
+        <!-- Loading State -->
+        <div id="loading-spinner" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Searching for results...</p>
+        </div>
+
+        <!-- No Results -->
+        <div id="no-results" class="text-center py-5" style="display: none;">
+            <div class="card">
+                <div class="card-body">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4>No Results Found</h4>
+                    <p class="text-muted">
+                        No companies match your search criteria. Try adjusting your search terms or filters.
+                    </p>
+                    <button class="btn btn-primary" onclick="clearSearch()">
+                        <i class="fas fa-refresh me-2"></i>Clear Search
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-message" class="alert alert-danger" style="display: none;" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Error:</strong> <span id="error-text"></span>
+        </div>
+
+        <!-- Results Grid -->
+        <div id="results-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" style="display: none;">
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Search results pagination" id="pagination-container" style="display: none;">
+            <ul class="pagination justify-content-center mt-4" id="pagination">
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSearch();
+    loadFilters();
+    setupEventListeners();
+});
+
+let currentPage = 1;
+let currentQuery = '';
+let currentFilters = {};
+
+function initializeSearch() {
+    const urlParams = new URLSearchParams(window.location.search);
+    currentQuery = urlParams.get('q') || '';
+    
+    if (currentQuery) {
+        document.getElementById('search-input').value = currentQuery;
+        document.getElementById('search-results-heading').innerHTML = 
+            `<i class="fas fa-search me-2"></i>Search Results for "${currentQuery}"`;
+        performSearch();
+    } else {
+        showNoResults();
+    }
+}
+
+function setupEventListeners() {
+    // Search functionality
+    document.getElementById('search-button').addEventListener('click', handleSearch);
+    document.getElementById('search-input').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            handleSearch();
+        }
+    });
+    
+    // Filter changes
+    document.getElementById('industry-filter').addEventListener('change', applyFilters);
+    document.getElementById('sector-filter').addEventListener('change', applyFilters);
+    document.getElementById('sort-select').addEventListener('change', applyFilters);
+    document.getElementById('results-per-page').addEventListener('change', applyFilters);
+    
+    // Clear filters
+    document.getElementById('clear-filters').addEventListener('click', clearFilters);
+}
+
+async function loadFilters() {
+    try {
+        // Load industries
+        const industriesResponse = await fetch('/api/v1/companies/industries');
+        if (industriesResponse.ok) {
+            const industriesData = await industriesResponse.json();
+            const industrySelect = document.getElementById('industry-filter');
+            industriesData.industries.forEach(industry => {
+                const option = document.createElement('option');
+                option.value = industry;
+                option.textContent = industry;
+                industrySelect.appendChild(option);
+            });
+        }
+        
+        // Load sectors
+        const sectorsResponse = await fetch('/api/v1/companies/sectors');
+        if (sectorsResponse.ok) {
+            const sectorsData = await sectorsResponse.json();
+            const sectorSelect = document.getElementById('sector-filter');
+            sectorsData.sectors.forEach(sector => {
+                const option = document.createElement('option');
+                option.value = sector;
+                option.textContent = sector;
+                sectorSelect.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading filters:', error);
+    }
+}
+
+function handleSearch() {
+    currentQuery = document.getElementById('search-input').value.trim();
+    currentPage = 1;
+    
+    if (currentQuery) {
+        // Update URL
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set('q', currentQuery);
+        window.history.pushState({}, '', newUrl);
+        
+        document.getElementById('search-results-heading').innerHTML = 
+            `<i class="fas fa-search me-2"></i>Search Results for "${currentQuery}"`;
+        
+        performSearch();
+    } else {
+        showToast('Please enter a search term', 'warning');
+    }
+}
+
+function applyFilters() {
+    currentFilters = {
+        industry: document.getElementById('industry-filter').value,
+        sector: document.getElementById('sector-filter').value,
+        sort: document.getElementById('sort-select').value,
+        per_page: document.getElementById('results-per-page').value
+    };
+    
+    currentPage = 1;
+    performSearch();
+}
+
+function clearFilters() {
+    document.getElementById('industry-filter').value = '';
+    document.getElementById('sector-filter').value = '';
+    document.getElementById('sort-select').value = 'name';
+    document.getElementById('results-per-page').value = '20';
+    
+    currentFilters = {};
+    currentPage = 1;
+    performSearch();
+}
+
+function clearSearch() {
+    document.getElementById('search-input').value = '';
+    currentQuery = '';
+    currentPage = 1;
+    currentFilters = {};
+    
+    // Update URL
+    window.history.pushState({}, '', window.location.pathname);
+    
+    document.getElementById('search-results-heading').innerHTML = 
+        '<i class="fas fa-search me-2"></i>Search Results';
+    
+    showNoResults();
+}
+
+async function performSearch() {
+    showLoading();
+    
+    try {
+        const params = new URLSearchParams({
+            page: currentPage,
+            per_page: currentFilters.per_page || 20,
+            search: currentQuery || '',
+            ...currentFilters
+        });
+        
+        const response = await fetch(`/api/v1/companies?${params}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        displayResults(data);
+        
+    } catch (error) {
+        console.error('Error performing search:', error);
+        showError(`Failed to search companies: ${error.message}`);
+    }
+}
+
+function showLoading() {
+    document.getElementById('loading-spinner').style.display = 'block';
+    document.getElementById('no-results').style.display = 'none';
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('results-grid').style.display = 'none';
+    document.getElementById('pagination-container').style.display = 'none';
+}
+
+function showNoResults() {
+    document.getElementById('loading-spinner').style.display = 'none';
+    document.getElementById('no-results').style.display = 'block';
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('results-grid').style.display = 'none';
+    document.getElementById('pagination-container').style.display = 'none';
+}
+
+function showError(message) {
+    document.getElementById('loading-spinner').style.display = 'none';
+    document.getElementById('no-results').style.display = 'none';
+    document.getElementById('error-message').style.display = 'block';
+    document.getElementById('error-text').textContent = message;
+    document.getElementById('results-grid').style.display = 'none';
+    document.getElementById('pagination-container').style.display = 'none';
+}
+
+function displayResults(data) {
+    document.getElementById('loading-spinner').style.display = 'none';
+    document.getElementById('no-results').style.display = 'none';
+    document.getElementById('error-message').style.display = 'none';
+    
+    if (data.companies.length === 0) {
+        showNoResults();
+        return;
+    }
+    
+    const resultsGrid = document.getElementById('results-grid');
+    resultsGrid.innerHTML = '';
+    resultsGrid.style.display = 'flex';
+    
+    data.companies.forEach(company => {
+        const card = createCompanyCard(company);
+        resultsGrid.appendChild(card);
+    });
+    
+    // Show pagination if needed
+    if (data.pagination.pages > 1) {
+        createPagination(data.pagination);
+        document.getElementById('pagination-container').style.display = 'block';
+    }
+}
+
+function createCompanyCard(company) {
+    const col = document.createElement('div');
+    col.className = 'col';
+    
+    const marketCapText = company.market_cap ? 
+        `Market Cap: ${formatCurrency(company.market_cap)}` : 
+        'Market Cap: N/A';
+    
+    const priceText = company.current_price ? 
+        `Current Price: ${formatCurrency(company.current_price)}` : 
+        'Current Price: N/A';
+    
+    col.innerHTML = `
+        <div class="card h-100 company-card">
+            <div class="card-body">
+                <h5 class="card-title text-primary">
+                    ${company.name}
+                    <span class="badge bg-primary ms-2">${company.ticker}</span>
+                </h5>
+                <p class="card-text">
+                    <small class="text-muted">
+                        <i class="fas fa-industry me-1"></i>${company.industry}
+                        ${company.sector ? ` | <i class="fas fa-sitemap me-1"></i>${company.sector}` : ''}
+                    </small>
+                </p>
+                ${company.description ? `
+                    <p class="card-text text-muted small">
+                        ${company.description.length > 100 ? 
+                            company.description.substring(0, 100) + '...' : 
+                            company.description}
+                    </p>
+                ` : ''}
+                <div class="row text-center mt-3">
+                    <div class="col-6">
+                        <small class="text-muted d-block">${priceText}</small>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">${marketCapText}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent">
+                <div class="d-flex justify-content-between">
+                    <a href="/company/${company.id}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                onclick="downloadCompanyData(${company.id}, 'csv')"
+                                title="Download CSV">
+                            <i class="fas fa-file-csv"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                onclick="downloadCompanyData(${company.id}, 'excel')"
+                                title="Download Excel">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return col;
+}
+
+function createPagination(pagination) {
+    const paginationList = document.getElementById('pagination');
+    paginationList.innerHTML = '';
+    
+    // Previous button
+    const prevItem = document.createElement('li');
+    prevItem.className = `page-item ${!pagination.has_prev ? 'disabled' : ''}`;
+    prevItem.innerHTML = `
+        <a class="page-link" href="#" onclick="changePage(${pagination.page - 1})">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+    `;
+    paginationList.appendChild(prevItem);
+    
+    // Page numbers
+    const startPage = Math.max(1, pagination.page - 2);
+    const endPage = Math.min(pagination.pages, pagination.page + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageItem = document.createElement('li');
+        pageItem.className = `page-item ${i === pagination.page ? 'active' : ''}`;
+        pageItem.innerHTML = `
+            <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+        `;
+        paginationList.appendChild(pageItem);
+    }
+    
+    // Next button
+    const nextItem = document.createElement('li');
+    nextItem.className = `page-item ${!pagination.has_next ? 'disabled' : ''}`;
+    nextItem.innerHTML = `
+        <a class="page-link" href="#" onclick="changePage(${pagination.page + 1})">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+    `;
+    paginationList.appendChild(nextItem);
+}
+
+function changePage(page) {
+    if (page < 1) return;
+    currentPage = page;
+    performSearch();
+}
+
+function downloadCompanyData(companyId, format) {
+    const url = `/api/v1/downloads/financials?company_id=${companyId}&format=${format}`;
+    window.open(url, '_blank');
+}
+</script>
+{% endblock %}
