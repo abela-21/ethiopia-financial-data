@@ -159,22 +159,11 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.6;
 }
 
-/* Fix for faded description text like in download sections */
-p.text-muted, .text-muted {
+/* Fix only the very faded description text under icons */
+.card-body p.text-muted {
     color: var(--gunmetal) !important;
-    opacity: 0.85;
-}
-
-/* Specific fix for download page descriptions that are too faded */
-.card-body p {
-    color: var(--gunmetal);
-    opacity: 0.9;
-}
-
-/* Company descriptions and similar content */
-.description, .company-description {
-    color: var(--midnight-green);
-    font-weight: var(--font-weight-normal);
+    opacity: 1;
+    font-weight: 400;
 }
 
 /* Navigation Styles */
