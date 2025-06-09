@@ -141,48 +141,40 @@ body {
 .display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
     font-weight: var(--font-weight-bold);
     line-height: 1.2;
-    color: var(--dark-color) !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: var(--font-weight-semibold);
-    color: var(--dark-color) !important;
+    color: var(--dark-color);
 }
 
 .lead {
     font-weight: var(--font-weight-normal);
     font-size: 1.125rem;
-    color: var(--dark-color) !important;
 }
 
-/* Text Visibility Fixes */
-p, .text-muted, small, .small {
-    color: var(--gunmetal) !important;
-    background: transparent !important;
-}
-
-/* Description Text Visibility */
-.card-text, .description, .company-description {
-    color: var(--gunmetal) !important;
-    background-color: transparent !important;
+/* Targeted visibility fixes for specific problem areas */
+.card-text {
+    color: var(--gunmetal);
     line-height: 1.6;
-    font-size: 0.95rem;
 }
 
-/* Ensure good contrast for all text */
-.text-dark {
+/* Fix for faded description text like in download sections */
+p.text-muted, .text-muted {
     color: var(--gunmetal) !important;
+    opacity: 0.85;
 }
 
-.text-secondary {
-    color: #6c757d !important;
+/* Specific fix for download page descriptions that are too faded */
+.card-body p {
+    color: var(--gunmetal);
+    opacity: 0.9;
 }
 
-/* Fix for text on light backgrounds */
-.bg-light .text-muted,
-.bg-light-silver .text-muted,
-.card .text-muted {
-    color: var(--gunmetal) !important;
+/* Company descriptions and similar content */
+.description, .company-description {
+    color: var(--midnight-green);
+    font-weight: var(--font-weight-normal);
 }
 
 /* Navigation Styles */
@@ -229,7 +221,6 @@ p, .text-muted, small, .small {
     border-radius: var(--card-border-radius);
     box-shadow: var(--shadow-sm);
     transition: all var(--transition-normal);
-    background-color: white !important;
 }
 
 .card:hover {
@@ -238,46 +229,9 @@ p, .text-muted, small, .small {
 }
 
 .card-header {
-    background-color: var(--light-silver) !important;
+    background-color: white;
     border-bottom: 1px solid rgba(0, 0, 0, 0.125);
     font-weight: var(--font-weight-semibold);
-    color: var(--midnight-green) !important;
-}
-
-.card-body {
-    background-color: white !important;
-    color: var(--gunmetal) !important;
-}
-
-.card-title {
-    color: var(--midnight-green) !important;
-    font-weight: var(--font-weight-semibold);
-}
-
-.card-subtitle {
-    color: var(--gunmetal) !important;
-}
-
-/* Ensure all card text is visible */
-.card p, .card .text-muted, .card small {
-    color: var(--gunmetal) !important;
-    background: transparent !important;
-}
-
-/* Table text visibility */
-.table td, .table th {
-    color: var(--gunmetal) !important;
-    background-color: transparent !important;
-}
-
-.table-striped > tbody > tr:nth-of-type(odd) > td {
-    background-color: rgba(211, 219, 221, 0.1) !important;
-}
-
-/* Badge visibility */
-.badge {
-    color: white !important;
-    font-weight: var(--font-weight-medium);
 }
 
 /* Company Card Specific */
