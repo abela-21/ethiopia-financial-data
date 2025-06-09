@@ -1,0 +1,557 @@
+{% extends "base.html" %}
+
+{% block title %}Economic Indicators - Ethiopia Capital Market{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 fw-bold text-primary">Economic Indicators</h1>
+                    <p class="text-muted mb-0">Key macroeconomic data for Ethiopia</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="refreshMacroData()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                    <a href="{{ url_for('main.downloads') }}" class="btn btn-outline-success">
+                        <i class="fas fa-download me-2"></i>Export Data
+                    </a>
+                </div>
+            </div>
+
+            <!-- Latest Indicators Overview -->
+            <div class="row mb-4" id="latestIndicators">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="icon-circle bg-success text-white mx-auto mb-3">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3 class="h4 fw-bold text-success" id="gdpGrowth">-</h3>
+                            <p class="text-muted mb-0">GDP Growth (%)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="icon-circle bg-warning text-white mx-auto mb-3">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <h3 class="h4 fw-bold text-warning" id="inflationRate">-</h3>
+                            <p class="text-muted mb-0">Inflation Rate (%)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="icon-circle bg-info text-white mx-auto mb-3">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <h3 class="h4 fw-bold text-info" id="usdExchange">-</h3>
+                            <p class="text-muted mb-0">USD Exchange (ETB)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="icon-circle bg-danger text-white mx-auto mb-3">
+                                <i class="fas fa-percent"></i>
+                            </div>
+                            <h3 class="h4 fw-bold text-danger" id="interestRate">-</h3>
+                            <p class="text-muted mb-0">Interest Rate (%)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="row mb-4">
+                <!-- Economic Growth Chart -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-area text-primary me-2"></i>Economic Growth Trends
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div style="height: 300px;" id="growthChartContainer">
+                                <canvas id="growthChart"></canvas>
+                            </div>
+                            <div class="text-center py-4 d-none" id="growthLoading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="text-muted mt-2">Loading growth data...</p>
+                            </div>
+                            <div class="text-center py-4 d-none" id="growthError">
+                                <i class="fas fa-exclamation-triangle fa-2x text-muted mb-3"></i>
+                                <p class="text-muted">No growth data available</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exchange Rates Chart -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-exchange-alt text-primary me-2"></i>Exchange Rates
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div style="height: 300px;" id="exchangeChartContainer">
+                                <canvas id="exchangeChart"></canvas>
+                            </div>
+                            <div class="text-center py-4 d-none" id="exchangeLoading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="text-muted mt-2">Loading exchange rate data...</p>
+                            </div>
+                            <div class="text-center py-4 d-none" id="exchangeError">
+                                <i class="fas fa-exclamation-triangle fa-2x text-muted mb-3"></i>
+                                <p class="text-muted">No exchange rate data available</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Indicators -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-table text-primary me-2"></i>Detailed Economic Indicators
+                                </h5>
+                                <small class="text-muted" id="dataAsOf">Data as of: Loading...</small>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="detailedIndicators">
+                                <!-- Real Sector -->
+                                <div class="col-lg-4 mb-4">
+                                    <h6 class="text-primary fw-bold mb-3">
+                                        <i class="fas fa-industry me-2"></i>Real Sector
+                                    </h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <tbody>
+                                                <tr>
+                                                    <td>GDP Growth</td>
+                                                    <td class="text-end fw-bold" id="detailGdpGrowth">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>GDP per Capita</td>
+                                                    <td class="text-end" id="detailGdpPerCapita">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Inflation Rate</td>
+                                                    <td class="text-end fw-bold" id="detailInflation">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Unemployment Rate</td>
+                                                    <td class="text-end" id="detailUnemployment">-</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Financial Sector -->
+                                <div class="col-lg-4 mb-4">
+                                    <h6 class="text-success fw-bold mb-3">
+                                        <i class="fas fa-university me-2"></i>Financial Sector
+                                    </h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <tbody>
+                                                <tr>
+                                                    <td>Interest Rate</td>
+                                                    <td class="text-end fw-bold" id="detailInterestRate">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Total Deposits</td>
+                                                    <td class="text-end" id="detailTotalDeposits">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Total Loans</td>
+                                                    <td class="text-end" id="detailTotalLoans">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>NPL Ratio</td>
+                                                    <td class="text-end" id="detailNplRatio">-</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- External Sector -->
+                                <div class="col-lg-4 mb-4">
+                                    <h6 class="text-warning fw-bold mb-3">
+                                        <i class="fas fa-globe me-2"></i>External Sector
+                                    </h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <tbody>
+                                                <tr>
+                                                    <td>USD Exchange</td>
+                                                    <td class="text-end fw-bold" id="detailUsdExchange">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>EUR Exchange</td>
+                                                    <td class="text-end" id="detailEurExchange">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>FX Reserves</td>
+                                                    <td class="text-end" id="detailFxReserves">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Trade Balance</td>
+                                                    <td class="text-end" id="detailTradeBalance">-</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Monthly Changes -->
+                            <div class="row mt-4" id="monthlyChanges">
+                                <div class="col-12">
+                                    <h6 class="text-info fw-bold mb-3">
+                                        <i class="fas fa-calendar-alt me-2"></i>Monthly Changes
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-lg-2 col-md-4 col-6 text-center mb-3">
+                                            <div class="p-3 border rounded">
+                                                <div class="fw-bold text-primary" id="changeInflation">-</div>
+                                                <small class="text-muted">Inflation Δ</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-4 col-6 text-center mb-3">
+                                            <div class="p-3 border rounded">
+                                                <div class="fw-bold text-success" id="changeInterestRate">-</div>
+                                                <small class="text-muted">Interest Rate Δ</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-4 col-6 text-center mb-3">
+                                            <div class="p-3 border rounded">
+                                                <div class="fw-bold text-warning" id="changeUsdFx">-</div>
+                                                <small class="text-muted">USD FX Δ (%)</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-4 col-6 text-center mb-3">
+                                            <div class="p-3 border rounded">
+                                                <div class="fw-bold text-info" id="changeFxReserves">-</div>
+                                                <small class="text-muted">FX Reserves Δ</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-4 col-6 text-center mb-3">
+                                            <div class="p-3 border rounded">
+                                                <div class="fw-bold text-danger" id="changeTradeBalance">-</div>
+                                                <small class="text-muted">Trade Balance Δ</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-4 col-6 text-center mb-3">
+                                            <div class="p-3 border rounded">
+                                                <div class="fw-bold text-primary" id="changeCurrentAccount">-</div>
+                                                <small class="text-muted">Current Acct Δ</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Initialize macro data loading
+document.addEventListener('DOMContentLoaded', function() {
+    loadLatestIndicators();
+    loadMacroIndicators();
+    loadMacroSummary();
+    
+    // Auto-refresh every 10 minutes
+    setInterval(function() {
+        loadLatestIndicators();
+        loadMacroIndicators();
+        loadMacroSummary();
+    }, 600000);
+});
+
+// Load latest indicators for the overview cards
+async function loadLatestIndicators() {
+    try {
+        const response = await fetch('/api/macro/latest');
+        if (response.ok) {
+            const data = await response.json();
+            updateLatestIndicators(data.latest_indicators);
+            document.getElementById('dataAsOf').textContent = `Data as of: ${data.as_of}`;
+        } else {
+            showLatestIndicatorsError();
+        }
+    } catch (error) {
+        console.error('Error loading latest indicators:', error);
+        showLatestIndicatorsError();
+    }
+}
+
+function updateLatestIndicators(indicators) {
+    document.getElementById('gdpGrowth').textContent = indicators.gdp_growth ? `${indicators.gdp_growth.toFixed(1)}%` : 'N/A';
+    document.getElementById('inflationRate').textContent = indicators.inflation_rate ? `${indicators.inflation_rate.toFixed(1)}%` : 'N/A';
+    document.getElementById('usdExchange').textContent = indicators.etb_usd ? `${indicators.etb_usd.toFixed(2)}` : 'N/A';
+    document.getElementById('interestRate').textContent = indicators.interest_rate ? `${indicators.interest_rate.toFixed(1)}%` : 'N/A';
+    
+    // Update detailed indicators
+    updateDetailedIndicators(indicators);
+}
+
+function updateDetailedIndicators(indicators) {
+    document.getElementById('detailGdpGrowth').textContent = indicators.gdp_growth ? `${indicators.gdp_growth.toFixed(1)}%` : 'N/A';
+    document.getElementById('detailGdpPerCapita').textContent = indicators.gdp_per_capita ? `$${indicators.gdp_per_capita.toLocaleString()}` : 'N/A';
+    document.getElementById('detailInflation').textContent = indicators.inflation_rate ? `${indicators.inflation_rate.toFixed(1)}%` : 'N/A';
+    document.getElementById('detailUnemployment').textContent = indicators.unemployment_rate ? `${indicators.unemployment_rate.toFixed(1)}%` : 'N/A';
+    
+    document.getElementById('detailInterestRate').textContent = indicators.interest_rate ? `${indicators.interest_rate.toFixed(1)}%` : 'N/A';
+    document.getElementById('detailTotalDeposits').textContent = indicators.total_deposits ? formatBillion(indicators.total_deposits) : 'N/A';
+    document.getElementById('detailTotalLoans').textContent = indicators.total_loans ? formatBillion(indicators.total_loans) : 'N/A';
+    document.getElementById('detailNplRatio').textContent = indicators.npl_ratio ? `${indicators.npl_ratio.toFixed(1)}%` : 'N/A';
+    
+    document.getElementById('detailUsdExchange').textContent = indicators.etb_usd ? `${indicators.etb_usd.toFixed(2)} ETB` : 'N/A';
+    document.getElementById('detailEurExchange').textContent = indicators.etb_eur ? `${indicators.etb_eur.toFixed(2)} ETB` : 'N/A';
+    document.getElementById('detailFxReserves').textContent = indicators.fx_reserves ? formatBillion(indicators.fx_reserves) : 'N/A';
+    document.getElementById('detailTradeBalance').textContent = indicators.trade_balance ? formatBillion(indicators.trade_balance) : 'N/A';
+}
+
+// Load macro indicators for charts
+async function loadMacroIndicators() {
+    showChartLoading('growth');
+    showChartLoading('exchange');
+    
+    try {
+        const response = await fetch('/api/macro-indicators?limit=12');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.macro_indicators && data.macro_indicators.length > 0) {
+                renderGrowthChart(data.macro_indicators);
+                renderExchangeChart(data.macro_indicators);
+            } else {
+                showChartError('growth');
+                showChartError('exchange');
+            }
+        } else {
+            throw new Error('Failed to load macro indicators');
+        }
+    } catch (error) {
+        console.error('Error loading macro indicators:', error);
+        showChartError('growth');
+        showChartError('exchange');
+    }
+}
+
+// Load macro summary for monthly changes
+async function loadMacroSummary() {
+    try {
+        const response = await fetch('/api/macro/summary');
+        if (response.ok) {
+            const data = await response.json();
+            updateMonthlyChanges(data.monthly_changes);
+        } else {
+            showMonthlyChangesError();
+        }
+    } catch (error) {
+        console.error('Error loading macro summary:', error);
+        showMonthlyChangesError();
+    }
+}
+
+function updateMonthlyChanges(changes) {
+    document.getElementById('changeInflation').textContent = changes.inflation_change ? formatChange(changes.inflation_change, '%') : 'N/A';
+    document.getElementById('changeInterestRate').textContent = changes.interest_rate_change ? formatChange(changes.interest_rate_change, '%') : 'N/A';
+    document.getElementById('changeUsdFx').textContent = changes.fx_usd_change ? formatChange(changes.fx_usd_change, '%') : 'N/A';
+    document.getElementById('changeFxReserves').textContent = changes.fx_reserves_change ? formatBillion(changes.fx_reserves_change) : 'N/A';
+    document.getElementById('changeTradeBalance').textContent = changes.trade_balance_change ? formatBillion(changes.trade_balance_change) : 'N/A';
+    document.getElementById('changeCurrentAccount').textContent = changes.current_account_change ? formatBillion(changes.current_account_change) : 'N/A';
+}
+
+function renderGrowthChart(indicators) {
+    const ctx = document.getElementById('growthChart').getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (window.growthChart) {
+        window.growthChart.destroy();
+    }
+    
+    const sortedData = indicators.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    window.growthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: sortedData.map(d => new Date(d.date).toLocaleDateString()),
+            datasets: [{
+                label: 'GDP Growth (%)',
+                data: sortedData.map(d => d.gdp_growth),
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1
+            }, {
+                label: 'Inflation Rate (%)',
+                data: sortedData.map(d => d.inflation_rate),
+                borderColor: '#ffc107',
+                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Percentage (%)'
+                    }
+                }
+            }
+        }
+    });
+    
+    hideChartLoading('growth');
+}
+
+function renderExchangeChart(indicators) {
+    const ctx = document.getElementById('exchangeChart').getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (window.exchangeChart) {
+        window.exchangeChart.destroy();
+    }
+    
+    const sortedData = indicators.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    window.exchangeChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: sortedData.map(d => new Date(d.date).toLocaleDateString()),
+            datasets: [{
+                label: 'ETB/USD',
+                data: sortedData.map(d => d.etb_usd),
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1
+            }, {
+                label: 'ETB/EUR',
+                data: sortedData.map(d => d.etb_eur),
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Exchange Rate (ETB)'
+                    }
+                }
+            }
+        }
+    });
+    
+    hideChartLoading('exchange');
+}
+
+function showChartLoading(chartType) {
+    document.getElementById(`${chartType}ChartContainer`).classList.add('d-none');
+    document.getElementById(`${chartType}Loading`).classList.remove('d-none');
+    document.getElementById(`${chartType}Error`).classList.add('d-none');
+}
+
+function hideChartLoading(chartType) {
+    document.getElementById(`${chartType}ChartContainer`).classList.remove('d-none');
+    document.getElementById(`${chartType}Loading`).classList.add('d-none');
+    document.getElementById(`${chartType}Error`).classList.add('d-none');
+}
+
+function showChartError(chartType) {
+    document.getElementById(`${chartType}ChartContainer`).classList.add('d-none');
+    document.getElementById(`${chartType}Loading`).classList.add('d-none');
+    document.getElementById(`${chartType}Error`).classList.remove('d-none');
+}
+
+function showLatestIndicatorsError() {
+    ['gdpGrowth', 'inflationRate', 'usdExchange', 'interestRate'].forEach(id => {
+        document.getElementById(id).textContent = 'N/A';
+    });
+    document.getElementById('dataAsOf').textContent = 'Data as of: N/A';
+}
+
+function showMonthlyChangesError() {
+    ['changeInflation', 'changeInterestRate', 'changeUsdFx', 'changeFxReserves', 'changeTradeBalance', 'changeCurrentAccount'].forEach(id => {
+        document.getElementById(id).textContent = 'N/A';
+    });
+}
+
+function refreshMacroData() {
+    loadLatestIndicators();
+    loadMacroIndicators();
+    loadMacroSummary();
+}
+
+function formatBillion(num) {
+    if (num >= 1e9) {
+        return `${(num / 1e9).toFixed(1)}B ETB`;
+    } else if (num >= 1e6) {
+        return `${(num / 1e6).toFixed(1)}M ETB`;
+    }
+    return `${num.toLocaleString()} ETB`;
+}
+
+function formatChange(value, suffix = '') {
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}${value.toFixed(2)}${suffix}`;
+}
+</script>
+{% endblock %}

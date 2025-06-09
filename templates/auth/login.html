@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Ethiopia Capital Market{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5">
+                    <!-- Logo and Title -->
+                    <div class="text-center mb-4">
+                        <div class="icon-circle bg-primary text-white mx-auto mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                        <h3 class="fw-bold text-primary">Welcome Back</h3>
+                        <p class="text-muted">Sign in to access Ethiopia's financial data platform</p>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form method="POST" action="{{ url_for('auth.login') }}">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="username" 
+                                       name="username" 
+                                       placeholder="Enter your username"
+                                       required
+                                       autocomplete="username">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="password" 
+                                       placeholder="Enter your password"
+                                       required
+                                       autocomplete="current-password">
+                                <button class="btn btn-outline-secondary" 
+                                        type="button" 
+                                        onclick="togglePassword('password')">
+                                    <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rememberMe" name="remember_me">
+                                <label class="form-check-label" for="rememberMe">
+                                    Remember me
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Alternative Actions -->
+                    <div class="text-center">
+                        <p class="text-muted mb-3">Don't have an account?</p>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </a>
+                    </div>
+
+                    <!-- Divider -->
+                    <hr class="my-4">
+
+                    <!-- Quick Access -->
+                    <div class="text-center">
+                        <p class="text-muted small mb-3">Quick Access</p>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <a href="{{ url_for('main.index') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-home me-1"></i>Home
+                            </a>
+                            <a href="{{ url_for('main.companies') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-building me-1"></i>Companies
+                            </a>
+                            <a href="{{ url_for('main.market') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-chart-bar me-1"></i>Market
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="text-center mt-4">
+                <p class="text-muted small">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    Your data is protected with industry-standard security measures
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ethiopian Flag Colors Background -->
+<style>
+.auth-background {
+    background: linear-gradient(135deg, 
+        rgba(0, 122, 51, 0.1) 0%, 
+        rgba(255, 220, 0, 0.1) 50%, 
+        rgba(239, 51, 64, 0.1) 100%);
+    min-height: 100vh;
+}
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function togglePassword(inputId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleIcon = document.getElementById('passwordToggleIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+
+// Add enhanced form validation
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Reset previous validation states
+        [usernameInput, passwordInput].forEach(input => {
+            input.classList.remove('is-invalid');
+        });
+        
+        // Validate username
+        if (!usernameInput.value.trim()) {
+            usernameInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        // Validate password
+        if (!passwordInput.value) {
+            passwordInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Show error message
+            showAlert('Please fill in all required fields', 'error');
+        }
+    });
+    
+    // Real-time validation feedback
+    [usernameInput, passwordInput].forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+            }
+        });
+    });
+});
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.card-body');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv && alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

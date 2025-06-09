@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Ethiopia Capital Market Data Platform - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold text-primary mb-4">
+                    Ethiopia's Premier Financial Data Platform
+                </h1>
+                <p class="lead mb-4">
+                    Access comprehensive financial, economic, and business data for Ethiopia's emerging capital market. 
+                    Empowering investors, analysts, and researchers with reliable market intelligence.
+                </p>
+                <div class="d-flex gap-3 mb-4">
+                    <a href="{{ url_for('main.companies') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-building me-2"></i>Explore Companies
+                    </a>
+                    <a href="{{ url_for('main.market') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-chart-line me-2"></i>Market Overview
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <img src="https://pixabay.com/get/g96ede666a773953609350b06d7d0080f99b29ccfae4614c46c300d103c5306d5cf2e5b3b34354368ce92221d819a33de1616b663276c413f7172a27eb1229e9c_1280.jpg" 
+                         alt="Ethiopian Business Professionals" 
+                         class="img-fluid rounded-3 shadow-lg">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-ethiopia rounded-3 opacity-75"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Market Summary Cards -->
+<section class="market-summary py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <div class="icon-circle bg-primary text-white">
+                                <i class="fas fa-building"></i>
+                            </div>
+                        </div>
+                        <h3 class="h2 fw-bold text-primary">{{ market_summary.total_companies or 0 }}</h3>
+                        <p class="text-muted mb-0">Listed Companies</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <div class="icon-circle bg-success text-white">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                        <h3 class="h2 fw-bold text-success">{{ market_summary.active_companies or 0 }}</h3>
+                        <p class="text-muted mb-0">Active Trading</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <div class="icon-circle bg-warning text-white">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                        </div>
+                        <h3 class="h2 fw-bold text-warning">{{ "{:,}".format(market_summary.total_volume) if market_summary.total_volume else 0 }}</h3>
+                        <p class="text-muted mb-0">Daily Volume</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <div class="icon-circle bg-info text-white">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                        <h3 class="h5 fw-bold text-info">{{ market_summary.last_updated or 'N/A' }}</h3>
+                        <p class="text-muted mb-0">Last Updated</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Features -->
+<section class="features py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-5 fw-bold mb-4">Comprehensive Market Data</h2>
+                <p class="lead text-muted">
+                    Access real-time and historical data across multiple asset classes and economic indicators
+                </p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="icon-circle bg-primary text-white me-3">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <h4 class="mb-0">Company Profiles</h4>
+                        </div>
+                        <p class="text-muted mb-3">
+                            Detailed company information, financial statements, and performance metrics
+                        </p>
+                        <a href="{{ url_for('main.companies') }}" class="btn btn-outline-primary">
+                            Explore Companies <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="icon-circle bg-success text-white me-3">
+                                <i class="fas fa-globe-africa"></i>
+                            </div>
+                            <h4 class="mb-0">Macro Indicators</h4>
+                        </div>
+                        <p class="text-muted mb-3">
+                            Key economic indicators including GDP, inflation, currency rates, and trade data
+                        </p>
+                        <a href="{{ url_for('main.macro') }}" class="btn btn-outline-success">
+                            View Indicators <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="icon-circle bg-warning text-white me-3">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <h4 class="mb-0">Data Exports</h4>
+                        </div>
+                        <p class="text-muted mb-3">
+                            Download data in CSV and Excel formats for further analysis and research
+                        </p>
+                        <a href="{{ url_for('main.downloads') }}" class="btn btn-outline-warning">
+                            Download Data <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Latest Economic Indicators -->
+{% if latest_macro %}
+<section class="macro-preview py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-6 fw-bold mb-3">Latest Economic Indicators</h2>
+                <p class="text-muted">Key macroeconomic data as of {{ latest_macro.date.strftime('%B %d, %Y') }}</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">GDP Growth</h5>
+                        <h3 class="text-success">{{ "%.1f"|format(latest_macro.gdp_growth) }}%</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Inflation Rate</h5>
+                        <h3 class="text-warning">{{ "%.1f"|format(latest_macro.inflation_rate) }}%</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">USD Exchange</h5>
+                        <h3 class="text-info">{{ "%.2f"|format(latest_macro.etb_usd) if latest_macro.etb_usd else 'N/A' }} ETB</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Interest Rate</h5>
+                        <h3 class="text-danger">{{ "%.1f"|format(latest_macro.interest_rate) }}%</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Call to Action -->
+<section class="cta py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-6 fw-bold mb-4">Ready to Explore Ethiopia's Market?</h2>
+                <p class="lead mb-4">
+                    Join thousands of investors, analysts, and researchers accessing reliable Ethiopian market data
+                </p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    {% if not session.user_id %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Create Account
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('main.market') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-chart-line me-2"></i>View Market Data
+                    </a>
+                    <a href="{{ url_for('main.downloads') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-download me-2"></i>Download Data
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

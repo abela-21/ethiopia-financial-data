@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+
+{% block title %}Data Downloads - Ethiopia Capital Market{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="mb-4">
+                <h1 class="h3 fw-bold text-primary">Data Downloads</h1>
+                <p class="text-muted mb-0">Export comprehensive market and economic data in CSV and Excel formats</p>
+            </div>
+
+            <!-- Data Statistics -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="icon-circle bg-primary text-white mx-auto mb-3">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <h3 class="h4 fw-bold text-primary">{{ stats.companies_count or 0 }}</h3>
+                            <p class="text-muted mb-0">Companies</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="icon-circle bg-success text-white mx-auto mb-3">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3 class="h4 fw-bold text-success">{{ stats.stocks_count or 0 }}</h3>
+                            <p class="text-muted mb-0">Stock Records</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="icon-circle bg-warning text-white mx-auto mb-3">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <h3 class="h4 fw-bold text-warning">{{ stats.financials_count or 0 }}</h3>
+                            <p class="text-muted mb-0">Financial Records</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="icon-circle bg-info text-white mx-auto mb-3">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <h3 class="h4 fw-bold text-info">{{ stats.macro_count or 0 }}</h3>
+                            <p class="text-muted mb-0">Macro Indicators</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download Sections -->
+            <div class="row">
+                <!-- Companies Data -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-building text-primary me-2"></i>Companies Data
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">Download comprehensive company profiles, industry classifications, and basic information.</p>
+                            
+                            <form id="companiesForm" onsubmit="downloadCompanies(event)">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="companyIndustry" class="form-label">Industry Filter</label>
+                                        <select class="form-select" id="companyIndustry" name="industry">
+                                            <option value="">All Industries</option>
+                                            {% for industry in industries %}
+                                            <option value="{{ industry }}">{{ industry }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="companyFormat" class="form-label">Format</label>
+                                        <select class="form-select" id="companyFormat" name="format">
+                                            <option value="csv">CSV</option>
+                                            <option value="excel">Excel</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-download me-2"></i>Download Companies Data
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Macroeconomic Indicators -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-globe text-success me-2"></i>Macroeconomic Indicators
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">Download economic indicators including GDP, inflation, exchange rates, and trade data.</p>
+                            
+                            <form id="macroForm" onsubmit="downloadMacro(event)">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="macroDateFrom" class="form-label">From Date</label>
+                                        <input type="date" class="form-control" id="macroDateFrom" name="date_from"
+                                               {% if macro_date_range and macro_date_range[0] %}min="{{ macro_date_range[0] }}"{% endif %}
+                                               {% if macro_date_range and macro_date_range[1] %}max="{{ macro_date_range[1] }}"{% endif %}>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="macroDateTo" class="form-label">To Date</label>
+                                        <input type="date" class="form-control" id="macroDateTo" name="date_to"
+                                               {% if macro_date_range and macro_date_range[0] %}min="{{ macro_date_range[0] }}"{% endif %}
+                                               {% if macro_date_range and macro_date_range[1] %}max="{{ macro_date_range[1] }}"{% endif %}>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="macroVariables" class="form-label">Specific Variables (optional)</label>
+                                    <input type="text" class="form-control" id="macroVariables" name="variables" 
+                                           placeholder="e.g., gdp_growth,inflation_rate,etb_usd">
+                                    <div class="form-text">Leave empty for all variables, or specify comma-separated variable names</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="macroFormat" class="form-label">Format</label>
+                                    <select class="form-select" id="macroFormat" name="format">
+                                        <option value="csv">CSV</option>
+                                        <option value="excel">Excel</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-download me-2"></i>Download Macro Data
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Price Data -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-line text-warning me-2"></i>Stock Price Data
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">Download historical stock prices, trading volumes, and market data for individual companies.</p>
+                            
+                            <form id="stocksForm" onsubmit="downloadStocks(event)">
+                                <div class="mb-3">
+                                    <label for="stockCompany" class="form-label">Select Company</label>
+                                    <select class="form-select" id="stockCompany" name="company_id" required>
+                                        <option value="">Choose a company...</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="stockDateFrom" class="form-label">From Date</label>
+                                        <input type="date" class="form-control" id="stockDateFrom" name="start_date"
+                                               {% if stock_date_range and stock_date_range[0] %}min="{{ stock_date_range[0] }}"{% endif %}
+                                               {% if stock_date_range and stock_date_range[1] %}max="{{ stock_date_range[1] }}"{% endif %}>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="stockDateTo" class="form-label">To Date</label>
+                                        <input type="date" class="form-control" id="stockDateTo" name="end_date"
+                                               {% if stock_date_range and stock_date_range[0] %}min="{{ stock_date_range[0] }}"{% endif %}
+                                               {% if stock_date_range and stock_date_range[1] %}max="{{ stock_date_range[1] }}"{% endif %}>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="stockFormat" class="form-label">Format</label>
+                                    <select class="form-select" id="stockFormat" name="format">
+                                        <option value="csv">CSV</option>
+                                        <option value="excel">Excel</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-warning w-100">
+                                    <i class="fas fa-download me-2"></i>Download Stock Data
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Statements -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-calculator text-info me-2"></i>Financial Statements
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">Download comprehensive financial statements including income statements, balance sheets, and key ratios.</p>
+                            
+                            <form id="financialsForm" onsubmit="downloadFinancials(event)">
+                                <div class="mb-3">
+                                    <label for="financialCompany" class="form-label">Select Company</label>
+                                    <select class="form-select" id="financialCompany" name="company_id" required>
+                                        <option value="">Choose a company...</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="financialYearFrom" class="form-label">From Year</label>
+                                        <input type="number" class="form-control" id="financialYearFrom" name="year_from" 
+                                               min="2000" max="2030" placeholder="e.g., 2020">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="financialYearTo" class="form-label">To Year</label>
+                                        <input type="number" class="form-control" id="financialYearTo" name="year_to" 
+                                               min="2000" max="2030" placeholder="e.g., 2023">
+                                    </div>
+                                </div>
+                                
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="financialPeriod" class="form-label">Period</label>
+                                        <select class="form-select" id="financialPeriod" name="period">
+                                            <option value="">All Periods</option>
+                                            <option value="Annual">Annual</option>
+                                            <option value="Q1">Q1</option>
+                                            <option value="Q2">Q2</option>
+                                            <option value="Q3">Q3</option>
+                                            <option value="Q4">Q4</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="financialFormat" class="form-label">Format</label>
+                                        <select class="form-select" id="financialFormat" name="format">
+                                            <option value="csv">CSV</option>
+                                            <option value="excel">Excel</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-info w-100">
+                                    <i class="fas fa-download me-2"></i>Download Financial Data
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download Help -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-question-circle text-primary me-2"></i>Download Help
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">File Formats</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-file-csv text-success me-2"></i><strong>CSV:</strong> Compatible with Excel, Google Sheets, and most data analysis tools</li>
+                                        <li><i class="fas fa-file-excel text-primary me-2"></i><strong>Excel:</strong> Native Excel format with formatted columns and auto-sized cells</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Data Usage Guidelines</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-info-circle text-info me-2"></i>Data is provided for research and analysis purposes</li>
+                                        <li><i class="fas fa-clock text-warning me-2"></i>Data is updated regularly based on official sources</li>
+                                        <li><i class="fas fa-shield-alt text-success me-2"></i>All data follows international standards and best practices</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Download Progress Modal -->
+<div class="modal fade" id="downloadModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5>Preparing Download</h5>
+                <p class="text-muted mb-0">Please wait while we prepare your data...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Load companies for dropdown selects
+document.addEventListener('DOMContentLoaded', function() {
+    loadCompaniesForDropdowns();
+});
+
+async function loadCompaniesForDropdowns() {
+    try {
+        const response = await fetch('/api/companies?per_page=1000');
+        if (response.ok) {
+            const data = await response.json();
+            populateCompanyDropdowns(data.companies);
+        }
+    } catch (error) {
+        console.error('Error loading companies:', error);
+    }
+}
+
+function populateCompanyDropdowns(companies) {
+    const stockSelect = document.getElementById('stockCompany');
+    const financialSelect = document.getElementById('financialCompany');
+    
+    companies.forEach(company => {
+        const option1 = new Option(`${company.name} (${company.ticker})`, company.id);
+        const option2 = new Option(`${company.name} (${company.ticker})`, company.id);
+        stockSelect.add(option1);
+        financialSelect.add(option2);
+    });
+}
+
+function downloadCompanies(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const params = new URLSearchParams(formData);
+    downloadFile(`/api/download/companies?${params}`);
+}
+
+function downloadMacro(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const params = new URLSearchParams();
+    
+    // Only add non-empty parameters
+    for (const [key, value] of formData.entries()) {
+        if (value.trim()) {
+            params.append(key, value);
+        }
+    }
+    
+    downloadFile(`/api/download/macro_indicators?${params}`);
+}
+
+function downloadStocks(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const companyId = formData.get('company_id');
+    
+    if (!companyId) {
+        alert('Please select a company');
+        return;
+    }
+    
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+        if (key !== 'company_id' && value.trim()) {
+            params.append(key, value);
+        }
+    }
+    
+    downloadFile(`/api/download/stocks/${companyId}?${params}`);
+}
+
+function downloadFinancials(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const companyId = formData.get('company_id');
+    
+    if (!companyId) {
+        alert('Please select a company');
+        return;
+    }
+    
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+        if (key !== 'company_id' && value.trim()) {
+            params.append(key, value);
+        }
+    }
+    
+    downloadFile(`/api/download/financials/${companyId}?${params}`);
+}
+
+function downloadFile(url) {
+    // Show loading modal
+    const modal = new bootstrap.Modal(document.getElementById('downloadModal'));
+    modal.show();
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Hide modal after a short delay
+    setTimeout(() => {
+        modal.hide();
+    }, 2000);
+}
+
+// Form validation
+document.getElementById('macroDateFrom').addEventListener('change', function() {
+    const toDate = document.getElementById('macroDateTo');
+    toDate.min = this.value;
+});
+
+document.getElementById('macroDateTo').addEventListener('change', function() {
+    const fromDate = document.getElementById('macroDateFrom');
+    fromDate.max = this.value;
+});
+
+document.getElementById('stockDateFrom').addEventListener('change', function() {
+    const toDate = document.getElementById('stockDateTo');
+    toDate.min = this.value;
+});
+
+document.getElementById('stockDateTo').addEventListener('change', function() {
+    const fromDate = document.getElementById('stockDateFrom');
+    fromDate.max = this.value;
+});
+
+document.getElementById('financialYearFrom').addEventListener('change', function() {
+    const toYear = document.getElementById('financialYearTo');
+    toYear.min = this.value;
+});
+
+document.getElementById('financialYearTo').addEventListener('change', function() {
+    const fromYear = document.getElementById('financialYearFrom');
+    fromYear.max = this.value;
+});
+</script>
+{% endblock %}

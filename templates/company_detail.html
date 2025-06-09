@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+
+{% block title %}{{ company.name }} ({{ company.ticker }}) - Company Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Back Button -->
+        <div class="col-12 mb-3">
+            <a href="{{ url_for('main.companies') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Companies
+            </a>
+        </div>
+        
+        <!-- Company Header -->
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="company-logo-placeholder me-3">
+                                    <i class="fas fa-building fa-2x text-primary"></i>
+                                </div>
+                                <div>
+                                    <h1 class="h3 fw-bold mb-1">{{ company.name }}</h1>
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <span class="badge bg-primary fs-6">{{ company.ticker }}</span>
+                                        <span class="badge bg-light text-dark">{{ company.industry }}</span>
+                                        {% if company.sector %}
+                                        <span class="badge bg-light text-dark">{{ company.sector }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% if company.description %}
+                            <p class="text-muted mb-0">{{ company.description }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            {% if latest_stock %}
+                            <div class="text-center">
+                                <h2 class="h4 fw-bold text-primary">{{ "%.2f"|format(latest_stock.close) }} ETB</h2>
+                                <small class="text-muted">
+                                    {% set change = ((latest_stock.close - latest_stock.open) / latest_stock.open * 100) if latest_stock.open else 0 %}
+                                    <span class="{% if change > 0 %}text-success{% elif change < 0 %}text-danger{% else %}text-muted{% endif %}">
+                                        {% if change > 0 %}+{% endif %}{{ "%.2f"|format(change) }}%
+                                    </span>
+                                    <br>{{ latest_stock.date.strftime('%Y-%m-%d') }}
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Company Details and Charts -->
+        <div class="col-lg-8 mb-4">
+            <!-- Stock Price Chart -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line text-primary me-2"></i>Stock Price History (30 Days)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if stock_history %}
+                    <div style="height: 300px;">
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-line fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No stock price data available</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Financial Summary -->
+            {% if latest_financial %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calculator text-primary me-2"></i>
+                        Latest Financial Data ({{ latest_financial.year }} {{ latest_financial.period }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Income Statement</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    {% if latest_financial.revenue %}
+                                    <tr>
+                                        <td>Revenue</td>
+                                        <td class="text-end fw-bold">{{ "{:,.0f}"|format(latest_financial.revenue) }} ETB</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if latest_financial.gross_profit %}
+                                    <tr>
+                                        <td>Gross Profit</td>
+                                        <td class="text-end">{{ "{:,.0f}"|format(latest_financial.gross_profit) }} ETB</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if latest_financial.operating_income %}
+                                    <tr>
+                                        <td>Operating Income</td>
+                                        <td class="text-end">{{ "{:,.0f}"|format(latest_financial.operating_income) }} ETB</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if latest_financial.net_income %}
+                                    <tr>
+                                        <td>Net Income</td>
+                                        <td class="text-end fw-bold">{{ "{:,.0f}"|format(latest_financial.net_income) }} ETB</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Balance Sheet</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    {% if latest_financial.total_assets %}
+                                    <tr>
+                                        <td>Total Assets</td>
+                                        <td class="text-end fw-bold">{{ "{:,.0f}"|format(latest_financial.total_assets) }} ETB</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if latest_financial.total_liabilities %}
+                                    <tr>
+                                        <td>Total Liabilities</td>
+                                        <td class="text-end">{{ "{:,.0f}"|format(latest_financial.total_liabilities) }} ETB</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if latest_financial.total_equity %}
+                                    <tr>
+                                        <td>Total Equity</td>
+                                        <td class="text-end fw-bold">{{ "{:,.0f}"|format(latest_financial.total_equity) }} ETB</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Financial Ratios -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6 class="text-muted">Key Ratios</h6>
+                            <div class="row">
+                                {% if latest_financial.profit_margin %}
+                                <div class="col-md-3 col-6 text-center">
+                                    <div class="ratio-card p-2 border rounded">
+                                        <div class="h5 fw-bold text-primary">{{ "%.1f"|format(latest_financial.profit_margin * 100) }}%</div>
+                                        <small class="text-muted">Profit Margin</small>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if latest_financial.return_on_equity %}
+                                <div class="col-md-3 col-6 text-center">
+                                    <div class="ratio-card p-2 border rounded">
+                                        <div class="h5 fw-bold text-success">{{ "%.1f"|format(latest_financial.return_on_equity * 100) }}%</div>
+                                        <small class="text-muted">ROE</small>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if latest_financial.current_ratio %}
+                                <div class="col-md-3 col-6 text-center">
+                                    <div class="ratio-card p-2 border rounded">
+                                        <div class="h5 fw-bold text-info">{{ "%.2f"|format(latest_financial.current_ratio) }}</div>
+                                        <small class="text-muted">Current Ratio</small>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if latest_financial.debt_to_equity %}
+                                <div class="col-md-3 col-6 text-center">
+                                    <div class="ratio-card p-2 border rounded">
+                                        <div class="h5 fw-bold text-warning">{{ "%.2f"|format(latest_financial.debt_to_equity) }}</div>
+                                        <small class="text-muted">D/E Ratio</small>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Company Information Sidebar -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle text-primary me-2"></i>Company Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Ticker Symbol</small>
+                        <strong>{{ company.ticker }}</strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Industry</small>
+                        <strong>{{ company.industry }}</strong>
+                    </div>
+                    
+                    {% if company.sector %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Sector</small>
+                        <strong>{{ company.sector }}</strong>
+                    </div>
+                    {% endif %}
+                    
+                    {% if company.established_date %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Established</small>
+                        <strong>{{ company.established_date.strftime('%B %d, %Y') }}</strong>
+                    </div>
+                    {% endif %}
+                    
+                    {% if company.shares_outstanding %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Shares Outstanding</small>
+                        <strong>{{ "{:,}".format(company.shares_outstanding) }}</strong>
+                    </div>
+                    {% endif %}
+                    
+                    {% if company.website %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Website</small>
+                        <a href="{{ company.website }}" target="_blank" class="text-decoration-none">
+                            {{ company.website }} <i class="fas fa-external-link-alt ms-1"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Stock Summary -->
+            {% if latest_stock %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-area text-primary me-2"></i>Latest Trading Data
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 border-end">
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Open</small>
+                                <strong>{{ "%.2f"|format(latest_stock.open) }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Close</small>
+                                <strong>{{ "%.2f"|format(latest_stock.close) }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6 border-end">
+                            <div class="mb-2">
+                                <small class="text-muted d-block">High</small>
+                                <strong class="text-success">{{ "%.2f"|format(latest_stock.high) }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Low</small>
+                                <strong class="text-danger">{{ "%.2f"|format(latest_stock.low) }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <small class="text-muted d-block">Volume</small>
+                        <strong>{{ "{:,}".format(latest_stock.volume) }}</strong>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+{% if stock_history %}
+// Stock price chart
+const stockData = {{ stock_history | tojson }};
+const ctx = document.getElementById('stockChart').getContext('2d');
+
+const stockChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: stockData.map(d => new Date(d.date).toLocaleDateString()),
+        datasets: [{
+            label: 'Close Price',
+            data: stockData.map(d => d.close),
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: false,
+                grid: {
+                    color: 'rgba(0,0,0,0.1)'
+                }
+            },
+            x: {
+                grid: {
+                    color: 'rgba(0,0,0,0.1)'
+                }
+            }
+        },
+        elements: {
+            point: {
+                radius: 3,
+                hoverRadius: 6
+            }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

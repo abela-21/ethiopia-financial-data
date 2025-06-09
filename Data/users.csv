@@ -1,0 +1,3 @@
+﻿id,username,password,email
+1,admin,$2b$12$hashedpassword123,admin@example.com
+2,user1,$2b$12$hashedpassword456,user1@example.com

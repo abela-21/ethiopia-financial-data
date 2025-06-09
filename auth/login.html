@@ -1,0 +1,267 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Login - Ethiopia Capital Market{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card login-card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Login
+                    </h3>
+                    <p class="mb-0 mt-2">Access your account</p>
+                </div>
+                <div class="card-body p-4">
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user me-2"></i>Username or Email
+                            </label>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   placeholder="Enter your username or email" required>
+                            <div class="invalid-feedback" id="username-error"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       placeholder="Enter your password" required>
+                                <button class="btn btn-outline-secondary" type="button" id="toggle-password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback" id="password-error"></div>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember-me">
+                            <label class="form-check-label" for="remember-me">
+                                Remember me
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="login-button">
+                                <span id="login-text">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                                </span>
+                                <span id="login-spinner" class="d-none">
+                                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                    Logging in...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div id="error-message" class="alert alert-danger mt-3" style="display: none;" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span id="error-text"></span>
+                    </div>
+                    
+                    <div id="success-message" class="alert alert-success mt-3" style="display: none;" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span id="success-text"></span>
+                    </div>
+                </div>
+                <div class="card-footer text-center bg-light">
+                    <p class="mb-0">
+                        Don't have an account? 
+                        <a href="/register" class="text-decoration-none">
+                            <i class="fas fa-user-plus me-1"></i>Register here
+                        </a>
+                    </p>
+                    <small class="text-muted mt-2 d-block">
+                        <a href="#" class="text-decoration-none">Forgot your password?</a>
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Demo Credentials (for development) -->
+            <div class="card mt-3 border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Demo Account
+                    </h6>
+                </div>
+                <div class="card-body p-3">
+                    <small class="text-muted">
+                        For testing purposes, you can use:
+                        <br><strong>Username:</strong> admin
+                        <br><strong>Password:</strong> admin123
+                    </small>
+                    <button class="btn btn-sm btn-outline-info mt-2 w-100" onclick="fillDemoCredentials()">
+                        <i class="fas fa-fill-drip me-1"></i>Use Demo Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if already logged in
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken) {
+        window.location.href = '/dashboard';
+        return;
+    }
+    
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    // Form submission
+    document.getElementById('login-form').addEventListener('submit', handleLogin);
+    
+    // Password toggle
+    document.getElementById('toggle-password').addEventListener('click', togglePassword);
+    
+    // Clear errors on input
+    document.getElementById('username').addEventListener('input', clearFieldError);
+    document.getElementById('password').addEventListener('input', clearFieldError);
+}
+
+function togglePassword() {
+    const passwordField = document.getElementById('password');
+    const toggleButton = document.getElementById('toggle-password');
+    const icon = toggleButton.querySelector('i');
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        passwordField.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+function clearFieldError(event) {
+    const field = event.target;
+    field.classList.remove('is-invalid');
+    const errorElement = document.getElementById(field.name + '-error');
+    if (errorElement) {
+        errorElement.textContent = '';
+    }
+}
+
+async function handleLogin(event) {
+    event.preventDefault();
+    
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    
+    // Validation
+    if (!username) {
+        showFieldError('username', 'Username or email is required');
+        return;
+    }
+    
+    if (!password) {
+        showFieldError('password', 'Password is required');
+        return;
+    }
+    
+    // Show loading state
+    setLoadingState(true);
+    hideMessages();
+    
+    try {
+        const response = await fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Login failed');
+        }
+        
+        // Store tokens
+        localStorage.setItem('access_token', data.access_token);
+        
+        // Show success message
+        showSuccess('Login successful! Redirecting...');
+        
+        // Trigger auth status change event
+        window.dispatchEvent(new Event('authStatusChanged'));
+        
+        // Redirect after short delay
+        setTimeout(() => {
+            const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/dashboard';
+            window.location.href = redirectUrl;
+        }, 1500);
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        showError(error.message);
+        setLoadingState(false);
+    }
+}
+
+function setLoadingState(loading) {
+    const button = document.getElementById('login-button');
+    const text = document.getElementById('login-text');
+    const spinner = document.getElementById('login-spinner');
+    
+    button.disabled = loading;
+    
+    if (loading) {
+        text.classList.add('d-none');
+        spinner.classList.remove('d-none');
+    } else {
+        text.classList.remove('d-none');
+        spinner.classList.add('d-none');
+    }
+}
+
+function showFieldError(fieldName, message) {
+    const field = document.getElementById(fieldName);
+    const errorElement = document.getElementById(fieldName + '-error');
+    
+    field.classList.add('is-invalid');
+    errorElement.textContent = message;
+}
+
+function showError(message) {
+    const errorElement = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    
+    errorText.textContent = message;
+    errorElement.style.display = 'block';
+}
+
+function showSuccess(message) {
+    const successElement = document.getElementById('success-message');
+    const successText = document.getElementById('success-text');
+    
+    successText.textContent = message;
+    successElement.style.display = 'block';
+}
+
+function hideMessages() {
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('success-message').style.display = 'none';
+}
+
+function fillDemoCredentials() {
+    document.getElementById('username').value = 'admin';
+    document.getElementById('password').value = 'admin123';
+}
+</script>
+{% endblock %}

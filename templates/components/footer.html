@@ -1,0 +1,203 @@
+<footer class="bg-dark text-light py-5 mt-5">
+    <div class="container">
+        <div class="row">
+            <!-- About Section -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Ethiopia Capital Market Platform
+                </h5>
+                <p class="text-light-50">
+                    Your trusted source for comprehensive financial, economic, and business data 
+                    for Ethiopia's emerging capital market. Empowering investors, analysts, and 
+                    researchers with reliable market intelligence.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-light-50 hover-text-white">
+                        <i class="fab fa-twitter fa-lg"></i>
+                    </a>
+                    <a href="#" class="text-light-50 hover-text-white">
+                        <i class="fab fa-linkedin fa-lg"></i>
+                    </a>
+                    <a href="#" class="text-light-50 hover-text-white">
+                        <i class="fab fa-facebook fa-lg"></i>
+                    </a>
+                    <a href="#" class="text-light-50 hover-text-white">
+                        <i class="fas fa-envelope fa-lg"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-lg-2 col-md-6 mb-4">
+                <h6 class="fw-bold mb-3">Quick Links</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="{{ url_for('main.index') }}" class="text-light-50 text-decoration-none hover-text-white">
+                            <i class="fas fa-chevron-right me-1 small"></i>Home
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('main.companies') }}" class="text-light-50 text-decoration-none hover-text-white">
+                            <i class="fas fa-chevron-right me-1 small"></i>Companies
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('main.market') }}" class="text-light-50 text-decoration-none hover-text-white">
+                            <i class="fas fa-chevron-right me-1 small"></i>Market Data
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('main.macro') }}" class="text-light-50 text-decoration-none hover-text-white">
+                            <i class="fas fa-chevron-right me-1 small"></i>Economic Indicators
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('main.downloads') }}" class="text-light-50 text-decoration-none hover-text-white">
+                            <i class="fas fa-chevron-right me-1 small"></i>Downloads
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Data Sources -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h6 class="fw-bold mb-3">Data & Resources</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="#" class="text-light-50 text-decoration-none hover-text-white">
+                            <i class="fas fa-chevron-right me-1 small"></i>API Documentation
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="text-light-50 text-decoration-none hover-text-white">
+                            <i class="fas fa-chevron-right me-1 small"></i>Data Dictionary
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="text-light-50 text-decoration-none hover-text-white">
+                            <i class="fas fa-chevron-right me-1 small"></i>Research Reports
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="text-light-50 text-decoration-none hover-text-white">
+                            <i class="fas fa-chevron-right me-1 small"></i>Market Analysis
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="text-light-50 text-decoration-none hover-text-white">
+                            <i class="fas fa-chevron-right me-1 small"></i>Help Center
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h6 class="fw-bold mb-3">Contact Information</h6>
+                <div class="contact-info">
+                    <div class="mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        <span class="text-light-50">
+                            Addis Ababa, Ethiopia<br>
+                            <small>Financial District</small>
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <i class="fas fa-envelope me-2"></i>
+                        <a href="mailto:info@ethiopiacapitalmarket.com" class="text-light-50 text-decoration-none hover-text-white">
+                            info@ethiopiacapitalmarket.com
+                        </a>
+                    </div>
+                    <div class="mb-3">
+                        <i class="fas fa-phone me-2"></i>
+                        <span class="text-light-50">+251 11 XXX XXXX</span>
+                    </div>
+                    <div>
+                        <i class="fas fa-clock me-2"></i>
+                        <span class="text-light-50">
+                            Mon - Fri: 8:00 AM - 6:00 PM EAT
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <hr class="border-light-25 my-4">
+
+        <!-- Bottom Section -->
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="text-light-50 mb-0">
+                    &copy; {{ moment().format('YYYY') if moment else '2024' }} Ethiopia Capital Market Platform. 
+                    All rights reserved.
+                </p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="d-flex flex-wrap justify-content-md-end gap-3">
+                    <a href="#" class="text-light-50 text-decoration-none hover-text-white small">
+                        Privacy Policy
+                    </a>
+                    <a href="#" class="text-light-50 text-decoration-none hover-text-white small">
+                        Terms of Service
+                    </a>
+                    <a href="#" class="text-light-50 text-decoration-none hover-text-white small">
+                        Cookie Policy
+                    </a>
+                    <a href="#" class="text-light-50 text-decoration-none hover-text-white small">
+                        Disclaimer
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ethiopian Flag Colors Accent -->
+        <div class="mt-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex" style="height: 4px;">
+                        <div class="flex-fill bg-success"></div>
+                        <div class="flex-fill bg-warning"></div>
+                        <div class="flex-fill bg-danger"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Back to Top Button -->
+<button id="backToTop" class="btn btn-primary btn-floating position-fixed bottom-0 end-0 m-4" 
+        style="display: none; z-index: 1000; border-radius: 50%; width: 50px; height: 50px;">
+    <i class="fas fa-chevron-up"></i>
+</button>
+
+<!-- Ethiopian Flag Colors CSS -->
+<style>
+.text-light-50 {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.text-light-25 {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.border-light-25 {
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.hover-text-white:hover {
+    color: white !important;
+    transition: color 0.3s ease;
+}
+
+.btn-floating {
+    transition: all 0.3s ease;
+}
+
+.btn-floating:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+</style>

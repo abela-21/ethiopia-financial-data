@@ -1,0 +1,4 @@
+id,date,gdp_growth,inflation_rate,interest_rate,etb_usd,etb_eur,etb_gbp,etb_jpy,fx_reserves,trade_balance,current_account_balance,total_loans,total_deposits,npl_ratio
+1,2025-01-01,6.5,20,7,110,120,130,0.8,4000,-150,50,200000,180000,3.5
+2,2025-02-01,6.4,19.8,7,112,121,131,0.82,4020,-140,55,201500,181000,3.4
+

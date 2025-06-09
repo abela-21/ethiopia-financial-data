@@ -1,0 +1,6 @@
+﻿id,name,ticker,industry,description,sector,website,established_date,shares_outstanding
+1,Wegagen Bank,WGB,Banking,"Leading commercial bank in Ethiopia",Financial Services,https://www.wegagen.com,1997-04-15,1000000000
+2,Ethio Telecom,ETC,Telecommunications,"Premier telecom provider",Communication,https://www.ethiotelecom.et,1894-11-01,5000000000
+3,Habesha Breweries,HBR,Manufacturing,"Major beverage company",Consumer Goods,https://www.habeshabreweries.com,2012-08-15,1500000000
+4,Awash Insurance,AIN,Insurance,"Trusted insurer",Financial Services,https://www.awashinsurance.com,1994-10-01,1000000000
+5,Dangote Cement,DCE,Construction,"Key cement producer",Industrial,https://www.dangotecement.com,2015-06-05,2000000000
