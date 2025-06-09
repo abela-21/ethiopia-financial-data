@@ -98,6 +98,7 @@ def get_latest_indicators():
             return jsonify({"message": "No macro indicators data available"}), 200
         
         response = {
+            "indicators": serialize_macro(latest),
             "latest_indicators": serialize_macro(latest),
             "as_of": latest.date.strftime("%Y-%m-%d")
         }
@@ -109,4 +110,28 @@ def get_latest_indicators():
         return jsonify({"error": str(e)}), e.status_code
     except Exception as e:
         logger.error(f"Unexpected error in get_latest_indicators: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@macro_api.route("/macro", methods=["GET"])
+@cache.cached(timeout=300)
+@limiter.limit("30/minute")
+def get_macro():
+    """Get macro indicators for charts - simplified endpoint"""
+    try:
+        limit = request.args.get('limit', type=int, default=20)
+        
+        macro_indicators = MacroIndicators.query.order_by(desc(MacroIndicators.date)).limit(limit).all()
+        
+        if not macro_indicators:
+            return jsonify({"indicators": [], "message": "No macro indicators data available"}), 200
+        
+        # Sort by date ascending for charts
+        macro_indicators.reverse()
+        
+        return jsonify({
+            "indicators": [serialize_macro(m) for m in macro_indicators]
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Unexpected error in get_macro: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500

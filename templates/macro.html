@@ -98,12 +98,41 @@
                     </div>
                 </div>
 
+                <!-- Inflation Chart -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light-silver border-0">
+                            <h5 class="card-title mb-0 text-midnight-green">
+                                <i class="fas fa-percentage me-2"></i>Inflation Trends
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div style="height: 300px;" id="inflationChartContainer">
+                                <canvas id="inflationChart"></canvas>
+                            </div>
+                            <div class="text-center py-4 d-none" id="inflationLoading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="text-muted mt-2">Loading inflation data...</p>
+                            </div>
+                            <div class="text-center py-4 d-none" id="inflationError">
+                                <i class="fas fa-exclamation-triangle fa-2x text-muted mb-3"></i>
+                                <p class="text-muted">No inflation data available</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Charts Row -->
+            <div class="row mb-4">
                 <!-- Exchange Rates Chart -->
                 <div class="col-lg-6 mb-4">
                     <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white border-0">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-exchange-alt text-primary me-2"></i>Exchange Rates
+                        <div class="card-header bg-light-silver border-0">
+                            <h5 class="card-title mb-0 text-midnight-green">
+                                <i class="fas fa-exchange-alt me-2"></i>Exchange Rates
                             </h5>
                         </div>
                         <div class="card-body">
@@ -119,6 +148,32 @@
                             <div class="text-center py-4 d-none" id="exchangeError">
                                 <i class="fas fa-exclamation-triangle fa-2x text-muted mb-3"></i>
                                 <p class="text-muted">No exchange rate data available</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trade Balance Chart -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light-silver border-0">
+                            <h5 class="card-title mb-0 text-midnight-green">
+                                <i class="fas fa-balance-scale me-2"></i>Trade Balance
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div style="height: 300px;" id="tradeChartContainer">
+                                <canvas id="tradeChart"></canvas>
+                            </div>
+                            <div class="text-center py-4 d-none" id="tradeLoading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="text-muted mt-2">Loading trade data...</p>
+                            </div>
+                            <div class="text-center py-4 d-none" id="tradeError">
+                                <i class="fas fa-exclamation-triangle fa-2x text-muted mb-3"></i>
+                                <p class="text-muted">No trade data available</p>
                             </div>
                         </div>
                     </div>

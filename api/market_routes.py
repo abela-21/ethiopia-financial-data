@@ -111,20 +111,28 @@ def get_market_trends():
         companies = Company.query.all()
 
         daily_metrics = []
-        current_date = start_date
-        while current_date <= latest_date:
-            metrics = calculate_market_metrics(companies, current_date)
-            if metrics["active_companies"] > 0:
-                daily_metrics.append(
-                    {
-                        "date": current_date.strftime("%Y-%m-%d"),
-                        "market_cap": metrics["total_market_cap"],
-                        "volume": metrics["total_volume"],
-                        "gainers": metrics["gainers"],
-                        "losers": metrics["losers"],
-                    }
-                )
-            current_date += timedelta(days=1)
+        # Get data for specific dates with trading activity
+        trading_dates = db.session.query(Stock.date.distinct()).filter(
+            Stock.date.between(start_date, latest_date)
+        ).order_by(Stock.date).all()
+        
+        for date_tuple in trading_dates:
+            current_date = date_tuple[0]
+            try:
+                metrics = calculate_market_metrics(companies, current_date)
+                if metrics["active_companies"] > 0:
+                    daily_metrics.append(
+                        {
+                            "date": current_date.strftime("%Y-%m-%d"),
+                            "market_cap": metrics["total_market_cap"],
+                            "volume": metrics["total_volume"],
+                            "gainers": metrics["gainers"],
+                            "losers": metrics["losers"],
+                        }
+                    )
+            except Exception as e:
+                logger.warning(f"Error calculating metrics for date {current_date}: {str(e)}")
+                continue
 
         response = {
             "trends": daily_metrics,
