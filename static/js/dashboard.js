@@ -68,8 +68,8 @@ class DashboardManager {
             // Load market summary
             await this.loadMarketSummary(forceRefresh);
             
-            // Load latest indicators
-            await this.loadLatestIndicators(forceRefresh);
+            // Load latest news
+            await this.loadLatestNews(forceRefresh);
             
             // Load recent activities
             await this.loadRecentActivities(forceRefresh);

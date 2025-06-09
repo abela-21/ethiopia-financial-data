@@ -29,7 +29,7 @@
                     <img src="https://pixabay.com/get/g96ede666a773953609350b06d7d0080f99b29ccfae4614c46c300d103c5306d5cf2e5b3b34354368ce92221d819a33de1616b663276c413f7172a27eb1229e9c_1280.jpg" 
                          alt="Ethiopian Business Professionals" 
                          class="img-fluid rounded-3 shadow-lg">
-                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-ethiopia rounded-3 opacity-75"></div>
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-primary rounded-3 opacity-75"></div>
                 </div>
             </div>
         </div>
@@ -169,54 +169,25 @@
     </div>
 </section>
 
-<!-- Latest Economic Indicators -->
-{% if latest_macro %}
-<section class="macro-preview py-5 bg-light">
+<!-- Latest News -->
+<section class="news-section py-5">
     <div class="container">
         <div class="row mb-4">
             <div class="col-lg-8 mx-auto text-center">
-                <h2 class="display-6 fw-bold mb-3">Latest Economic Indicators</h2>
-                <p class="text-muted">Key macroeconomic data as of {{ latest_macro.date.strftime('%B %d, %Y') }}</p>
+                <h2 class="display-6 fw-bold mb-3">Latest Market News</h2>
+                <p class="text-muted">Stay informed with the latest developments in Ethiopian capital markets</p>
             </div>
         </div>
         
-        <div class="row">
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card text-center border-0 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary">GDP Growth</h5>
-                        <h3 class="text-success">{{ "%.1f"|format(latest_macro.gdp_growth) }}%</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card text-center border-0 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary">Inflation Rate</h5>
-                        <h3 class="text-warning">{{ "%.1f"|format(latest_macro.inflation_rate) }}%</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card text-center border-0 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary">USD Exchange</h5>
-                        <h3 class="text-info">{{ "%.2f"|format(latest_macro.etb_usd) if latest_macro.etb_usd else 'N/A' }} ETB</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card text-center border-0 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary">Interest Rate</h5>
-                        <h3 class="text-danger">{{ "%.1f"|format(latest_macro.interest_rate) }}%</h3>
-                    </div>
+        <div class="row" id="latest-news">
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading news...</span>
                 </div>
             </div>
         </div>
     </div>
 </section>
-{% endif %}
 
 <!-- Call to Action -->
 <section class="cta py-5">

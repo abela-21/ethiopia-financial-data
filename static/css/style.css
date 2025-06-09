@@ -1,21 +1,22 @@
 /* Ethiopian Capital Market Platform - Custom Styles */
 
-/* Root Variables - Ethiopian Flag Colors */
+/* Root Variables - Preferred Color Scheme */
 :root {
-    /* Ethiopian Flag Colors */
-    --ethiopia-green: #007a33;
-    --ethiopia-yellow: #ffdc00;
-    --ethiopia-red: #ef3340;
+    /* Preferred Color Palette */
+    --midnight-green: #1f3a2e;
+    --gunmetal: #2a3439;
+    --ivory-cream: #f8f6f0;
+    --sand-yellow: #d4af37;
     
     /* Extended Color Palette */
-    --primary-color: #0d6efd;
-    --secondary-color: #6c757d;
-    --success-color: var(--ethiopia-green);
-    --warning-color: var(--ethiopia-yellow);
-    --danger-color: var(--ethiopia-red);
-    --info-color: #0dcaf0;
-    --light-color: #f8f9fa;
-    --dark-color: #212529;
+    --primary-color: var(--midnight-green);
+    --secondary-color: var(--gunmetal);
+    --success-color: var(--midnight-green);
+    --warning-color: var(--sand-yellow);
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --light-color: var(--ivory-cream);
+    --dark-color: var(--gunmetal);
     
     /* Typography */
     --font-family-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -46,22 +47,21 @@ body {
     font-family: var(--font-family-sans-serif);
     line-height: 1.6;
     color: var(--dark-color);
-    background-color: #ffffff;
+    background-color: var(--ivory-cream);
 }
 
-/* Ethiopian Gradient Background */
-.bg-gradient-ethiopia {
+/* Preferred Gradient Backgrounds */
+.bg-gradient-primary {
     background: linear-gradient(135deg, 
-        rgba(0, 122, 51, 0.9) 0%, 
-        rgba(255, 220, 0, 0.8) 50%, 
-        rgba(239, 51, 64, 0.9) 100%);
+        var(--midnight-green) 0%, 
+        var(--gunmetal) 100%);
 }
 
-.bg-gradient-ethiopia-light {
+.bg-gradient-light {
     background: linear-gradient(135deg, 
-        rgba(0, 122, 51, 0.1) 0%, 
-        rgba(255, 220, 0, 0.1) 50%, 
-        rgba(239, 51, 64, 0.1) 100%);
+        rgba(31, 58, 46, 0.1) 0%, 
+        rgba(42, 52, 57, 0.1) 50%, 
+        rgba(212, 175, 55, 0.1) 100%);
 }
 
 /* Typography Enhancements */
