@@ -161,9 +161,9 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Fix only the very faded description text under icons */
 .card-body p.text-muted {
-    color: var(--gunmetal) !important;
+    color: var(--midnight-green) !important;
     opacity: 1;
-    font-weight: 400;
+    font-weight: 500;
 }
 
 /* Navigation Styles */
