@@ -95,6 +95,48 @@ body {
     border-color: var(--sand-yellow);
 }
 
+/* Text Color Utilities */
+.text-midnight-green {
+    color: var(--midnight-green) !important;
+}
+
+.text-gunmetal {
+    color: var(--gunmetal) !important;
+}
+
+.text-orange-pantone {
+    color: var(--orange-pantone) !important;
+}
+
+.text-sand-yellow {
+    color: var(--sand-yellow) !important;
+}
+
+/* Background Color Utilities */
+.bg-midnight-green {
+    background-color: var(--midnight-green) !important;
+}
+
+.bg-ivory-cream {
+    background-color: var(--ivory-cream) !important;
+}
+
+.bg-gunmetal {
+    background-color: var(--gunmetal) !important;
+}
+
+.bg-light-silver {
+    background-color: var(--light-silver) !important;
+}
+
+.bg-sand-yellow {
+    background-color: var(--sand-yellow) !important;
+}
+
+.bg-orange-pantone {
+    background-color: var(--orange-pantone) !important;
+}
+
 /* Typography Enhancements */
 .display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
     font-weight: var(--font-weight-bold);
