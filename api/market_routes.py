@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from models import Company, Stock, db
-from utils.cache import cache
+from app import cache
 from utils.limiter import limiter
 from utils.errors import APIError
 from sqlalchemy import func, desc

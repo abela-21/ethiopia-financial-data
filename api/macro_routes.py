@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from models import MacroIndicators
-from utils.cache import cache
+from app import cache
 from utils.limiter import limiter
 from utils.errors import APIError
 from datetime import datetime, timedelta

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from models import Stock, Company
-from utils.cache import cache
+from app import cache
 from utils.limiter import limiter
 from utils.errors import APIError
 from flask_jwt_extended import jwt_required, get_jwt_identity

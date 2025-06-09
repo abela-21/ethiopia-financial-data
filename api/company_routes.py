@@ -3,7 +3,7 @@ from models import Company, CompanyAudit, db
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from utils.errors import APIError
 from utils.validators import validate_company_data
-from utils.cache import cache
+from app import cache
 from utils.limiter import limiter
 from datetime import datetime
 from sqlalchemy import desc, asc, or_

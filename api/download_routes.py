@@ -1,7 +1,7 @@
 from flask import Blueprint, send_file, request, jsonify
 from models import Company, Financial, Stock, MacroIndicators
 from utils.errors import APIError
-from utils.cache import cache
+from app import cache
 from utils.limiter import limiter
 from datetime import datetime
 import pandas as pd
