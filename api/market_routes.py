@@ -151,3 +151,87 @@ def get_market_trends():
     except Exception as e:
         logger.error(f"Unexpected error in get_market_trends: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
+
+
+@market_api.route("/market/leaders")
+@cache.cached(timeout=300)
+@limiter.limit("60/minute")
+def get_market_leaders():
+    """Get market leaders (top gainers and losers)"""
+    try:
+        limit = request.args.get("limit", default=10, type=int)
+        if limit <= 0 or limit > 50:
+            raise APIError("Limit must be between 1 and 50", status_code=400)
+
+        # Get companies with recent stock data
+        companies = Company.query.all()
+        if not companies:
+            return jsonify({"message": "No companies found"}), 200
+
+        leaders_data = []
+
+        for company in companies:
+            # Get latest stock price
+            latest_stock = (
+                Stock.query.filter_by(company_id=company.id)
+                .order_by(desc(Stock.date))
+                .first()
+            )
+            
+            if not latest_stock:
+                continue
+
+            # Get previous stock price for comparison
+            prev_stock = (
+                Stock.query.filter_by(company_id=company.id)
+                .filter(Stock.date < latest_stock.date)
+                .order_by(desc(Stock.date))
+                .first()
+            )
+
+            if prev_stock and prev_stock.close and prev_stock.close > 0:
+                price_change = latest_stock.close - prev_stock.close
+                percent_change = (price_change / prev_stock.close) * 100
+
+                leaders_data.append({
+                    "company_id": company.id,
+                    "name": company.name,
+                    "ticker": company.ticker,
+                    "current_price": latest_stock.close,
+                    "previous_price": prev_stock.close,
+                    "price_change": round(price_change, 2),
+                    "percent_change": round(percent_change, 2),
+                    "volume": latest_stock.volume or 0,
+                    "date": latest_stock.date.strftime("%Y-%m-%d")
+                })
+
+        # Sort by percent change to get gainers and losers
+        gainers = sorted(
+            [stock for stock in leaders_data if stock["percent_change"] > 0],
+            key=lambda x: x["percent_change"],
+            reverse=True
+        )[:limit]
+
+        losers = sorted(
+            [stock for stock in leaders_data if stock["percent_change"] < 0],
+            key=lambda x: x["percent_change"]
+        )[:limit]
+
+        response = {
+            "gainers": gainers,
+            "losers": losers,
+            "metadata": {
+                "total_companies": len(companies),
+                "companies_with_data": len(leaders_data),
+                "limit": limit
+            }
+        }
+
+        return jsonify(response), 200
+
+    except APIError as e:
+        logger.warning(f"API Error in get_market_leaders: {str(e)}")
+        return jsonify({"error": str(e)}), e.status_code
+    except Exception as e:
+        logger.error(f"Unexpected error in get_market_leaders: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
