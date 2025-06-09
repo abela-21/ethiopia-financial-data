@@ -127,24 +127,71 @@ class DashboardManager {
         this.updateMarketCapChange(summary.market_cap_change);
     }
 
-    async loadLatestIndicators(forceRefresh = false) {
-        const cacheKey = 'latest_indicators';
+    async loadLatestNews(forceRefresh = false) {
+        const cacheKey = 'latest_news';
         
         if (!forceRefresh) {
             const cached = cache.get(cacheKey);
             if (cached) {
-                this.updateLatestIndicators(cached);
+                this.updateLatestNews(cached);
                 return;
             }
         }
 
         try {
-            const data = await api.get('/macro/latest');
+            const data = await api.get('/news/latest?limit=6');
             cache.set(cacheKey, data);
-            this.updateLatestIndicators(data);
+            this.updateLatestNews(data);
         } catch (error) {
-            console.error('Latest indicators loading error:', error);
-            this.showIndicatorsError();
+            console.error('Latest news loading error:', error);
+            this.showNewsError();
+        }
+    }
+
+    updateLatestNews(data) {
+        const newsContainer = document.getElementById('latest-news');
+        if (!newsContainer) return;
+
+        if (!data.data || data.data.length === 0) {
+            newsContainer.innerHTML = `
+                <div class="col-12 text-center">
+                    <p class="text-muted">No news articles available</p>
+                </div>
+            `;
+            return;
+        }
+
+        const newsHtml = data.data.map(news => `
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <span class="badge bg-primary mb-2">${news.category || 'News'}</span>
+                        <h5 class="card-title">${news.title}</h5>
+                        <p class="card-text text-muted">${news.content.substring(0, 120)}...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">${news.source || 'Ethiopian Business News'}</small>
+                            <small class="text-muted">${new Date(news.published_date).toLocaleDateString()}</small>
+                        </div>
+                        ${news.company_name ? `<div class="mt-2"><small class="text-primary">Related: ${news.company_name}</small></div>` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        newsContainer.innerHTML = newsHtml;
+    }
+
+    showNewsError() {
+        const newsContainer = document.getElementById('latest-news');
+        if (newsContainer) {
+            newsContainer.innerHTML = `
+                <div class="col-12 text-center">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Unable to load news. Please try again later.
+                    </div>
+                </div>
+            `;
         }
     }
 
