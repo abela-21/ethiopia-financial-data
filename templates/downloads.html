@@ -65,9 +65,9 @@
                 <!-- Companies Data -->
                 <div class="col-lg-6 mb-4">
                     <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white border-0">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-building text-primary me-2"></i>Companies Data
+                        <div class="card-header bg-light-silver border-0">
+                            <h5 class="card-title mb-0 text-midnight-green">
+                                <i class="fas fa-building me-2"></i>Companies Data
                             </h5>
                         </div>
                         <div class="card-body">
@@ -101,12 +101,100 @@
                     </div>
                 </div>
 
+                <!-- Financial Data -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light-silver border-0">
+                            <h5 class="card-title mb-0 text-midnight-green">
+                                <i class="fas fa-calculator me-2"></i>Financial Data
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">Download comprehensive financial statements including income, balance sheet, and cash flow data.</p>
+                            
+                            <form id="financialsForm" onsubmit="downloadFinancials(event)">
+                                <div class="mb-3">
+                                    <label for="financialCompany" class="form-label">Select Company</label>
+                                    <select class="form-select" id="financialCompany" name="company_id">
+                                        <option value="">All Companies</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label for="financialYearFrom" class="form-label">From Year</label>
+                                        <input type="number" class="form-control" id="financialYearFrom" name="year_from" min="2015" max="2024" placeholder="2020">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="financialYearTo" class="form-label">To Year</label>
+                                        <input type="number" class="form-control" id="financialYearTo" name="year_to" min="2015" max="2024" placeholder="2024">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Select Variables</label>
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Revenue" id="var_revenue">
+                                                <label class="form-check-label" for="var_revenue">Revenue</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Net_Income" id="var_net_income">
+                                                <label class="form-check-label" for="var_net_income">Net Income</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Total_Assets" id="var_total_assets">
+                                                <label class="form-check-label" for="var_total_assets">Total Assets</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Total_Equity" id="var_total_equity">
+                                                <label class="form-check-label" for="var_total_equity">Total Equity</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Operating_Cash_Flow" id="var_operating_cash">
+                                                <label class="form-check-label" for="var_operating_cash">Operating Cash Flow</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Current_Ratio" id="var_current_ratio">
+                                                <label class="form-check-label" for="var_current_ratio">Current Ratio</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Return_on_Equity" id="var_roe">
+                                                <label class="form-check-label" for="var_roe">Return on Equity</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="all" id="var_all">
+                                                <label class="form-check-label" for="var_all"><strong>All Variables</strong></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="financialFormat" class="form-label">Format</label>
+                                    <select class="form-select" id="financialFormat" name="format">
+                                        <option value="csv">CSV</option>
+                                        <option value="excel">Excel</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-download me-2"></i>Download Financial Data
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Macroeconomic Indicators -->
                 <div class="col-lg-6 mb-4">
                     <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white border-0">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-globe text-success me-2"></i>Macroeconomic Indicators
+                        <div class="card-header bg-light-silver border-0">
+                            <h5 class="card-title mb-0 text-midnight-green">
+                                <i class="fas fa-globe me-2"></i>Macroeconomic Indicators
                             </h5>
                         </div>
                         <div class="card-body">
@@ -297,6 +385,8 @@
         </div>
     </div>
 </div>
+
+<script src="{{ url_for('static', filename='js/downloads.js') }}"></script>
 
 <!-- Download Progress Modal -->
 <div class="modal fade" id="downloadModal" tabindex="-1">

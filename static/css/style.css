@@ -1,20 +1,22 @@
 /* Ethiopian Capital Market Platform - Custom Styles */
 
-/* Root Variables - Preferred Color Scheme */
+/* Root Variables - Professional Color Scheme */
 :root {
-    /* Preferred Color Palette */
-    --midnight-green: #1f3a2e;
-    --gunmetal: #2a3439;
-    --ivory-cream: #f8f6f0;
-    --sand-yellow: #d4af37;
+    /* Professional Color Palette */
+    --midnight-green: #075056;
+    --ivory-cream: #FDF6E3;
+    --gunmetal: #233038;
+    --orange-pantone: #FF5B04;
+    --sand-yellow: #F4D47C;
+    --light-silver: #D3DBDD;
     
     /* Extended Color Palette */
     --primary-color: var(--midnight-green);
     --secondary-color: var(--gunmetal);
     --success-color: var(--midnight-green);
-    --warning-color: var(--sand-yellow);
-    --danger-color: #dc3545;
-    --info-color: #17a2b8;
+    --warning-color: var(--orange-pantone);
+    --danger-color: var(--orange-pantone);
+    --info-color: var(--midnight-green);
     --light-color: var(--ivory-cream);
     --dark-color: var(--gunmetal);
     
@@ -50,7 +52,7 @@ body {
     background-color: var(--ivory-cream);
 }
 
-/* Preferred Gradient Backgrounds */
+/* Professional Gradient Backgrounds */
 .bg-gradient-primary {
     background: linear-gradient(135deg, 
         var(--midnight-green) 0%, 
@@ -58,10 +60,39 @@ body {
 }
 
 .bg-gradient-light {
-    background: linear-gradient(135deg, 
-        rgba(31, 58, 46, 0.1) 0%, 
-        rgba(42, 52, 57, 0.1) 50%, 
-        rgba(212, 175, 55, 0.1) 100%);
+    background-color: var(--light-silver);
+}
+
+/* Card Backgrounds */
+.card {
+    background-color: white;
+    border: 1px solid var(--light-silver);
+}
+
+.card-header {
+    background-color: var(--light-silver);
+    border-bottom: 1px solid var(--gunmetal);
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: var(--midnight-green);
+    border-color: var(--midnight-green);
+}
+
+.btn-primary:hover {
+    background-color: var(--gunmetal);
+    border-color: var(--gunmetal);
+}
+
+.btn-warning {
+    background-color: var(--orange-pantone);
+    border-color: var(--orange-pantone);
+}
+
+.btn-warning:hover {
+    background-color: var(--sand-yellow);
+    border-color: var(--sand-yellow);
 }
 
 /* Typography Enhancements */
