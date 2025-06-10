@@ -384,6 +384,119 @@ class DocumentCategory(db.Model):
         return f"<DocumentCategory {self.name}>"
 
 
+class ListedCompany(db.Model):
+    """Ethiopian Stock Exchange listed companies"""
+    __tablename__ = "listed_company"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, index=True)
+    ticker_symbol = db.Column(db.String(20), nullable=False, unique=True, index=True)
+    sector = db.Column(db.String(50), nullable=False, index=True)  # 'Banking', 'Telecommunications', 'Manufacturing'
+    industry = db.Column(db.String(100), nullable=False)
+    market_cap = db.Column(db.BigInteger)  # In Ethiopian Birr
+    shares_outstanding = db.Column(db.BigInteger)
+    listing_date = db.Column(db.Date, nullable=False)
+    headquarters = db.Column(db.String(100))
+    website_url = db.Column(db.String(200))
+    logo_url = db.Column(db.String(200))
+    description = db.Column(db.Text)
+    ceo_name = db.Column(db.String(100))
+    employee_count = db.Column(db.Integer)
+    fiscal_year_end = db.Column(db.String(10))  # 'June 30', 'December 31'
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    financial_metrics = db.relationship('CompanyFinancialMetric', backref='company', lazy=True, cascade='all, delete-orphan')
+    financial_statements = db.relationship('FinancialStatement', backref='company', lazy=True, cascade='all, delete-orphan')
+    
+    def __repr__(self):
+        return f"<ListedCompany {self.name} ({self.ticker_symbol})>"
+
+
+class CompanyFinancialMetric(db.Model):
+    """Financial metrics for listed companies"""
+    __tablename__ = "company_financial_metric"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('listed_company.id'), nullable=False, index=True)
+    metric_name = db.Column(db.String(100), nullable=False, index=True)  # 'revenue', 'net_income', 'total_assets'
+    metric_value = db.Column(db.Numeric(20, 2))  # Monetary values in ETB
+    metric_unit = db.Column(db.String(20))  # 'ETB', 'USD', 'percentage', 'ratio'
+    reporting_period = db.Column(db.String(20), nullable=False, index=True)  # 'Q1-2024', 'FY-2023'
+    fiscal_year = db.Column(db.Integer, nullable=False, index=True)
+    quarter = db.Column(db.Integer)  # 1, 2, 3, 4 (null for annual data)
+    reporting_date = db.Column(db.Date, nullable=False, index=True)
+    currency = db.Column(db.String(10), default='ETB')
+    data_source = db.Column(db.String(100))  # 'ESX', 'Company Report', 'NBE'
+    is_audited = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<CompanyFinancialMetric {self.metric_name}: {self.metric_value} ({self.reporting_period})>"
+
+
+class FinancialStatement(db.Model):
+    """Complete financial statements for listed companies"""
+    __tablename__ = "financial_statement"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('listed_company.id'), nullable=False, index=True)
+    statement_type = db.Column(db.String(50), nullable=False, index=True)  # 'income_statement', 'balance_sheet', 'cash_flow'
+    reporting_period = db.Column(db.String(20), nullable=False, index=True)  # 'Q1-2024', 'FY-2023'
+    fiscal_year = db.Column(db.Integer, nullable=False, index=True)
+    period_start_date = db.Column(db.Date, nullable=False)
+    period_end_date = db.Column(db.Date, nullable=False)
+    filing_date = db.Column(db.Date)
+    
+    # Income Statement Data
+    revenue = db.Column(db.Numeric(20, 2))
+    cost_of_goods_sold = db.Column(db.Numeric(20, 2))
+    gross_profit = db.Column(db.Numeric(20, 2))
+    operating_expenses = db.Column(db.Numeric(20, 2))
+    operating_income = db.Column(db.Numeric(20, 2))
+    interest_expense = db.Column(db.Numeric(20, 2))
+    interest_income = db.Column(db.Numeric(20, 2))
+    net_income = db.Column(db.Numeric(20, 2))
+    earnings_per_share = db.Column(db.Numeric(10, 4))
+    
+    # Balance Sheet Data
+    total_assets = db.Column(db.Numeric(20, 2))
+    current_assets = db.Column(db.Numeric(20, 2))
+    cash_and_equivalents = db.Column(db.Numeric(20, 2))
+    accounts_receivable = db.Column(db.Numeric(20, 2))
+    inventory = db.Column(db.Numeric(20, 2))
+    total_liabilities = db.Column(db.Numeric(20, 2))
+    current_liabilities = db.Column(db.Numeric(20, 2))
+    long_term_debt = db.Column(db.Numeric(20, 2))
+    shareholders_equity = db.Column(db.Numeric(20, 2))
+    
+    # Cash Flow Data
+    operating_cash_flow = db.Column(db.Numeric(20, 2))
+    investing_cash_flow = db.Column(db.Numeric(20, 2))
+    financing_cash_flow = db.Column(db.Numeric(20, 2))
+    free_cash_flow = db.Column(db.Numeric(20, 2))
+    
+    # Banking-specific metrics (for Wegagen Bank)
+    deposits = db.Column(db.Numeric(20, 2))
+    loans_and_advances = db.Column(db.Numeric(20, 2))
+    loan_loss_provisions = db.Column(db.Numeric(20, 2))
+    net_interest_income = db.Column(db.Numeric(20, 2))
+    non_interest_income = db.Column(db.Numeric(20, 2))
+    
+    # Metadata
+    currency = db.Column(db.String(10), default='ETB')
+    is_audited = db.Column(db.Boolean, default=False)
+    auditor_name = db.Column(db.String(100))
+    data_source = db.Column(db.String(100))
+    file_url = db.Column(db.String(500))  # Link to original filing
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<FinancialStatement {self.statement_type} - {self.reporting_period}>"
+
+
 class DataCitation(db.Model):
     """Data citation tracking for academic and professional use"""
     __tablename__ = "data_citation"
