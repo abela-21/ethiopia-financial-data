@@ -2,8 +2,8 @@
     <div class="container-fluid">
         <!-- Brand -->
         <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">
-            <i class="fas fa-chart-line me-2"></i>
-            Ethiopia Capital Market
+            <i class="fas fa-university me-2"></i>
+            Ethiopia Economic Data
         </a>
 
         <!-- Mobile Toggle -->
@@ -21,21 +21,21 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint == 'main.companies' }}" 
-                       href="{{ url_for('main.companies') }}">
-                        <i class="fas fa-building me-1"></i>Companies
+                    <a class="nav-link {{ 'active' if request.endpoint == 'main.banking' }}" 
+                       href="{{ url_for('main.banking') }}">
+                        <i class="fas fa-university me-1"></i>Banking Sector
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint == 'main.market' }}" 
-                       href="{{ url_for('main.market') }}">
-                        <i class="fas fa-chart-bar me-1"></i>Market
+                    <a class="nav-link {{ 'active' if request.endpoint == 'main.research' }}" 
+                       href="{{ url_for('main.research') }}">
+                        <i class="fas fa-file-alt me-1"></i>Research
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'main.macro' }}" 
                        href="{{ url_for('main.macro') }}">
-                        <i class="fas fa-globe me-1"></i>Economic Data
+                        <i class="fas fa-chart-line me-1"></i>Economic Indicators
                     </a>
                 </li>
                 <li class="nav-item">
@@ -47,14 +47,14 @@
             </ul>
 
             <!-- Search Bar -->
-            <form class="d-flex me-3" role="search" action="{{ url_for('main.companies') }}" method="GET">
+            <form class="d-flex me-3" role="search" action="{{ url_for('main.research') }}" method="GET">
                 <div class="input-group">
                     <input class="form-control bg-light border-0" 
                            type="search" 
-                           name="search"
-                           placeholder="Search companies..." 
+                           name="search_query"
+                           placeholder="Search research & banks..." 
                            aria-label="Search"
-                           value="{{ request.args.get('search', '') }}">
+                           value="{{ request.args.get('search_query', '') }}">
                     <button class="btn btn-outline-light" type="submit">
                         <i class="fas fa-search"></i>
                     </button>
@@ -131,7 +131,11 @@
                     <i class="fas fa-home"></i> Home
                 </a>
             </li>
-            {% if request.endpoint == 'main.companies' %}
+            {% if request.endpoint == 'main.banking' %}
+            <li class="breadcrumb-item active" aria-current="page">Banking Sector</li>
+            {% elif request.endpoint == 'main.research' %}
+            <li class="breadcrumb-item active" aria-current="page">Research Documents</li>
+            {% elif request.endpoint == 'main.companies' %}
             <li class="breadcrumb-item active" aria-current="page">Companies</li>
             {% elif request.endpoint == 'main.company_detail' %}
             <li class="breadcrumb-item">
