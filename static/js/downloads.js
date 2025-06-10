@@ -114,7 +114,7 @@ function downloadFinancials(event) {
     }
     
     const url = `/api/download/financials?${params.toString()}`;
-    window.open(url, '_blank');
+    downloadFile(url, 'financials');
 }
 
 function downloadStocks(event) {
@@ -138,5 +138,60 @@ function downloadStocks(event) {
     }
     
     const url = `/api/download/stocks?${params.toString()}`;
-    window.open(url, '_blank');
+    downloadFile(url, 'stocks');
+}
+
+// Helper function to handle file downloads properly
+function downloadFile(url, dataType) {
+    // Show loading indicator
+    const button = event.target.querySelector('button[type="submit"]') || event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Downloading...';
+    button.disabled = true;
+    
+    // Create a temporary link element to trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    
+    // Handle the download
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Extract filename from response headers
+            const contentDisposition = response.headers.get('content-disposition');
+            let filename = `${dataType}.csv`;
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                if (match) {
+                    filename = match[1].replace(/['"]/g, '');
+                }
+            }
+            
+            return response.blob().then(blob => ({ blob, filename }));
+        })
+        .then(({ blob, filename }) => {
+            // Create object URL and trigger download
+            const downloadUrl = window.URL.createObjectURL(blob);
+            link.href = downloadUrl;
+            link.download = filename;
+            link.click();
+            
+            // Cleanup
+            window.URL.revokeObjectURL(downloadUrl);
+            document.body.removeChild(link);
+        })
+        .catch(error => {
+            console.error('Download error:', error);
+            alert('Download failed. Please try again.');
+        })
+        .finally(() => {
+            // Reset button
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
 }
