@@ -67,7 +67,9 @@ def create_app():
     limiter.init_app(app)
     
     # Import models to ensure they're registered
-    from models import User, Company, Stock, Financial, MacroIndicators, CompanyNews, CompanyAudit
+    from models import (User, Company, Stock, Financial, MacroIndicators, CompanyNews, CompanyAudit,
+                       EconomicDataSource, Bank, BankFinancialMetric, EconomicSector, 
+                       ResearchDocument, DocumentCategory, DataCitation, EconomicForecast, EconomicEvent)
     
     # Register blueprints
     from routes import main_bp

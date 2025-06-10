@@ -226,3 +226,219 @@ class MacroIndicators(db.Model):
 
     def __repr__(self):
         return f"<MacroIndicators {self.date}>"
+
+
+# NEW BANKING SECTOR MODELS
+
+class EconomicDataSource(db.Model):
+    """Data source tracking for credibility and lineage"""
+    __tablename__ = "economic_data_source"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)  # NBE, Statistics Service, etc.
+    abbreviation = db.Column(db.String(20), nullable=False)
+    website = db.Column(db.String(200))
+    data_types = db.Column(db.JSON)  # Types of data provided
+    update_frequency = db.Column(db.String(50))  # Daily, Monthly, Quarterly
+    reliability_score = db.Column(db.Float(precision=2))  # 1-10 scale
+    last_updated = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<EconomicDataSource {self.name}>"
+
+
+class Bank(db.Model):
+    """Enhanced bank profiles with banking-specific metrics"""
+    __tablename__ = "bank"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, index=True)
+    license_number = db.Column(db.String(20), unique=True, nullable=False)
+    establishment_date = db.Column(db.Date)
+    headquarters_location = db.Column(db.String(100))
+    branch_count = db.Column(db.Integer)
+    atm_count = db.Column(db.Integer)
+    digital_banking_users = db.Column(db.Integer)
+    nbe_rating = db.Column(db.String(10))  # A, B, C, etc.
+    website_url = db.Column(db.String(200))
+    logo_url = db.Column(db.String(200))
+    swift_code = db.Column(db.String(11))
+    bank_type = db.Column(db.String(50))  # Commercial, Development, Microfinance
+    ownership_type = db.Column(db.String(50))  # State, Private, Mixed
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    financial_metrics = db.relationship("BankFinancialMetric", backref="bank", lazy=True, cascade="all, delete-orphan")
+    research_documents = db.relationship("ResearchDocument", 
+                                       foreign_keys="ResearchDocument.entity_id",
+                                       primaryjoin="and_(Bank.id==ResearchDocument.entity_id, ResearchDocument.entity_type=='bank')",
+                                       backref="bank_entity", lazy=True)
+    
+    def __repr__(self):
+        return f"<Bank {self.name}>"
+
+
+class BankFinancialMetric(db.Model):
+    """Banking-specific financial metrics and KPIs"""
+    __tablename__ = "bank_financial_metric"
+    __table_args__ = (db.UniqueConstraint('bank_id', 'reporting_date', name='unique_bank_metric_date'),)
+    
+    id = db.Column(db.Integer, primary_key=True)
+    bank_id = db.Column(db.Integer, db.ForeignKey("bank.id", ondelete="CASCADE"), nullable=False)
+    reporting_date = db.Column(db.Date, nullable=False, index=True)
+    
+    # Balance Sheet Items
+    total_assets = db.Column(db.Float(precision=2))
+    total_deposits = db.Column(db.Float(precision=2))
+    total_loans = db.Column(db.Float(precision=2))
+    shareholders_equity = db.Column(db.Float(precision=2))
+    cash_and_bank_balances = db.Column(db.Float(precision=2))
+    
+    # Income Statement Items
+    net_interest_income = db.Column(db.Float(precision=2))
+    non_interest_income = db.Column(db.Float(precision=2))
+    operating_expenses = db.Column(db.Float(precision=2))
+    net_profit = db.Column(db.Float(precision=2))
+    loan_loss_provisions = db.Column(db.Float(precision=2))
+    
+    # Banking-Specific Ratios
+    npl_ratio = db.Column(db.Float(precision=4))  # Non-performing loan ratio
+    capital_adequacy_ratio = db.Column(db.Float(precision=4))  # CAR
+    return_on_assets = db.Column(db.Float(precision=4))  # ROA
+    return_on_equity = db.Column(db.Float(precision=4))  # ROE
+    loan_to_deposit_ratio = db.Column(db.Float(precision=4))
+    cost_to_income_ratio = db.Column(db.Float(precision=4))
+    net_interest_margin = db.Column(db.Float(precision=4))
+    
+    # Digital Banking Metrics
+    mobile_banking_users = db.Column(db.Integer)
+    internet_banking_users = db.Column(db.Integer)
+    digital_transaction_volume = db.Column(db.Float(precision=2))
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<BankFinancialMetric {self.bank.name} {self.reporting_date}>"
+
+
+class EconomicSector(db.Model):
+    """Economic sector analysis and contribution tracking"""
+    __tablename__ = "economic_sector"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    sector_name = db.Column(db.String(50), nullable=False, unique=True)
+    sector_code = db.Column(db.String(10))  # ISIC codes
+    gdp_contribution = db.Column(db.Float(precision=2))  # Percentage
+    employment_share = db.Column(db.Float(precision=2))  # Percentage
+    growth_rate = db.Column(db.Float(precision=2))  # Annual growth
+    investment_share = db.Column(db.Float(precision=2))  # Percentage of total investment
+    export_contribution = db.Column(db.Float(precision=2))  # Percentage of total exports
+    last_updated = db.Column(db.Date)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<EconomicSector {self.sector_name}>"
+
+
+class ResearchDocument(db.Model):
+    """Research documents and publication repository"""
+    __tablename__ = "research_document"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    entity_id = db.Column(db.Integer)  # Bank ID, Government agency ID, etc.
+    entity_type = db.Column(db.String(20), nullable=False, index=True)  # 'bank', 'government', 'nbe'
+    title = db.Column(db.String(200), nullable=False)
+    document_type = db.Column(db.String(50), nullable=False, index=True)  # 'annual_report', 'press_release', etc.
+    publication_date = db.Column(db.Date, nullable=False, index=True)
+    file_url = db.Column(db.String(500))
+    summary = db.Column(db.Text)
+    keywords = db.Column(db.JSON)  # Searchable keywords
+    language = db.Column(db.String(10), default='en')
+    file_size = db.Column(db.Integer)  # In bytes
+    download_count = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<ResearchDocument {self.title[:50]}>"
+
+
+class DocumentCategory(db.Model):
+    """Document categorization for research organization"""
+    __tablename__ = "document_category"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
+    description = db.Column(db.Text)
+    parent_category_id = db.Column(db.Integer, db.ForeignKey('document_category.id'))
+    sort_order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Self-referential relationship for hierarchical categories
+    subcategories = db.relationship('DocumentCategory', backref=db.backref('parent_category', remote_side=[id]), lazy=True)
+    
+    def __repr__(self):
+        return f"<DocumentCategory {self.name}>"
+
+
+class DataCitation(db.Model):
+    """Data citation tracking for academic and professional use"""
+    __tablename__ = "data_citation"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    data_source_id = db.Column(db.Integer, db.ForeignKey("economic_data_source.id"))
+    citation_format = db.Column(db.String(20))  # 'APA', 'MLA', 'Chicago', 'Custom'
+    citation_text = db.Column(db.Text, nullable=False)
+    access_date = db.Column(db.Date, nullable=False)
+    data_range = db.Column(db.String(100))  # "2020-2024" or "Latest available"
+    usage_purpose = db.Column(db.String(100))  # "Academic research", "Policy analysis"
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    data_source = db.relationship("EconomicDataSource", backref="citations")
+    
+    def __repr__(self):
+        return f"<DataCitation {self.citation_format}>"
+
+
+class EconomicForecast(db.Model):
+    """Economic forecasting and projections"""
+    __tablename__ = "economic_forecast"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    indicator_name = db.Column(db.String(100), nullable=False)
+    forecast_period = db.Column(db.String(20))  # "2025 Q1", "2025", etc.
+    forecast_value = db.Column(db.Float(precision=4))
+    confidence_interval_lower = db.Column(db.Float(precision=4))
+    confidence_interval_upper = db.Column(db.Float(precision=4))
+    forecasting_method = db.Column(db.String(50))  # "Econometric", "Time Series", etc.
+    source_organization = db.Column(db.String(100))  # "NBE", "IMF", "World Bank"
+    created_date = db.Column(db.Date, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<EconomicForecast {self.indicator_name} {self.forecast_period}>"
+
+
+class EconomicEvent(db.Model):
+    """Economic calendar and significant events"""
+    __tablename__ = "economic_event"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    event_name = db.Column(db.String(200), nullable=False)
+    event_type = db.Column(db.String(50), nullable=False)  # "Policy", "Data Release", "Meeting"
+    event_date = db.Column(db.Date, nullable=False, index=True)
+    importance = db.Column(db.String(10))  # "High", "Medium", "Low"
+    actual_value = db.Column(db.String(100))
+    forecast_value = db.Column(db.String(100))
+    previous_value = db.Column(db.String(100))
+    description = db.Column(db.Text)
+    source_organization = db.Column(db.String(100))
+    market_impact = db.Column(db.String(20))  # "Positive", "Negative", "Neutral"
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<EconomicEvent {self.event_name} {self.event_date}>"
