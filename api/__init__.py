@@ -25,6 +25,6 @@ api_bp.register_blueprint(dashboard_routes.dashboard_bp, url_prefix='/dashboard'
 api_bp.register_blueprint(external_data_routes.external_data_bp, url_prefix='/external-data')
 api_bp.register_blueprint(export_routes.export_bp, url_prefix='/export')
 
-# Import and register download routes
-from api import download_routes
-api_bp.register_blueprint(download_routes.download_bp)
+# Register download tracking routes
+from . import download_routes
+api_bp.register_blueprint(download_routes.download_bp, name='download_tracking')

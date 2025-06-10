@@ -179,7 +179,14 @@ class APIClient {
             return await response.json();
         } catch (error) {
             console.error(`API request failed: ${url}`, error);
-            throw error;
+            
+            // Return a graceful error response instead of throwing
+            return {
+                error: true,
+                message: 'Data temporarily unavailable',
+                details: error.message,
+                status: error.status || 500
+            };
         }
     }
 
