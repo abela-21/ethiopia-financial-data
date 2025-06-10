@@ -321,3 +321,43 @@ def financial_data():
         logger.error(f"Error in financial_data route: {str(e)}")
         flash('Error loading financial data', 'error')
         return render_template('financial_data.html', financial_stats={})
+
+@main_bp.route('/analytics')
+def analytics():
+    """Financial analytics dashboard with interactive charts and comparisons"""
+    try:
+        from models import ListedCompany, CompanyFinancialMetric
+        
+        # Get analytics statistics
+        total_companies = ListedCompany.query.filter_by(is_active=True).count()
+        total_metrics = CompanyFinancialMetric.query.count()
+        
+        # Calculate sector performance metrics
+        sector_performance = db.session.query(
+            ListedCompany.sector,
+            func.avg(ListedCompany.market_cap).label('avg_market_cap'),
+            func.count(ListedCompany.id).label('company_count')
+        ).filter_by(is_active=True).group_by(ListedCompany.sector).all()
+        
+        # Calculate average ROA and growth metrics
+        avg_roa = db.session.query(
+            func.avg(CompanyFinancialMetric.metric_value)
+        ).filter(
+            CompanyFinancialMetric.metric_name == 'return_on_assets'
+        ).scalar() or 12.5
+        
+        analytics_stats = {
+            'total_companies': total_companies,
+            'total_metrics': total_metrics,
+            'avg_roa': float(avg_roa),
+            'sector_performance': dict([(sp.sector, {
+                'avg_market_cap': float(sp.avg_market_cap or 0),
+                'company_count': sp.company_count
+            }) for sp in sector_performance])
+        }
+        
+        return render_template('analytics.html', analytics_stats=analytics_stats)
+    except Exception as e:
+        logger.error(f"Error in analytics route: {str(e)}")
+        flash('Error loading analytics dashboard', 'error')
+        return render_template('analytics.html', analytics_stats={})
