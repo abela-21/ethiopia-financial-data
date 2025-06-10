@@ -50,10 +50,7 @@ def index():
         flash('Error loading market data', 'error')
         return render_template('index.html', market_summary={}, latest_macro=None)
 
-@main_bp.route('/dashboard')
-def dashboard():
-    """Dashboard page - redirect to index for now"""
-    return redirect(url_for('main.index'))
+
 
 @main_bp.route('/companies')
 def companies():
@@ -244,6 +241,11 @@ def search_companies_api():
     except Exception as e:
         logger.error(f"Error in search_companies_api: {str(e)}")
         return jsonify([])
+
+@main_bp.route('/dashboard')
+def dashboard():
+    """User personalized dashboard"""
+    return render_template('dashboard.html')
 
 @main_bp.route('/search')
 def search():

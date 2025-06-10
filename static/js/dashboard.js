@@ -1,583 +1,563 @@
-// Ethiopia Capital Market Platform - Dashboard JavaScript
-
-// Dashboard Manager Class
 class DashboardManager {
     constructor() {
-        this.refreshInterval = null;
-        this.refreshRate = 300000; // 5 minutes
-        this.isLoading = false;
-        this.retryCount = 0;
-        this.maxRetries = 3;
-        
-        this.initialize();
+        this.init();
     }
 
-    initialize() {
-        console.log('Dashboard Manager - Initializing...');
-        
-        // Load initial data
-        this.loadDashboardData();
-        
-        // Set up auto-refresh
-        this.startAutoRefresh();
-        
-        // Set up event listeners
+    init() {
+        this.loadDashboardStats();
+        this.loadWatchlists();
+        this.loadRecentActivity();
+        this.loadDownloadHistory();
+        this.loadSavedSearches();
         this.setupEventListeners();
-        
-        console.log('Dashboard Manager - Initialized');
     }
 
     setupEventListeners() {
-        // Refresh button
-        const refreshBtn = document.querySelector('[data-action="refresh"]');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => {
-                this.loadDashboardData(true);
-            });
-        }
+        // Create watchlist modal
+        document.getElementById('saveWatchlist')?.addEventListener('click', () => {
+            this.createWatchlist();
+        });
 
-        // Auto-refresh toggle
-        const autoRefreshToggle = document.querySelector('[data-toggle="auto-refresh"]');
-        if (autoRefreshToggle) {
-            autoRefreshToggle.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    this.startAutoRefresh();
-                } else {
-                    this.stopAutoRefresh();
-                }
-            });
-        }
+        // Update watchlist modal
+        document.getElementById('updateWatchlist')?.addEventListener('click', () => {
+            this.updateWatchlist();
+        });
 
-        // Page visibility change
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                this.stopAutoRefresh();
-            } else {
-                this.startAutoRefresh();
-            }
+        // Delete watchlist
+        document.getElementById('deleteWatchlist')?.addEventListener('click', () => {
+            this.deleteWatchlist();
+        });
+
+        // View toggle buttons
+        document.getElementById('gridViewBtn')?.addEventListener('click', () => {
+            this.setWatchlistView('grid');
+        });
+
+        document.getElementById('listViewBtn')?.addEventListener('click', () => {
+            this.setWatchlistView('list');
+        });
+
+        // Alert category navigation
+        document.querySelectorAll('#alertCategories .list-group-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.loadAlerts(item.dataset.category);
+            });
+        });
+
+        // Preferences button
+        document.getElementById('preferencesBtn')?.addEventListener('click', () => {
+            this.showPreferences();
         });
     }
 
-    async loadDashboardData(forceRefresh = false) {
-        if (this.isLoading) return;
-        
-        this.isLoading = true;
-        this.showLoadingState();
-
+    async loadDashboardStats() {
         try {
-            // Load market summary
-            await this.loadMarketSummary(forceRefresh);
-            
-            // Load latest news
-            await this.loadLatestNews(forceRefresh);
-            
-            // Load recent activities
-            await this.loadRecentActivities(forceRefresh);
-            
-            this.retryCount = 0;
-            this.hideLoadingState();
-            
-        } catch (error) {
-            console.error('Dashboard data loading error:', error);
-            this.handleLoadingError(error);
-        } finally {
-            this.isLoading = false;
-        }
-    }
+            const response = await fetch('/api/dashboard/stats');
+            const result = await response.json();
 
-    async loadMarketSummary(forceRefresh = false) {
-        const cacheKey = 'market_summary';
-        
-        if (!forceRefresh) {
-            const cached = cache.get(cacheKey);
-            if (cached) {
-                this.updateMarketSummary(cached);
-                return;
+            if (result.status === 'success') {
+                const data = result.data;
+                document.getElementById('watchlistCount').textContent = data.watchlist_count;
+                document.getElementById('companiesCount').textContent = data.companies_count;
+                document.getElementById('downloadsCount').textContent = data.downloads_count;
+                document.getElementById('alertsCount').textContent = data.alerts_count;
             }
-        }
-
-        try {
-            const data = await api.get('/market/summary');
-            cache.set(cacheKey, data);
-            this.updateMarketSummary(data);
         } catch (error) {
-            console.error('Market summary loading error:', error);
-            this.showMarketSummaryError();
+            console.error('Error loading dashboard stats:', error);
         }
     }
 
-    updateMarketSummary(data) {
-        const summary = data.summary;
-        
-        // Update summary cards
-        this.updateElement('totalCompanies', summary.total_companies || 0);
-        this.updateElement('activeCompanies', summary.active_companies || 0);
-        this.updateElement('marketCap', Utils.formatLargeNumber(summary.market_cap || 0));
-        this.updateElement('dailyVolume', Utils.formatLargeNumber(summary.daily_volume || 0));
-        this.updateElement('gainers', summary.gainers || 0);
-        this.updateElement('losers', summary.losers || 0);
-        this.updateElement('unchanged', summary.unchanged || 0);
-        
-        // Update last updated timestamp
-        if (data.metadata && data.metadata.last_updated) {
-            this.updateElement('lastUpdated', data.metadata.last_updated);
-        }
+    async loadWatchlists() {
+        try {
+            const response = await fetch('/api/dashboard/watchlists');
+            const result = await response.json();
 
-        // Update market cap change indicator
-        this.updateMarketCapChange(summary.market_cap_change);
-    }
-
-    async loadLatestNews(forceRefresh = false) {
-        const cacheKey = 'latest_news';
-        
-        if (!forceRefresh) {
-            const cached = cache.get(cacheKey);
-            if (cached) {
-                this.updateLatestNews(cached);
-                return;
+            if (result.status === 'success') {
+                this.renderWatchlists(result.data);
             }
-        }
-
-        try {
-            const data = await api.get('/news/latest?limit=6');
-            cache.set(cacheKey, data);
-            this.updateLatestNews(data);
         } catch (error) {
-            console.error('Latest news loading error:', error);
-            this.showNewsError();
+            console.error('Error loading watchlists:', error);
         }
     }
 
-    updateLatestNews(data) {
-        const newsContainer = document.getElementById('latest-news');
-        if (!newsContainer) return;
-
-        if (!data.data || data.data.length === 0) {
-            newsContainer.innerHTML = `
-                <div class="col-12 text-center">
-                    <p class="text-muted">No news articles available</p>
+    renderWatchlists(watchlists) {
+        const container = document.getElementById('watchlistsContainer');
+        
+        if (watchlists.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-eye fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">No watchlists yet</h6>
+                    <p class="text-muted">Create your first watchlist to start tracking companies</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createWatchlistModal">
+                        <i class="fas fa-plus me-1"></i>Create Watchlist
+                    </button>
                 </div>
             `;
             return;
         }
 
-        const newsHtml = data.data.map(news => `
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <span class="badge bg-primary mb-2">${news.category || 'News'}</span>
-                        <h5 class="card-title">${news.title}</h5>
-                        <p class="card-text text-muted">${news.content.substring(0, 120)}...</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">${news.source || 'Ethiopian Business News'}</small>
-                            <small class="text-muted">${new Date(news.published_date).toLocaleDateString()}</small>
-                        </div>
-                        ${news.company_name ? `<div class="mt-2"><small class="text-primary">Related: ${news.company_name}</small></div>` : ''}
-                    </div>
-                </div>
-            </div>
-        `).join('');
-
-        newsContainer.innerHTML = newsHtml;
-    }
-
-    showNewsError() {
-        const newsContainer = document.getElementById('latest-news');
-        if (newsContainer) {
-            newsContainer.innerHTML = `
-                <div class="col-12 text-center">
-                    <div class="alert alert-warning" role="alert">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Unable to load news. Please try again later.
-                    </div>
-                </div>
-            `;
+        const view = localStorage.getItem('watchlistView') || 'grid';
+        
+        if (view === 'grid') {
+            this.renderGridView(watchlists, container);
+        } else {
+            this.renderListView(watchlists, container);
         }
     }
 
-    updateLatestIndicators(data) {
-        if (!data.latest_indicators) return;
-
-        const indicators = data.latest_indicators;
-        
-        // Update economic indicator cards
-        this.updateElement('gdpGrowth', 
-            indicators.gdp_growth ? `${indicators.gdp_growth.toFixed(1)}%` : 'N/A'
-        );
-        
-        this.updateElement('inflationRate', 
-            indicators.inflation_rate ? `${indicators.inflation_rate.toFixed(1)}%` : 'N/A'
-        );
-        
-        this.updateElement('usdExchange', 
-            indicators.etb_usd ? `${indicators.etb_usd.toFixed(2)}` : 'N/A'
-        );
-        
-        this.updateElement('interestRate', 
-            indicators.interest_rate ? `${indicators.interest_rate.toFixed(1)}%` : 'N/A'
-        );
-
-        // Update indicator changes with colors
-        this.updateIndicatorChange('gdpGrowthChange', indicators.gdp_growth_change);
-        this.updateIndicatorChange('inflationChange', indicators.inflation_change);
-        this.updateIndicatorChange('exchangeChange', indicators.exchange_change);
-        this.updateIndicatorChange('interestChange', indicators.interest_change);
+    renderGridView(watchlists, container) {
+        const html = `
+            <div class="row">
+                ${watchlists.map(watchlist => `
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 ${watchlist.is_default ? 'border-primary' : ''}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title mb-0">
+                                        ${watchlist.name}
+                                        ${watchlist.is_default ? '<span class="badge bg-primary ms-1">Default</span>' : ''}
+                                        ${watchlist.is_public ? '<span class="badge bg-success ms-1">Public</span>' : ''}
+                                    </h6>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="dashboard.editWatchlist(${watchlist.id})">
+                                                <i class="fas fa-edit me-2"></i>Edit
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="dashboard.viewWatchlist(${watchlist.id})">
+                                                <i class="fas fa-eye me-2"></i>View Companies
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#" onclick="dashboard.confirmDeleteWatchlist(${watchlist.id})">
+                                                <i class="fas fa-trash me-2"></i>Delete
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p class="card-text text-muted small">${watchlist.description || 'No description'}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-building me-1"></i>${watchlist.companies_count} companies
+                                    </small>
+                                    <small class="text-muted">
+                                        Created ${new Date(watchlist.created_at).toLocaleDateString()}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        container.innerHTML = html;
     }
 
-    async loadRecentActivities(forceRefresh = false) {
-        const cacheKey = 'recent_activities';
+    renderListView(watchlists, container) {
+        const html = `
+            <div class="list-group">
+                ${watchlists.map(watchlist => `
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                ${watchlist.name}
+                                ${watchlist.is_default ? '<span class="badge bg-primary ms-2">Default</span>' : ''}
+                                ${watchlist.is_public ? '<span class="badge bg-success ms-2">Public</span>' : ''}
+                            </h6>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="dashboard.editWatchlist(${watchlist.id})">
+                                        <i class="fas fa-edit me-2"></i>Edit
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="dashboard.viewWatchlist(${watchlist.id})">
+                                        <i class="fas fa-eye me-2"></i>View Companies
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="dashboard.confirmDeleteWatchlist(${watchlist.id})">
+                                        <i class="fas fa-trash me-2"></i>Delete
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="mb-1">${watchlist.description || 'No description'}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-building me-1"></i>${watchlist.companies_count} companies • 
+                            Created ${new Date(watchlist.created_at).toLocaleDateString()}
+                        </small>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        container.innerHTML = html;
+    }
+
+    setWatchlistView(view) {
+        localStorage.setItem('watchlistView', view);
         
-        if (!forceRefresh) {
-            const cached = cache.get(cacheKey);
-            if (cached) {
-                this.updateRecentActivities(cached);
-                return;
-            }
+        // Update button states
+        document.querySelectorAll('#gridViewBtn, #listViewBtn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(view + 'ViewBtn').classList.add('active');
+        
+        // Reload watchlists with new view
+        this.loadWatchlists();
+    }
+
+    async createWatchlist() {
+        const name = document.getElementById('watchlistName').value.trim();
+        const description = document.getElementById('watchlistDescription').value.trim();
+        const isPublic = document.getElementById('isPublic').checked;
+        const isDefault = document.getElementById('isDefault').checked;
+
+        if (!name) {
+            alert('Please enter a watchlist name');
+            return;
         }
 
         try {
-            // Simulate recent activities for now
-            const activities = this.generateRecentActivities();
-            cache.set(cacheKey, activities);
-            this.updateRecentActivities(activities);
+            const response = await fetch('/api/dashboard/watchlists', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name,
+                    description,
+                    is_public: isPublic,
+                    is_default: isDefault
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('createWatchlistModal')).hide();
+                
+                // Reset form
+                document.getElementById('createWatchlistForm').reset();
+                
+                // Reload data
+                this.loadWatchlists();
+                this.loadDashboardStats();
+                
+                // Show success message
+                this.showNotification('Watchlist created successfully!', 'success');
+            } else {
+                alert(result.message || 'Failed to create watchlist');
+            }
         } catch (error) {
-            console.error('Recent activities loading error:', error);
-            this.showActivitiesError();
+            console.error('Error creating watchlist:', error);
+            alert('Failed to create watchlist');
         }
     }
 
-    generateRecentActivities() {
-        // This would normally come from an API
-        return [
-            {
-                type: 'market',
-                title: 'Market Update',
-                description: 'Daily trading volume reached new monthly high',
-                time: '2 minutes ago',
-                icon: 'chart-line',
-                color: 'success'
-            },
-            {
-                type: 'company',
-                title: 'New Company Listed',
-                description: 'ABC Manufacturing joined the exchange',
-                time: '1 hour ago',
-                icon: 'building',
-                color: 'primary'
-            },
-            {
-                type: 'macro',
-                title: 'Economic Indicator Update',
-                description: 'Inflation rate decreased by 0.2%',
-                time: '3 hours ago',
-                icon: 'globe',
-                color: 'info'
-            },
-            {
-                type: 'system',
-                title: 'Data Refresh',
-                description: 'Financial statements updated for Q3 2024',
-                time: '6 hours ago',
-                icon: 'sync-alt',
-                color: 'warning'
+    async editWatchlist(watchlistId) {
+        try {
+            const response = await fetch(`/api/dashboard/watchlists/${watchlistId}/companies`);
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                const watchlist = result.data.watchlist;
+                
+                // Populate edit form
+                document.getElementById('editWatchlistId').value = watchlistId;
+                document.getElementById('editWatchlistName').value = watchlist.name;
+                document.getElementById('editWatchlistDescription').value = watchlist.description || '';
+                
+                // Load companies in watchlist
+                this.renderWatchlistCompanies(result.data.companies);
+                
+                // Show modal
+                new bootstrap.Modal(document.getElementById('editWatchlistModal')).show();
             }
-        ];
+        } catch (error) {
+            console.error('Error loading watchlist:', error);
+        }
     }
 
-    updateRecentActivities(activities) {
-        const container = document.getElementById('recentActivities');
-        if (!container) return;
+    renderWatchlistCompanies(companies) {
+        const container = document.getElementById('watchlistCompanies');
+        
+        if (companies.length === 0) {
+            container.innerHTML = '<p class="text-muted text-center">No companies in this watchlist</p>';
+            return;
+        }
 
-        container.innerHTML = activities.map(activity => `
-            <div class="activity-item d-flex align-items-start mb-3">
-                <div class="activity-icon me-3">
-                    <div class="icon-circle bg-${activity.color} text-white">
-                        <i class="fas fa-${activity.icon}"></i>
-                    </div>
+        const html = companies.map(company => `
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <div>
+                    <strong>${company.name}</strong> (${company.ticker})
+                    <br>
+                    <small class="text-muted">${company.sector}</small>
                 </div>
-                <div class="activity-content flex-grow-1">
-                    <h6 class="activity-title mb-1">${activity.title}</h6>
-                    <p class="activity-description text-muted mb-1">${activity.description}</p>
-                    <small class="activity-time text-muted">${activity.time}</small>
+                <button class="btn btn-sm btn-outline-danger" onclick="dashboard.removeFromWatchlist(${company.id})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+    }
+
+    async loadRecentActivity() {
+        try {
+            const response = await fetch('/api/dashboard/recent-activity');
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                this.renderRecentActivity(result.data);
+            }
+        } catch (error) {
+            console.error('Error loading recent activity:', error);
+        }
+    }
+
+    renderRecentActivity(activities) {
+        const container = document.getElementById('recentActivity');
+        
+        if (activities.length === 0) {
+            container.innerHTML = '<div class="text-center py-3"><p class="text-muted">No recent activity</p></div>';
+            return;
+        }
+
+        const html = activities.map(activity => `
+            <div class="d-flex align-items-start mb-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-${this.getActivityIcon(activity.type)} text-primary"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <p class="mb-1">${activity.description}</p>
+                    <small class="text-muted">${new Date(activity.timestamp).toLocaleString()}</small>
                 </div>
             </div>
         `).join('');
-    }
-
-    // Chart creation methods
-    createMarketTrendsChart() {
-        const canvas = document.getElementById('marketTrendsChart');
-        if (!canvas) return;
-
-        // Sample data - in real app this would come from API
-        const data = {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Market Cap',
-                data: [1200, 1350, 1280, 1420, 1380, 1450],
-                borderColor: ChartConfig.colors.primary,
-                backgroundColor: chartManager.hexToRgba(ChartConfig.colors.primary, 0.1),
-                fill: true
-            }]
-        };
-
-        const options = {
-            ...ChartTemplates.marketTrends.options,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        };
-
-        return chartManager.createLineChart('marketTrendsChart', data, options);
-    }
-
-    createSectorDistributionChart() {
-        const canvas = document.getElementById('sectorDistributionChart');
-        if (!canvas) return;
-
-        // Sample data
-        const data = {
-            labels: ['Banking', 'Manufacturing', 'Agriculture', 'Services', 'Technology'],
-            data: [35, 25, 20, 15, 5],
-            backgroundColor: [
-                ChartConfig.colors.primary,
-                ChartConfig.colors.success,
-                ChartConfig.colors.warning,
-                ChartConfig.colors.info,
-                ChartConfig.colors.danger
-            ]
-        };
-
-        return chartManager.createDoughnutChart('sectorDistributionChart', data);
-    }
-
-    // Utility methods
-    updateElement(elementId, value) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.textContent = value;
-            element.classList.add('updated');
-            setTimeout(() => element.classList.remove('updated'), 1000);
-        }
-    }
-
-    updateMarketCapChange(change) {
-        const element = document.getElementById('marketCapChange');
-        if (element && change !== undefined) {
-            element.textContent = Utils.formatPercentage(change);
-            element.className = `small ${Utils.getChangeColor(change)}`;
-        }
-    }
-
-    updateIndicatorChange(elementId, change) {
-        const element = document.getElementById(elementId);
-        if (element && change !== undefined) {
-            element.textContent = Utils.formatPercentage(change);
-            element.className = `small ${Utils.getChangeColor(change)}`;
-        }
-    }
-
-    // Loading states
-    showLoadingState() {
-        const refreshBtn = document.querySelector('[data-action="refresh"]');
-        if (refreshBtn) {
-            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
-            refreshBtn.disabled = true;
-        }
-
-        // Add loading shimmer to cards
-        const summaryCards = document.querySelectorAll('.market-summary .card-body');
-        summaryCards.forEach(card => card.classList.add('loading-shimmer'));
-    }
-
-    hideLoadingState() {
-        const refreshBtn = document.querySelector('[data-action="refresh"]');
-        if (refreshBtn) {
-            refreshBtn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Refresh';
-            refreshBtn.disabled = false;
-        }
-
-        // Remove loading shimmer
-        const summaryCards = document.querySelectorAll('.market-summary .card-body');
-        summaryCards.forEach(card => card.classList.remove('loading-shimmer'));
-    }
-
-    // Error handling
-    handleLoadingError(error) {
-        this.hideLoadingState();
         
-        if (this.retryCount < this.maxRetries) {
-            this.retryCount++;
-            setTimeout(() => {
-                this.loadDashboardData();
-            }, 2000 * this.retryCount);
-        } else {
-            notifications.error('Failed to load dashboard data. Please check your connection.');
+        container.innerHTML = html;
+    }
+
+    getActivityIcon(type) {
+        const icons = {
+            'download': 'download',
+            'watchlist_addition': 'eye',
+            'search': 'search',
+            'alert': 'bell'
+        };
+        return icons[type] || 'circle';
+    }
+
+    async loadDownloadHistory() {
+        try {
+            const response = await fetch('/api/dashboard/download-history?per_page=5');
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                this.renderDownloadHistory(result.data.downloads);
+            }
+        } catch (error) {
+            console.error('Error loading download history:', error);
         }
     }
 
-    showMarketSummaryError() {
-        const elements = ['totalCompanies', 'activeCompanies', 'marketCap', 'dailyVolume'];
-        elements.forEach(id => this.updateElement(id, 'N/A'));
-    }
+    renderDownloadHistory(downloads) {
+        const container = document.getElementById('downloadHistory');
+        
+        if (downloads.length === 0) {
+            container.innerHTML = '<div class="text-center py-3"><small class="text-muted">No downloads yet</small></div>';
+            return;
+        }
 
-    showIndicatorsError() {
-        const elements = ['gdpGrowth', 'inflationRate', 'usdExchange', 'interestRate'];
-        elements.forEach(id => this.updateElement(id, 'N/A'));
-    }
-
-    showActivitiesError() {
-        const container = document.getElementById('recentActivities');
-        if (container) {
-            container.innerHTML = `
-                <div class="text-center py-4">
-                    <i class="fas fa-exclamation-triangle text-muted fa-2x mb-2"></i>
-                    <p class="text-muted">Unable to load recent activities</p>
+        const html = downloads.map(download => `
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <div>
+                    <small class="fw-bold">${download.resource_name}</small>
+                    <br>
+                    <small class="text-muted">${download.file_format.toUpperCase()} • ${this.formatFileSize(download.file_size)}</small>
                 </div>
-            `;
-        }
-    }
-
-    // Auto-refresh management
-    startAutoRefresh() {
-        if (this.refreshInterval) {
-            clearInterval(this.refreshInterval);
-        }
+                <small class="text-muted">${new Date(download.downloaded_at).toLocaleDateString()}</small>
+            </div>
+        `).join('');
         
-        this.refreshInterval = setInterval(() => {
-            this.loadDashboardData();
-        }, this.refreshRate);
+        container.innerHTML = html;
     }
 
-    stopAutoRefresh() {
-        if (this.refreshInterval) {
-            clearInterval(this.refreshInterval);
-            this.refreshInterval = null;
+    async loadSavedSearches() {
+        try {
+            const response = await fetch('/api/dashboard/saved-searches');
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                this.renderSavedSearches(result.data.slice(0, 5)); // Show only recent 5
+            }
+        } catch (error) {
+            console.error('Error loading saved searches:', error);
         }
     }
 
-    // Cleanup
-    destroy() {
-        this.stopAutoRefresh();
-        chartManager.destroyAllCharts();
+    renderSavedSearches(searches) {
+        const container = document.getElementById('savedSearches');
+        
+        if (searches.length === 0) {
+            container.innerHTML = '<div class="text-center py-3"><small class="text-muted">No saved searches</small></div>';
+            return;
+        }
+
+        const html = searches.map(search => `
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <div>
+                    <small class="fw-bold">${search.name}</small>
+                    <br>
+                    <small class="text-muted">${search.results_count} results</small>
+                </div>
+                <div class="text-end">
+                    ${search.alert_enabled ? '<i class="fas fa-bell text-warning"></i>' : ''}
+                    <br>
+                    <small class="text-muted">${new Date(search.updated_at).toLocaleDateString()}</small>
+                </div>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
     }
-}
 
-// Real-time updates simulation
-class RealTimeUpdates {
-    constructor() {
-        this.websocket = null;
-        this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 5;
-        this.reconnectDelay = 1000;
-    }
+    async loadAlerts(category = 'price') {
+        try {
+            const response = await fetch(`/api/dashboard/alerts?type=${category}`);
+            const result = await response.json();
 
-    // Simulate real-time updates with periodic data changes
-    startSimulation() {
-        setInterval(() => {
-            this.simulateMarketChange();
-        }, 30000); // Update every 30 seconds
-    }
-
-    simulateMarketChange() {
-        // Simulate small changes in market data
-        const elements = {
-            'totalVolume': () => Math.random() > 0.5 ? 1 : -1,
-            'gainers': () => Math.floor(Math.random() * 3),
-            'losers': () => Math.floor(Math.random() * 3)
-        };
-
-        Object.entries(elements).forEach(([elementId, changeFn]) => {
-            const element = document.getElementById(elementId);
-            if (element) {
-                const currentValue = parseInt(element.textContent) || 0;
-                const change = changeFn();
-                const newValue = Math.max(0, currentValue + change);
-                
-                element.textContent = Utils.formatNumber(newValue);
-                element.classList.add('flash-update');
-                setTimeout(() => element.classList.remove('flash-update'), 1000);
+            if (result.status === 'success') {
+                this.renderAlerts(result.data);
             }
-        });
+
+            // Update active category
+            document.querySelectorAll('#alertCategories .list-group-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`#alertCategories [data-category="${category}"]`).classList.add('active');
+        } catch (error) {
+            console.error('Error loading alerts:', error);
+        }
+    }
+
+    renderAlerts(alerts) {
+        const container = document.getElementById('alertsList');
+        
+        if (alerts.length === 0) {
+            container.innerHTML = '<div class="text-center py-3"><p class="text-muted">No alerts in this category</p></div>';
+            return;
+        }
+
+        const html = alerts.map(alert => `
+            <div class="card mb-2">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">${alert.title}</h6>
+                            <p class="mb-1 text-muted small">${alert.message}</p>
+                            <small class="text-muted">
+                                ${alert.frequency} • ${alert.delivery_method} • 
+                                Created ${new Date(alert.created_at).toLocaleDateString()}
+                            </small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" ${alert.is_active ? 'checked' : ''} 
+                                   onchange="dashboard.toggleAlert(${alert.id}, this.checked)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+    }
+
+    formatFileSize(bytes) {
+        if (!bytes) return 'Unknown';
+        
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    showNotification(message, type = 'info') {
+        // Create a simple notification
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    async toggleAlert(alertId, isActive) {
+        try {
+            const response = await fetch(`/api/dashboard/alerts/${alertId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ is_active: isActive })
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                this.loadDashboardStats(); // Refresh alert count
+            }
+        } catch (error) {
+            console.error('Error toggling alert:', error);
+        }
+    }
+
+    confirmDeleteWatchlist(watchlistId) {
+        if (confirm('Are you sure you want to delete this watchlist? This action cannot be undone.')) {
+            this.deleteWatchlistById(watchlistId);
+        }
+    }
+
+    async deleteWatchlistById(watchlistId) {
+        try {
+            const response = await fetch(`/api/dashboard/watchlists/${watchlistId}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                this.loadWatchlists();
+                this.loadDashboardStats();
+                this.showNotification('Watchlist deleted successfully!', 'success');
+            } else {
+                alert(result.message || 'Failed to delete watchlist');
+            }
+        } catch (error) {
+            console.error('Error deleting watchlist:', error);
+            alert('Failed to delete watchlist');
+        }
+    }
+
+    showPreferences() {
+        // Navigate to preferences page or show preferences modal
+        window.location.href = '/settings';
     }
 }
 
 // Initialize dashboard when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Only initialize on pages that have dashboard elements
-    if (document.querySelector('.market-summary') || document.getElementById('marketTrendsChart')) {
-        console.log('Initializing Dashboard Manager...');
-        
-        window.dashboardManager = new DashboardManager();
-        window.realTimeUpdates = new RealTimeUpdates();
-        
-        // Start real-time updates simulation
-        window.realTimeUpdates.startSimulation();
-        
-        // Create charts if elements exist
-        setTimeout(() => {
-            if (typeof chartManager !== 'undefined') {
-                dashboardManager.createMarketTrendsChart();
-                dashboardManager.createSectorDistributionChart();
-            }
-        }, 100);
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    window.dashboard = new DashboardManager();
 });
-
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-    if (window.dashboardManager) {
-        window.dashboardManager.destroy();
-    }
-});
-
-// CSS for flash updates
-const style = document.createElement('style');
-style.textContent = `
-    .flash-update {
-        background-color: rgba(255, 193, 7, 0.3) !important;
-        transition: background-color 0.3s ease;
-    }
-    
-    .updated {
-        color: #198754 !important;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-    
-    .activity-item {
-        padding: 0.75rem;
-        border-radius: 0.5rem;
-        transition: background-color 0.2s ease;
-    }
-    
-    .activity-item:hover {
-        background-color: rgba(0, 0, 0, 0.02);
-    }
-    
-    .activity-icon .icon-circle {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .activity-title {
-        font-weight: 600;
-        color: #212529;
-    }
-    
-    .activity-description {
-        font-size: 0.9rem;
-        line-height: 1.4;
-    }
-    
-    .activity-time {
-        font-size: 0.8rem;
-    }
-`;
-document.head.appendChild(style);
-
-// Export for global use
-window.DashboardManager = DashboardManager;
-window.RealTimeUpdates = RealTimeUpdates;
