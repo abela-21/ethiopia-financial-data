@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Data Downloads - Ethiopia Economic Intelligence</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .metric-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .company-selector {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .download-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+        }
+        .financial-metric {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #28a745;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .company-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .company-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        .sector-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e3c72;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark economic-navbar">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('routes.index') }}">
+                <i class="bi bi-graph-up-arrow me-2"></i>
+                Ethiopia Economic Intelligence
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('routes.index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('routes.banking') }}">Banking</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('routes.research') }}">Research</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('routes.financial_data') }}">Financial Data</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold text-white mb-4">
+                        Financial Data Downloads
+                    </h1>
+                    <p class="lead text-white-50 mb-4">
+                        Access comprehensive financial metrics and statements for Ethiopian Stock Exchange listed companies. 
+                        Download authentic data from Wegagen Bank, Ethio Telecom, and other major ESX-listed corporations.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <button class="btn btn-primary btn-lg" onclick="scrollToSection('companies')">
+                            <i class="bi bi-download me-2"></i>Browse Companies
+                        </button>
+                        <button class="btn btn-outline-light btn-lg" onclick="scrollToSection('download')">
+                            <i class="bi bi-file-earmark-excel me-2"></i>Quick Download
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalCompanies">5</div>
+                            <div class="stat-label">Listed Companies</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalMetrics">18+</div>
+                            <div class="stat-label">Financial Metrics</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">172B</div>
+                            <div class="stat-label">Total Market Cap (ETB)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Companies Section -->
+    <section id="companies" class="py-5">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12 text-center">
+                    <h2 class="display-5 fw-bold mb-3">Ethiopian Listed Companies</h2>
+                    <p class="lead text-muted">Select companies to view and download their financial data</p>
+                </div>
+            </div>
+            
+            <div class="row" id="companiesGrid">
+                <!-- Companies will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Company Details Modal -->
+    <div class="modal fade" id="companyModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="companyModalTitle">Company Financial Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="company-info p-3 bg-light rounded">
+                                <h6 class="fw-bold mb-3">Company Information</h6>
+                                <div id="companyDetails"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="financial-metrics">
+                                <h6 class="fw-bold mb-3">Financial Metrics</h6>
+                                <div id="financialMetrics"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadCompanyData()">
+                        <i class="bi bi-download me-2"></i>Download Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Section -->
+    <section id="download" class="py-5 bg-light">
+        <div class="container">
+            <div class="download-section">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h3 class="fw-bold mb-4">Bulk Financial Data Download</h3>
+                        <p class="mb-4">Download comprehensive financial data for multiple companies in Excel or CSV format.</p>
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-semibold">Select Companies:</label>
+                            <div id="companyCheckboxes" class="row">
+                                <!-- Company checkboxes will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-semibold">Metric Types:</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="revenue" id="metricRevenue" checked>
+                                        <label class="form-check-label" for="metricRevenue">Revenue & Income</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="assets" id="metricAssets" checked>
+                                        <label class="form-check-label" for="metricAssets">Assets & Liabilities</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="ratios" id="metricRatios" checked>
+                                        <label class="form-check-label" for="metricRatios">Financial Ratios</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="banking" id="metricBanking" checked>
+                                        <label class="form-check-label" for="metricBanking">Banking Specific</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="telecom" id="metricTelecom" checked>
+                                        <label class="form-check-label" for="metricTelecom">Telecom Specific</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label class="form-label fw-semibold">Download Format:</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="format" id="formatExcel" value="excel" checked>
+                                <label class="btn btn-outline-light" for="formatExcel">
+                                    <i class="bi bi-file-earmark-excel me-2"></i>Excel (.xlsx)
+                                </label>
+                                <input type="radio" class="btn-check" name="format" id="formatCsv" value="csv">
+                                <label class="btn btn-outline-light" for="formatCsv">
+                                    <i class="bi bi-filetype-csv me-2"></i>CSV (.csv)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-light btn-lg w-100" onclick="downloadBulkData()">
+                            <i class="bi bi-cloud-download me-2"></i>Download Financial Data
+                        </button>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="download-preview bg-white rounded p-4">
+                            <h6 class="fw-bold mb-3">Download Preview</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Company</th>
+                                            <th>Metric</th>
+                                            <th>Value</th>
+                                            <th>Period</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Wegagen Bank</td>
+                                            <td>Total Assets</td>
+                                            <td>89.5B ETB</td>
+                                            <td>Q2-2024</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Ethio Telecom</td>
+                                            <td>Total Revenue</td>
+                                            <td>18.5B ETB</td>
+                                            <td>Q1-2024</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Ethiopian Airlines</td>
+                                            <td>Passenger Count</td>
+                                            <td>13.5M</td>
+                                            <td>FY-2023</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <small class="text-muted">Sample data format for downloaded files</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Sources Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h3 class="fw-bold mb-3">Authentic Data Sources</h3>
+                    <p class="lead text-muted">All financial data sourced from verified Ethiopian institutions</p>
+                </div>
+            </div>
+            <div class="row text-center">
+                <div class="col-md-3 mb-4">
+                    <div class="p-4">
+                        <i class="bi bi-building display-4 text-primary mb-3"></i>
+                        <h6 class="fw-bold">Ethiopian Stock Exchange</h6>
+                        <small class="text-muted">Official listing and trading data</small>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="p-4">
+                        <i class="bi bi-file-earmark-text display-4 text-success mb-3"></i>
+                        <h6 class="fw-bold">Company Annual Reports</h6>
+                        <small class="text-muted">Audited financial statements</small>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="p-4">
+                        <i class="bi bi-bank display-4 text-warning mb-3"></i>
+                        <h6 class="fw-bold">National Bank of Ethiopia</h6>
+                        <small class="text-muted">Banking sector supervision data</small>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="p-4">
+                        <i class="bi bi-graph-up display-4 text-info mb-3"></i>
+                        <h6 class="fw-bold">Quarterly Filings</h6>
+                        <small class="text-muted">Regular financial updates</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="economic-footer py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h5 class="fw-bold text-white mb-3">Ethiopia Economic Intelligence</h5>
+                    <p class="text-white-50">Comprehensive financial data platform for Ethiopia's capital market, delivering authentic insights through advanced data visualization.</p>
+                </div>
+                <div class="col-lg-6 text-lg-end">
+                    <p class="text-white-50 mb-0">
+                        Data sources: ESX, NBE, Company Reports, Government Publications
+                    </p>
+                    <small class="text-white-50">
+                        Financial data updated regularly from verified Ethiopian institutions
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/financial_data.js') }}"></script>
+</body>
+</html>
