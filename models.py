@@ -19,15 +19,7 @@ class User(UserMixin, db.Model):
     def is_active(self):
         return self.active
 
-    # Relationships
-    companies_created = db.relationship('Company', 
-                                      foreign_keys='Company.created_by',
-                                      backref='creator', 
-                                      lazy=True)
-    companies_updated = db.relationship('Company', 
-                                      foreign_keys='Company.updated_by',
-                                      backref='updater', 
-                                      lazy=True)
+    # Relationships will be defined through foreign keys
 
     def __repr__(self):
         return f"<User {self.username}>"
