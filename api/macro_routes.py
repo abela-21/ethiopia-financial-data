@@ -51,7 +51,7 @@ def serialize_macro(record):
     }
 
 @macro_api.route("/macro-indicators", methods=["GET"])
-@cache.cached(timeout=300)
+
 @limiter.limit("30/minute")
 def get_macro_indicators():
     """Get macro indicators with optional filtering"""
@@ -87,7 +87,7 @@ def get_macro_indicators():
         return jsonify({"error": "Internal server error"}), 500
 
 @macro_api.route("/macro/latest")
-@cache.cached(timeout=60)
+
 @limiter.limit("60/minute")
 def get_latest_indicators():
     """Get latest macro indicators"""
@@ -113,7 +113,7 @@ def get_latest_indicators():
         return jsonify({"error": "Internal server error"}), 500
 
 @macro_api.route("/macro", methods=["GET"])
-@cache.cached(timeout=300)
+
 @limiter.limit("30/minute")
 def get_macro():
     """Get macro indicators for charts - simplified endpoint"""

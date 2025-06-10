@@ -134,7 +134,7 @@ def get_banks():
 
 @banking_api.route('/banks/<int:bank_id>')
 @limiter.limit("100/minute")
-@cache.cached(timeout=300)
+
 def get_bank_by_id(bank_id):
     """Get detailed bank information by ID"""
     try:
@@ -170,7 +170,7 @@ def get_bank_by_id(bank_id):
 
 @banking_api.route('/banks/<int:bank_id>/financial-metrics')
 @limiter.limit("50/minute")
-@cache.cached(timeout=300, query_string=True)
+
 def get_bank_financial_metrics(bank_id):
     """Get financial metrics for a specific bank"""
     try:
@@ -203,7 +203,6 @@ def get_bank_financial_metrics(bank_id):
 
 @banking_api.route('/banking-sector/overview')
 @limiter.limit("30/minute")
-@cache.cached(timeout=600)
 def get_banking_sector_overview():
     """Get comprehensive banking sector overview and statistics"""
     try:
@@ -262,7 +261,7 @@ def get_banking_sector_overview():
 
 @banking_api.route('/banking-sector/performance-comparison')
 @limiter.limit("30/minute")
-@cache.cached(timeout=600, query_string=True)
+
 def get_banking_performance_comparison():
     """Compare performance metrics across banks"""
     try:

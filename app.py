@@ -63,7 +63,11 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
     cors.init_app(app)
-    cache.init_app(app)
+    
+    # Initialize cache with app context
+    with app.app_context():
+        cache.init_app(app)
+    
     limiter.init_app(app)
     
     # Import models to ensure they're registered

@@ -27,7 +27,7 @@ def serialize_news(news):
 
 @news_api.route("/latest", methods=["GET"])
 @limiter.limit("30 per minute")
-@cache.cached(timeout=300)
+
 def get_latest_news():
     """Get latest news articles"""
     try:
@@ -51,7 +51,7 @@ def get_latest_news():
 
 @news_api.route("/company/<int:company_id>", methods=["GET"])
 @limiter.limit("30 per minute")
-@cache.cached(timeout=300)
+
 def get_company_news(company_id):
     """Get news articles for a specific company"""
     try:

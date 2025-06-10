@@ -38,7 +38,7 @@ def serialize_stock(stock):
     }
 
 @stock_api.route("/stocks/<int:company_id>", methods=["GET"])
-@cache.cached(timeout=300, query_string=True)
+
 @limiter.limit("30/minute")
 def get_stocks(company_id):
     """Get stock prices for a company with optional date filters"""
@@ -92,7 +92,7 @@ def get_stocks(company_id):
         return jsonify({"error": "Internal server error"}), 500
 
 @stock_api.route("/stocks/<int:company_id>/latest", methods=["GET"])
-@cache.cached(timeout=60)
+
 @limiter.limit("60/minute")
 def get_latest_stock(company_id):
     """Get latest stock price for a company"""

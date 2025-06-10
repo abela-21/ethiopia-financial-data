@@ -62,7 +62,7 @@ def get_economic_sectors():
 
 @economic_api.route('/sectors/<int:sector_id>')
 @limiter.limit("100/minute")
-@cache.cached(timeout=600)
+
 def get_sector_by_id(sector_id):
     """Get detailed information for a specific economic sector"""
     try:
@@ -75,7 +75,7 @@ def get_sector_by_id(sector_id):
 
 @economic_api.route('/indicators/enhanced')
 @limiter.limit("50/minute")
-@cache.cached(timeout=300, query_string=True)
+
 def get_enhanced_macro_indicators():
     """Get enhanced macroeconomic indicators with additional context"""
     try:
@@ -189,7 +189,7 @@ def get_enhanced_macro_indicators():
 
 @economic_api.route('/analysis/correlation')
 @limiter.limit("30/minute")
-@cache.cached(timeout=600, query_string=True)
+
 def get_economic_correlation_analysis():
     """Get correlation analysis between economic indicators"""
     try:
@@ -259,7 +259,7 @@ def get_economic_correlation_analysis():
 
 @economic_api.route('/trends/sector-growth')
 @limiter.limit("30/minute")
-@cache.cached(timeout=600)
+
 def get_sector_growth_trends():
     """Get economic sector growth trends and projections"""
     try:
@@ -301,7 +301,7 @@ def get_sector_growth_trends():
 
 @economic_api.route('/analysis/economic-health-index')
 @limiter.limit("30/minute")
-@cache.cached(timeout=600)
+
 def get_economic_health_index():
     """Calculate composite economic health index for Ethiopia"""
     try:

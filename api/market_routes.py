@@ -53,7 +53,7 @@ def calculate_market_metrics(companies, date=None):
     }
 
 @market_api.route("/market/summary")
-@cache.cached(timeout=300)
+
 @limiter.limit("60/minute")
 def get_market_summary():
     """Get market summary with key metrics"""
@@ -94,7 +94,7 @@ def get_market_summary():
         return jsonify({"error": "Internal server error"}), 500
 
 @market_api.route("/market/trends")
-@cache.cached(timeout=300)
+
 @limiter.limit("30/minute")
 def get_market_trends():
     """Get market trends over time"""
@@ -154,7 +154,7 @@ def get_market_trends():
 
 
 @market_api.route("/market/leaders")
-@cache.cached(timeout=300)
+
 @limiter.limit("60/minute")
 def get_market_leaders():
     """Get market leaders (top gainers and losers)"""

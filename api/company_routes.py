@@ -64,7 +64,7 @@ def add_audit_log(company_id, action, user_id, details=None):
     db.session.add(audit)
 
 @company_api.route('/companies', methods=['GET'])
-@cache.cached(timeout=300, query_string=True)
+
 @limiter.limit("30/minute")
 def get_companies():
     """Get companies with filtering, sorting, pagination"""

@@ -45,7 +45,7 @@ def create_excel_response(df, filename):
 
 @download_api.route("/download/companies")
 @limiter.limit("30/minute")
-@cache.cached(timeout=300, query_string=True)
+
 def download_companies():
     """Download companies data in CSV or Excel format"""
     try:
@@ -99,7 +99,7 @@ def download_companies():
 
 @download_api.route("/download/macro_indicators")
 @limiter.limit("30/minute")
-@cache.cached(timeout=300, query_string=True)
+
 def download_macro():
     """Download macroeconomic indicators with filtering options"""
     try:
@@ -160,7 +160,7 @@ def download_macro():
 
 @download_api.route("/download/financials")
 @limiter.limit("30/minute")
-@cache.cached(timeout=300, query_string=True)
+
 def download_financials():
     """Download financial data with company and variable filtering"""
     try:
@@ -281,7 +281,7 @@ def download_financials():
 
 @download_api.route("/download/stocks")
 @limiter.limit("30/minute")
-@cache.cached(timeout=300, query_string=True)
+
 def download_stocks():
     """Download stock price data with company and date filtering"""
     try:

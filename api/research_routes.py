@@ -101,7 +101,7 @@ def get_research_documents():
 
 @research_api.route('/documents/<int:document_id>')
 @limiter.limit("100/minute")
-@cache.cached(timeout=300)
+
 def get_document_by_id(document_id):
     """Get detailed document information"""
     try:
@@ -119,7 +119,7 @@ def get_document_by_id(document_id):
 
 @research_api.route('/documents/entity/<int:entity_id>/<entity_type>')
 @limiter.limit("50/minute")
-@cache.cached(timeout=300)
+
 def get_documents_by_entity(entity_id, entity_type):
     """Get all documents for a specific entity (bank, government, etc.)"""
     try:
@@ -141,7 +141,7 @@ def get_documents_by_entity(entity_id, entity_type):
 
 @research_api.route('/data-sources')
 @limiter.limit("50/minute")
-@cache.cached(timeout=600)
+
 def get_data_sources():
     """Get all economic data sources with reliability metrics"""
     try:
@@ -170,7 +170,7 @@ def get_data_sources():
 
 @research_api.route('/forecasts')
 @limiter.limit("50/minute")
-@cache.cached(timeout=300, query_string=True)
+
 def get_economic_forecasts():
     """Get economic forecasts and projections"""
     try:
@@ -214,7 +214,7 @@ def get_economic_forecasts():
 
 @research_api.route('/economic-calendar')
 @limiter.limit("50/minute")
-@cache.cached(timeout=300, query_string=True)
+
 def get_economic_calendar():
     """Get economic events and calendar"""
     try:
@@ -265,7 +265,7 @@ def get_economic_calendar():
 
 @research_api.route('/document-types')
 @limiter.limit("30/minute")
-@cache.cached(timeout=600)
+
 def get_document_types():
     """Get available document types and categories"""
     try:
