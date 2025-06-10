@@ -245,7 +245,14 @@ def search_companies_api():
 @main_bp.route('/dashboard')
 def dashboard():
     """User personalized dashboard"""
-    return render_template('dashboard.html')
+    # Create a mock user context for testing
+    from flask import g
+    g.current_user = type('MockUser', (), {
+        'first_name': 'Test',
+        'email': 'test@example.com',
+        'is_authenticated': True
+    })()
+    return render_template('dashboard.html', current_user=g.current_user)
 
 @main_bp.route('/search')
 def search():
