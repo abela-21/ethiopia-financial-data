@@ -217,10 +217,54 @@
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="macroVariables" class="form-label">Specific Variables (optional)</label>
-                                    <input type="text" class="form-control" id="macroVariables" name="variables" 
-                                           placeholder="e.g., gdp_growth,inflation_rate,etb_usd">
-                                    <div class="form-text">Leave empty for all variables, or specify comma-separated variable names</div>
+                                    <label for="macroVariables" class="form-label">Select Variables</label>
+                                    <select class="form-select" id="macroVariables" name="variables" multiple size="8">
+                                        <option value="">All Variables</option>
+                                        <optgroup label="Economic Growth">
+                                            <option value="gdp_growth">GDP Growth Rate (%)</option>
+                                            <option value="gdp_per_capita">GDP Per Capita (USD)</option>
+                                            <option value="industrial_production">Industrial Production Index</option>
+                                            <option value="agricultural_production">Agricultural Production Index</option>
+                                        </optgroup>
+                                        <optgroup label="Inflation & Interest">
+                                            <option value="inflation_rate">Inflation Rate (%)</option>
+                                            <option value="food_inflation">Food Inflation (%)</option>
+                                            <option value="interest_rate">Interest Rate (%)</option>
+                                        </optgroup>
+                                        <optgroup label="Trade & External">
+                                            <option value="exports">Exports (Million USD)</option>
+                                            <option value="imports">Imports (Million USD)</option>
+                                            <option value="trade_balance">Trade Balance (Million USD)</option>
+                                            <option value="current_account_balance">Current Account Balance (Million USD)</option>
+                                            <option value="fdi_inflow">FDI Inflow (Million USD)</option>
+                                            <option value="remittances">Remittances (Million USD)</option>
+                                        </optgroup>
+                                        <optgroup label="Exchange Rates">
+                                            <option value="etb_usd">ETB/USD Exchange Rate</option>
+                                            <option value="etb_eur">ETB/EUR Exchange Rate</option>
+                                            <option value="etb_gbp">ETB/GBP Exchange Rate</option>
+                                            <option value="etb_jpy">ETB/JPY Exchange Rate</option>
+                                            <option value="etb_cny">ETB/CNY Exchange Rate</option>
+                                        </optgroup>
+                                        <optgroup label="Government Finance">
+                                            <option value="govt_revenue">Government Revenue (Billion ETB)</option>
+                                            <option value="govt_expenditure">Government Expenditure (Billion ETB)</option>
+                                            <option value="budget_deficit">Budget Deficit (Billion ETB)</option>
+                                            <option value="govt_debt">Government Debt (Billion ETB)</option>
+                                        </optgroup>
+                                        <optgroup label="Banking & Finance">
+                                            <option value="total_deposits">Total Bank Deposits (Billion ETB)</option>
+                                            <option value="total_loans">Total Bank Loans (Billion ETB)</option>
+                                            <option value="money_supply_m2">Money Supply M2 (Billion ETB)</option>
+                                            <option value="private_sector_credit">Private Sector Credit (Billion ETB)</option>
+                                        </optgroup>
+                                        <optgroup label="Commodity Prices">
+                                            <option value="coffee_price">Coffee Price (USD/kg)</option>
+                                            <option value="gold_price">Gold Price (USD/oz)</option>
+                                            <option value="oil_price">Oil Price (USD/barrel)</option>
+                                        </optgroup>
+                                    </select>
+                                    <div class="form-text">Hold Ctrl/Cmd to select multiple variables, or leave unselected for all variables</div>
                                 </div>
                                 
                                 <div class="mb-3">
@@ -242,9 +286,9 @@
                 <!-- Stock Price Data -->
                 <div class="col-lg-6 mb-4">
                     <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white border-0">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-chart-line text-warning me-2"></i>Stock Price Data
+                        <div class="card-header bg-light-silver border-0">
+                            <h5 class="card-title mb-0 text-midnight-green">
+                                <i class="fas fa-chart-line me-2"></i>Stock Price Data
                             </h5>
                         </div>
                         <div class="card-body">

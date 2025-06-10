@@ -57,7 +57,7 @@ function downloadCompanies(event) {
     }
     
     const url = `/api/download/companies?${params.toString()}`;
-    window.open(url, '_blank');
+    downloadFile(url, 'companies');
 }
 
 function downloadMacro(event) {
@@ -67,12 +67,25 @@ function downloadMacro(event) {
     const formData = new FormData(form);
     const params = new URLSearchParams();
     
+    // Handle basic form fields
     for (const [key, value] of formData.entries()) {
-        if (value) params.append(key, value);
+        if (value && key !== 'variables') {
+            params.append(key, value);
+        }
+    }
+    
+    // Handle variable selection from multi-select dropdown
+    const variableSelect = document.getElementById('macroVariables');
+    const selectedVariables = Array.from(variableSelect.selectedOptions)
+        .map(option => option.value)
+        .filter(value => value !== ''); // Remove empty "All Variables" option
+    
+    if (selectedVariables.length > 0) {
+        params.append('variables', selectedVariables.join(','));
     }
     
     const url = `/api/download/macro_indicators?${params.toString()}`;
-    window.open(url, '_blank');
+    downloadFile(url, 'macro_indicators');
 }
 
 function downloadFinancials(event) {
