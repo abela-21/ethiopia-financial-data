@@ -291,3 +291,33 @@ def research():
         logger.error(f"Error in research route: {str(e)}")
         flash('Error loading research data', 'error')
         return render_template('research.html', research_stats={})
+
+@main_bp.route('/financial-data')
+def financial_data():
+    """Financial data downloads page for Ethiopian listed companies"""
+    try:
+        from models import ListedCompany, CompanyFinancialMetric
+        
+        # Get basic statistics
+        total_companies = ListedCompany.query.filter_by(is_active=True).count()
+        total_metrics = CompanyFinancialMetric.query.count()
+        total_market_cap = db.session.query(func.sum(ListedCompany.market_cap)).scalar() or 0
+        
+        # Get sector distribution
+        sectors = db.session.query(
+            ListedCompany.sector,
+            func.count(ListedCompany.id)
+        ).filter_by(is_active=True).group_by(ListedCompany.sector).all()
+        
+        financial_stats = {
+            'total_companies': total_companies,
+            'total_metrics': total_metrics,
+            'total_market_cap': total_market_cap,
+            'sectors': dict(sectors)
+        }
+        
+        return render_template('financial_data.html', financial_stats=financial_stats)
+    except Exception as e:
+        logger.error(f"Error in financial_data route: {str(e)}")
+        flash('Error loading financial data', 'error')
+        return render_template('financial_data.html', financial_stats={})

@@ -88,7 +88,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark economic-navbar">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url_for('routes.index') }}">
+            <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">
                 <i class="bi bi-graph-up-arrow me-2"></i>
                 Ethiopia Economic Intelligence
             </a>
@@ -98,16 +98,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('routes.index') }}">Home</a>
+                        <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('routes.banking') }}">Banking</a>
+                        <a class="nav-link" href="{{ url_for('main.banking') }}">Banking</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('routes.research') }}">Research</a>
+                        <a class="nav-link" href="{{ url_for('main.research') }}">Research</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('routes.financial_data') }}">Financial Data</a>
+                        <a class="nav-link active" href="{{ url_for('main.financial_data') }}">Financial Data</a>
                     </li>
                 </ul>
             </div>
