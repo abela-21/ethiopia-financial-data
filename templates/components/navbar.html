@@ -39,6 +39,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'main.dashboard' }}" 
+                       href="{{ url_for('main.dashboard') }}">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'main.search' }}" 
                        href="{{ url_for('main.search') }}">
                         <i class="fas fa-search me-1"></i>Search
@@ -168,6 +174,8 @@
             <li class="breadcrumb-item active" aria-current="page">Financial Data</li>
             {% elif request.endpoint == 'main.analytics' %}
             <li class="breadcrumb-item active" aria-current="page">Financial Analytics</li>
+            {% elif request.endpoint == 'main.dashboard' %}
+            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
             {% elif request.endpoint == 'main.search' %}
             <li class="breadcrumb-item active" aria-current="page">Advanced Search</li>
             {% elif request.endpoint == 'main.downloads' %}
