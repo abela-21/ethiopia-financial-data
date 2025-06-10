@@ -16,10 +16,13 @@
                     Empowering researchers, consultants, analysts, and portfolio managers with authentic data insights.
                 </p>
                 <div class="d-flex gap-3 mb-4">
-                    <a href="/banking" class="btn btn-primary btn-lg">
+                    <a href="{{ url_for('main.financial_data') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-chart-bar me-2"></i>Financial Data
+                    </a>
+                    <a href="/banking" class="btn btn-outline-primary btn-lg">
                         <i class="fas fa-university me-2"></i>Banking Sector
                     </a>
-                    <a href="{{ url_for('main.macro') }}" class="btn btn-outline-primary btn-lg">
+                    <a href="{{ url_for('main.macro') }}" class="btn btn-outline-secondary btn-lg">
                         <i class="fas fa-chart-line me-2"></i>Economic Overview
                     </a>
                 </div>
