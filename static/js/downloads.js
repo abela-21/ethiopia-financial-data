@@ -78,13 +78,16 @@ function downloadMacro(event) {
     const variableSelect = document.getElementById('macroVariables');
     const selectedVariables = Array.from(variableSelect.selectedOptions)
         .map(option => option.value)
-        .filter(value => value !== ''); // Remove empty "All Variables" option
+        .filter(value => value !== ''); // Remove empty values
+    
+    console.log('Selected macro variables:', selectedVariables); // Debug log
     
     if (selectedVariables.length > 0) {
         params.append('variables', selectedVariables.join(','));
     }
     
     const url = `/api/download/macro_indicators?${params.toString()}`;
+    console.log('Macro download URL:', url); // Debug log
     downloadFile(url, 'macro_indicators');
 }
 
