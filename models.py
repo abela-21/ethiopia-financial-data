@@ -668,3 +668,82 @@ class SavedSearch(db.Model):
     
     # Relationships
     user = db.relationship('User', backref='saved_searches')
+
+# External Data Sources Models
+class ExternalDataSource(db.Model):
+    """External data sources configuration"""
+    __tablename__ = 'external_data_sources'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    source_type = db.Column(db.String(50), nullable=False)  # 'api', 'file', 'database'
+    description = db.Column(db.Text)
+    endpoint_url = db.Column(db.String(500))
+    api_key_required = db.Column(db.Boolean, default=False)
+    update_frequency = db.Column(db.String(50))  # 'real-time', 'hourly', 'daily'
+    is_active = db.Column(db.Boolean, default=True)
+    status = db.Column(db.String(20), default='healthy')  # 'healthy', 'error', 'maintenance'
+    last_updated = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class DataIntegration(db.Model):
+    """Data integration tracking and logs"""
+    __tablename__ = 'data_integrations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    source_id = db.Column(db.Integer, db.ForeignKey('external_data_sources.id'), nullable=False)
+    data_type = db.Column(db.String(50), nullable=False)
+    status = db.Column(db.String(20), nullable=False)  # 'pending', 'running', 'completed', 'failed'
+    records_processed = db.Column(db.Integer)
+    error_message = db.Column(db.Text)
+    last_sync = db.Column(db.DateTime, default=datetime.utcnow)
+    duration_seconds = db.Column(db.Integer)
+    
+    # Relationships
+    source = db.relationship('ExternalDataSource', backref='integrations')
+
+class RealTimeQuote(db.Model):
+    """Real-time market quotes"""
+    __tablename__ = 'real_time_quotes'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    symbol = db.Column(db.String(20), nullable=False)
+    price = db.Column(db.Numeric(15, 4), nullable=False)
+    change = db.Column(db.Numeric(15, 4))
+    change_percent = db.Column(db.Numeric(8, 4))
+    volume = db.Column(db.BigInteger)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    market_status = db.Column(db.String(20))  # 'open', 'closed', 'pre-market', 'after-hours'
+    source_id = db.Column(db.Integer, db.ForeignKey('external_data_sources.id'))
+    
+    # Relationships
+    source = db.relationship('ExternalDataSource')
+
+class CurrencyRate(db.Model):
+    """Currency exchange rates"""
+    __tablename__ = 'currency_rates'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    base_currency = db.Column(db.String(3), nullable=False)  # ETB, USD, EUR
+    target_currency = db.Column(db.String(3), nullable=False)
+    rate = db.Column(db.Numeric(15, 6), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    source = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class DataExportLog(db.Model):
+    """Track data export requests and downloads"""
+    __tablename__ = 'data_export_logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    export_type = db.Column(db.String(50), nullable=False)  # 'companies', 'financial', 'banking'
+    export_format = db.Column(db.String(20), nullable=False)  # 'excel', 'csv', 'json', 'pdf'
+    filters_applied = db.Column(db.JSON)
+    file_size_bytes = db.Column(db.BigInteger)
+    records_exported = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    download_count = db.Column(db.Integer, default=0)
+    
+    # Relationships
+    user = db.relationship('User', backref='export_logs')

@@ -69,7 +69,10 @@ def create_app():
     # Import models to ensure they're registered
     from models import (User, Company, Stock, Financial, MacroIndicators, CompanyNews, CompanyAudit,
                        EconomicDataSource, Bank, BankFinancialMetric, EconomicSector, 
-                       ResearchDocument, DocumentCategory, DataCitation, EconomicForecast, EconomicEvent)
+                       ResearchDocument, DocumentCategory, DataCitation, EconomicForecast, EconomicEvent,
+                       ListedCompany, CompanyFinancialMetric, UserWatchlist, WatchlistCompany, 
+                       UserAlert, UserPreference, SavedSearch,
+                       ExternalDataSource, DataIntegration, RealTimeQuote, CurrencyRate, DataExportLog)
     
     # Register blueprints
     from routes import main_bp
