@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
 class User(UserMixin, db.Model):
-    __tablename__ = "user"
+    __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False, index=True)
@@ -555,3 +555,112 @@ class EconomicEvent(db.Model):
     
     def __repr__(self):
         return f"<EconomicEvent {self.event_name} {self.event_date}>"
+
+
+# User Dashboard & Personalization Models
+
+class UserWatchlist(db.Model):
+    __tablename__ = 'user_watchlists'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    is_default = db.Column(db.Boolean, default=False)
+    is_public = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref='watchlists')
+    companies = db.relationship('WatchlistCompany', back_populates='watchlist', cascade='all, delete-orphan')
+
+class WatchlistCompany(db.Model):
+    __tablename__ = 'watchlist_companies'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    watchlist_id = db.Column(db.Integer, db.ForeignKey('user_watchlists.id'), nullable=False)
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)
+    added_at = db.Column(db.DateTime, default=datetime.utcnow)
+    notes = db.Column(db.Text)
+    price_alert_enabled = db.Column(db.Boolean, default=False)
+    target_price = db.Column(db.Numeric(15, 2))
+    alert_type = db.Column(db.String(20))  # 'above', 'below', 'change'
+    
+    # Relationships
+    watchlist = db.relationship('UserWatchlist', back_populates='companies')
+    company = db.relationship('ListedCompany')
+    
+    __table_args__ = (db.UniqueConstraint('watchlist_id', 'company_id'),)
+
+class DownloadHistory(db.Model):
+    __tablename__ = 'download_history'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    download_type = db.Column(db.String(50), nullable=False)  # 'company_data', 'sector_report', 'bulk_export'
+    resource_id = db.Column(db.String(100))  # Company ID, sector name, etc.
+    resource_name = db.Column(db.String(200))  # Human readable name
+    file_format = db.Column(db.String(20))  # 'xlsx', 'csv', 'pdf'
+    file_size = db.Column(db.Integer)  # Size in bytes
+    parameters = db.Column(db.Text)  # JSON with download parameters
+    download_url = db.Column(db.String(500))  # Temporary download URL
+    status = db.Column(db.String(20), default='completed')  # 'pending', 'completed', 'failed'
+    downloaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime)  # When the download link expires
+    
+    # Relationships
+    user = db.relationship('User', backref='download_history')
+
+class UserAlert(db.Model):
+    __tablename__ = 'user_alerts'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id'), nullable=False)
+    alert_type = db.Column(db.String(50), nullable=False)  # 'price', 'financial', 'news', 'research'
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    company_id = db.Column(db.Integer, db.ForeignKey('listed_companies.id'))
+    trigger_conditions = db.Column(db.Text)  # JSON with alert conditions
+    is_active = db.Column(db.Boolean, default=True)
+    frequency = db.Column(db.String(20), default='immediate')  # 'immediate', 'daily', 'weekly'
+    delivery_method = db.Column(db.String(20), default='email')  # 'email', 'sms', 'push'
+    last_triggered = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref='alerts')
+    company = db.relationship('ListedCompany')
+
+class UserPreference(db.Model):
+    __tablename__ = 'user_preferences'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id'), nullable=False)
+    preference_key = db.Column(db.String(100), nullable=False)
+    preference_value = db.Column(db.Text)  # JSON or string value
+    category = db.Column(db.String(50))  # 'display', 'notifications', 'data'
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref='preferences')
+    
+    __table_args__ = (db.UniqueConstraint('user_id', 'preference_key'),)
+
+class SavedSearch(db.Model):
+    __tablename__ = 'saved_searches'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('users.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    search_criteria = db.Column(db.Text, nullable=False)  # JSON with search parameters
+    alert_enabled = db.Column(db.Boolean, default=False)
+    alert_frequency = db.Column(db.String(20), default='weekly')
+    last_executed = db.Column(db.DateTime)
+    results_count = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref='saved_searches')
