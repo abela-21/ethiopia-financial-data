@@ -239,12 +239,12 @@ def get_banking_sector_overview():
                 "total_banks": total_banks,
                 "commercial_banks": commercial_banks,
                 "development_banks": development_banks,
-                "total_assets": latest_metrics.sector_assets if latest_metrics else 0,
-                "total_deposits": latest_metrics.sector_deposits if latest_metrics else 0,
-                "total_loans": latest_metrics.sector_loans if latest_metrics else 0,
-                "average_npl_ratio": round(latest_metrics.avg_npl_ratio, 2) if latest_metrics.avg_npl_ratio else 0,
-                "average_car": round(latest_metrics.avg_car, 2) if latest_metrics.avg_car else 0,
-                "total_mobile_banking_users": latest_metrics.total_mobile_users if latest_metrics else 0
+                "total_assets": float(latest_metrics.sector_assets) if latest_metrics and latest_metrics.sector_assets else 0,
+                "total_deposits": float(latest_metrics.sector_deposits) if latest_metrics and latest_metrics.sector_deposits else 0,
+                "total_loans": float(latest_metrics.sector_loans) if latest_metrics and latest_metrics.sector_loans else 0,
+                "average_npl_ratio": round(float(latest_metrics.avg_npl_ratio), 2) if latest_metrics and latest_metrics.avg_npl_ratio else 0,
+                "average_car": round(float(latest_metrics.avg_car), 2) if latest_metrics and latest_metrics.avg_car else 0,
+                "total_mobile_banking_users": int(latest_metrics.total_mobile_users) if latest_metrics and latest_metrics.total_mobile_users else 0
             },
             "top_banks_by_assets": [
                 {

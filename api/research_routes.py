@@ -139,9 +139,29 @@ def get_documents_by_entity(entity_id, entity_type):
         logger.error(f"Error in get_documents_by_entity: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
 
+@research_api.route('/categories')
+@limiter.limit("30/minute")
+def get_document_categories():
+    """Get document categories for filtering"""
+    try:
+        categories = DocumentCategory.query.filter_by(is_active=True).order_by(
+            DocumentCategory.sort_order, DocumentCategory.name
+        ).all()
+        
+        return jsonify([{
+            "id": cat.id,
+            "name": cat.name,
+            "description": cat.description,
+            "parent_category_id": cat.parent_category_id,
+            "sort_order": cat.sort_order
+        } for cat in categories])
+        
+    except Exception as e:
+        logger.error(f"Error in get_document_categories: {str(e)}")
+        return jsonify([])
+
 @research_api.route('/data-sources')
 @limiter.limit("50/minute")
-
 def get_data_sources():
     """Get all economic data sources with reliability metrics"""
     try:

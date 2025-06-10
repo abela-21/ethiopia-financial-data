@@ -249,6 +249,24 @@ class LoadingManager {
         }
     }
 
+    showError(containerId, message = 'Data temporarily unavailable', details = null) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.innerHTML = `
+                <div class="alert alert-warning border-0 shadow-sm" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle text-warning me-3"></i>
+                        <div>
+                            <h6 class="alert-heading mb-1">Information Notice</h6>
+                            <p class="mb-0">${message}</p>
+                            ${details ? `<small class="text-muted">${details}</small>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
     hideAll() {
         this.loadingElements.forEach(elementId => this.hide(elementId));
         this.loadingElements.clear();
