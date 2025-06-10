@@ -218,8 +218,15 @@
                                 
                                 <div class="mb-3">
                                     <label for="macroVariables" class="form-label">Select Variables</label>
+                                    <div class="mb-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm me-2" onclick="selectAllMacroVariables()">
+                                            <i class="fas fa-check-square me-1"></i>Select All
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAllMacroVariables()">
+                                            <i class="fas fa-square me-1"></i>Clear All
+                                        </button>
+                                    </div>
                                     <select class="form-select" id="macroVariables" name="variables" multiple size="8">
-                                        <option value="">All Variables</option>
                                         <optgroup label="Economic Growth">
                                             <option value="gdp_growth">GDP Growth Rate (%)</option>
                                             <option value="gdp_per_capita">GDP Per Capita (USD)</option>
@@ -264,7 +271,7 @@
                                             <option value="oil_price">Oil Price (USD/barrel)</option>
                                         </optgroup>
                                     </select>
-                                    <div class="form-text">Hold Ctrl/Cmd to select multiple variables, or leave unselected for all variables</div>
+                                    <div class="form-text">Select one or more variables using the buttons above or Ctrl/Cmd+click. If none selected, all variables will be included.</div>
                                 </div>
                                 
                                 <div class="mb-3">
