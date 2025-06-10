@@ -133,8 +133,8 @@ def download_macro():
                 raise APIError(f"Invalid column(s) requested: {', '.join(invalid_cols)}", status_code=400)
             df = df[selected_columns]
             
-        if 'date' in df.columns and pd.api.types.is_datetime64_any_dtype(df['date']):
-            df['date'] = df['date'].dt.strftime('%Y-%m-%d')
+        if 'date' in df.columns:
+            df['date'] = pd.to_datetime(df['date']).strftime('%Y-%m-%d')
 
         filename = f"macro_indicators_{date_from or 'start'}_to_{date_to or 'present'}"
 
