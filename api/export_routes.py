@@ -666,30 +666,35 @@ def _export_banking_excel(banks, bank_metrics, include_analysis):
     percent_format = workbook.add_format({'num_format': '0.00%'})
     
     # Write banks data
-    bank_headers = ['ID', 'Name', 'Type', 'Total Assets', 'Founded Year', 'Headquarters', 'Website']
+    bank_headers = ['License Number', 'Bank Name', 'Type', 'Ownership', 'Branches', 'NBE Rating', 'Establishment Date', 'Headquarters']
     for col, header in enumerate(bank_headers):
         banks_sheet.write(0, col, header, header_format)
     
     for row, bank in enumerate(banks, 1):
-        banks_sheet.write(row, 0, bank.id)
+        banks_sheet.write(row, 0, bank.license_number or '')
         banks_sheet.write(row, 1, bank.name)
         banks_sheet.write(row, 2, bank.bank_type or '')
-        banks_sheet.write(row, 3, float(bank.total_assets) if bank.total_assets else 0, money_format)
-        banks_sheet.write(row, 4, bank.founded_year or '')
-        banks_sheet.write(row, 5, bank.headquarters or '')
-        banks_sheet.write(row, 6, bank.website or '')
+        banks_sheet.write(row, 3, bank.ownership_type or '')
+        banks_sheet.write(row, 4, bank.branch_count or 0)
+        banks_sheet.write(row, 5, bank.nbe_rating or '')
+        banks_sheet.write(row, 6, bank.establishment_date.strftime('%Y-%m-%d') if bank.establishment_date else '')
+        banks_sheet.write(row, 7, bank.headquarters_location or '')
     
-    # Write metrics data
-    metric_headers = ['Bank ID', 'Metric Name', 'Value', 'Period', 'Year']
+    # Write financial metrics data
+    metric_headers = ['Bank ID', 'Bank Name', 'Reporting Date', 'Total Assets', 'Total Deposits', 'Total Loans', 'Net Profit', 'CAR', 'NPL Ratio']
     for col, header in enumerate(metric_headers):
         metrics_sheet.write(0, col, header, header_format)
     
     for row, metric in enumerate(bank_metrics, 1):
         metrics_sheet.write(row, 0, metric.bank_id)
-        metrics_sheet.write(row, 1, metric.metric_name)
-        metrics_sheet.write(row, 2, float(metric.metric_value) if metric.metric_value else 0)
-        metrics_sheet.write(row, 3, metric.period or '')
-        metrics_sheet.write(row, 4, metric.year or '')
+        metrics_sheet.write(row, 1, metric.bank.name if metric.bank else '')
+        metrics_sheet.write(row, 2, metric.reporting_date.strftime('%Y-%m-%d') if metric.reporting_date else '')
+        metrics_sheet.write(row, 3, float(metric.total_assets) if metric.total_assets else 0, money_format)
+        metrics_sheet.write(row, 4, float(metric.total_deposits) if metric.total_deposits else 0, money_format)
+        metrics_sheet.write(row, 5, float(metric.total_loans) if metric.total_loans else 0, money_format)
+        metrics_sheet.write(row, 6, float(metric.net_profit) if metric.net_profit else 0, money_format)
+        metrics_sheet.write(row, 7, float(metric.capital_adequacy_ratio) if metric.capital_adequacy_ratio else 0, percent_format)
+        metrics_sheet.write(row, 8, float(metric.npl_ratio) if metric.npl_ratio else 0, percent_format)
     
     workbook.close()
     output.seek(0)
@@ -708,31 +713,34 @@ def _export_banking_csv(banks, bank_metrics):
     
     # Write banks section
     writer.writerow(['=== BANKS ==='])
-    writer.writerow(['ID', 'Name', 'Type', 'Total Assets', 'Founded Year', 'Headquarters', 'Website'])
+    writer.writerow(['License Number', 'Bank Name', 'Type', 'Ownership', 'Branches', 'NBE Rating', 'Establishment Date', 'Headquarters'])
     
     for bank in banks:
         writer.writerow([
-            bank.id,
+            bank.license_number or '',
             bank.name,
             bank.bank_type or '',
-            bank.total_assets or 0,
-            bank.founded_year or '',
-            bank.headquarters or '',
-            bank.website or ''
+            bank.ownership_type or '',
+            bank.branch_count or 0,
+            bank.nbe_rating or '',
+            bank.establishment_date.strftime('%Y-%m-%d') if bank.establishment_date else '',
+            bank.headquarters_location or ''
         ])
     
     # Write metrics section
     writer.writerow([])
     writer.writerow(['=== FINANCIAL METRICS ==='])
-    writer.writerow(['Bank ID', 'Metric Name', 'Value', 'Period', 'Year'])
+    writer.writerow(['Bank ID', 'Bank Name', 'Reporting Date', 'Total Assets', 'Total Deposits', 'Total Loans', 'Net Profit'])
     
     for metric in bank_metrics:
         writer.writerow([
             metric.bank_id,
-            metric.metric_name,
-            metric.metric_value or 0,
-            metric.period or '',
-            metric.year or ''
+            metric.bank.name if metric.bank else '',
+            metric.reporting_date.strftime('%Y-%m-%d') if metric.reporting_date else '',
+            metric.total_assets or 0,
+            metric.total_deposits or 0,
+            metric.total_loans or 0,
+            metric.net_profit or 0
         ])
     
     output.seek(0)
