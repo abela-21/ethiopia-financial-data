@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Ethiopia Capital Market Data Platform - Home{% endblock %}
+{% block title %}Ethiopia Economic Data Platform - Banking & Financial Intelligence{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
@@ -9,18 +9,18 @@
         <div class="row align-items-center min-vh-75">
             <div class="col-lg-6">
                 <h1 class="display-4 fw-bold text-primary mb-4">
-                    Ethiopia's Premier Financial Data Platform
+                    Ethiopia's Economic Data Intelligence Platform
                 </h1>
                 <p class="lead mb-4">
-                    Access comprehensive financial, economic, and business data for Ethiopia's emerging capital market. 
-                    Empowering investors, analysts, and researchers with reliable market intelligence.
+                    Comprehensive banking sector analysis, economic research, and financial intelligence for Ethiopia. 
+                    Empowering researchers, consultants, analysts, and portfolio managers with authentic data insights.
                 </p>
                 <div class="d-flex gap-3 mb-4">
-                    <a href="{{ url_for('main.companies') }}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-building me-2"></i>Explore Companies
+                    <a href="/banking" class="btn btn-primary btn-lg">
+                        <i class="fas fa-university me-2"></i>Banking Sector
                     </a>
-                    <a href="{{ url_for('main.market') }}" class="btn btn-outline-primary btn-lg">
-                        <i class="fas fa-chart-line me-2"></i>Market Overview
+                    <a href="{{ url_for('main.macro') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-chart-line me-2"></i>Economic Overview
                     </a>
                 </div>
             </div>

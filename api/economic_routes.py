@@ -36,7 +36,6 @@ def serialize_economic_sector(sector):
 
 @economic_api.route('/sectors')
 @limiter.limit("50/minute")
-@cache.cached(timeout=600)
 def get_economic_sectors():
     """Get Ethiopian economic sectors with GDP and employment data"""
     try:

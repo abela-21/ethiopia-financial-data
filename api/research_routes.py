@@ -40,7 +40,6 @@ def serialize_document(doc):
 
 @research_api.route('/documents')
 @limiter.limit("50/minute")
-@cache.cached(timeout=300, query_string=True)
 def get_research_documents():
     """Get research documents with filtering and search"""
     try:
