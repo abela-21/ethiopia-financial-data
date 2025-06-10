@@ -229,10 +229,32 @@ def download_financials():
         if variables:
             base_columns = ["Company_ID", "Company_Name", "Company_Ticker", "Year", "Period"]
             selected_variables = variables.split(",")
-            selected_columns = base_columns + selected_variables
-            invalid_cols = [col for col in selected_columns if col not in df.columns]
-            if invalid_cols:
-                raise APIError(f"Invalid variable(s) requested: {', '.join(invalid_cols)}", status_code=400)
+            
+            # Map frontend variable names to DataFrame column names
+            variable_mapping = {
+                "Revenue": "Revenue",
+                "Net_Income": "Net_Income", 
+                "Total_Assets": "Total_Assets",
+                "Total_Liabilities": "Total_Liabilities",
+                "Total_Equity": "Total_Equity",
+                "Operating_Cash_Flow": "Operating_Cash_Flow",
+                "Current_Ratio": "Current_Ratio",
+                "Debt_to_Equity": "Debt_to_Equity",
+                "Return_on_Equity": "Return_on_Equity",
+                "Return_on_Assets": "Return_on_Assets",
+                "Profit_Margin": "Profit_Margin"
+            }
+            
+            mapped_variables = []
+            for var in selected_variables:
+                if var in variable_mapping:
+                    mapped_variables.append(variable_mapping[var])
+                elif var in df.columns:
+                    mapped_variables.append(var)
+                else:
+                    raise APIError(f"Invalid variable requested: {var}", status_code=400)
+            
+            selected_columns = base_columns + mapped_variables
             df = df[selected_columns]
 
         filename = f"financial_data_{year_from or 'all'}_to_{year_to or 'latest'}"
