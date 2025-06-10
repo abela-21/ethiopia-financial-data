@@ -83,18 +83,74 @@
 <!-- Banking Data Table -->
 <section class="banking-data py-5">
     <div class="container">
+        <!-- Banking Sector Overview Cards -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="h3 fw-bold mb-4">Banking Sector Overview</h2>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="text-primary mb-2">
+                            <i class="fas fa-university fa-2x"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="total-banks-count">--</h5>
+                        <p class="card-text text-muted small">Total Banks</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="text-success mb-2">
+                            <i class="fas fa-coins fa-2x"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="total-assets">--</h5>
+                        <p class="card-text text-muted small">Total Assets (ETB)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="text-info mb-2">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="avg-car">--</h5>
+                        <p class="card-text text-muted small">Average CAR (%)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="text-warning mb-2">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="avg-npl">--</h5>
+                        <p class="card-text text-muted small">Average NPL (%)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row mb-4">
             <div class="col-lg-8">
                 <h2 class="h3 fw-bold">Bank Directory & Performance</h2>
                 <p class="text-muted">Complete listing of Ethiopian banks with key performance indicators</p>
             </div>
             <div class="col-lg-4 text-end">
-                <button class="btn btn-outline-primary me-2" id="export-csv">
-                    <i class="fas fa-file-csv me-1"></i>Export CSV
-                </button>
-                <button class="btn btn-outline-success" id="export-excel">
-                    <i class="fas fa-file-excel me-1"></i>Export Excel
-                </button>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-outline-primary" id="export-csv">
+                        <i class="fas fa-file-csv me-1"></i>CSV
+                    </button>
+                    <button class="btn btn-outline-success" id="export-excel">
+                        <i class="fas fa-file-excel me-1"></i>Excel
+                    </button>
+                    <button class="btn btn-outline-info" id="export-json">
+                        <i class="fas fa-file-code me-1"></i>JSON
+                    </button>
+                </div>
             </div>
         </div>
 

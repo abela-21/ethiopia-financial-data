@@ -172,6 +172,43 @@ def export_banking_data():
         logger.error(f"Error exporting banking data: {str(e)}")
         return jsonify({'error': 'Export failed'}), 500
 
+@export_bp.route('/macro-indicators', methods=['POST'])
+def export_macro_data():
+    """Export macro indicators data with multi-variable selection support"""
+    try:
+        from models import MacroIndicators
+        
+        data = request.get_json()
+        export_format = data.get('format', 'excel')
+        variables = data.get('variables', [])  # List of selected macro variables
+        date_range = data.get('date_range', {})
+        
+        # Build query for macro indicators
+        query = MacroIndicators.query
+        
+        if date_range.get('start'):
+            start_date = datetime.strptime(date_range['start'], '%Y-%m-%d').date()
+            query = query.filter(MacroIndicators.date >= start_date)
+        
+        if date_range.get('end'):
+            end_date = datetime.strptime(date_range['end'], '%Y-%m-%d').date()
+            query = query.filter(MacroIndicators.date <= end_date)
+        
+        macro_data = query.order_by(MacroIndicators.date.desc()).all()
+        
+        if export_format == 'excel':
+            return _export_macro_excel(macro_data, variables)
+        elif export_format == 'csv':
+            return _export_macro_csv(macro_data, variables)
+        elif export_format == 'json':
+            return _export_macro_json(macro_data, variables)
+        else:
+            return jsonify({'error': 'Unsupported format'}), 400
+            
+    except Exception as e:
+        logger.error(f"Error exporting macro data: {str(e)}")
+        return jsonify({'error': 'Export failed'}), 500
+
 def _export_companies_excel(companies, columns, filters):
     """Export companies to Excel with advanced formatting"""
     output = io.BytesIO()
@@ -415,6 +452,194 @@ def _export_financial_json(financial_data, metrics):
     response = make_response(json.dumps(export_data, indent=2))
     response.headers['Content-Type'] = 'application/json'
     response.headers['Content-Disposition'] = f'attachment; filename=financial_data_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+    
+    return response
+
+def _export_macro_excel(macro_data, variables):
+    """Export macro indicators to Excel with multi-variable support"""
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+    
+    # Create main data sheet
+    worksheet = workbook.add_worksheet('Macro Indicators')
+    
+    # Add formats
+    header_format = workbook.add_format({
+        'bold': True,
+        'bg_color': '#4472C4',
+        'font_color': 'white',
+        'border': 1
+    })
+    
+    money_format = workbook.add_format({'num_format': '#,##0.00'})
+    percent_format = workbook.add_format({'num_format': '0.00%'})
+    
+    # Define all available variables and their display names
+    all_variables = {
+        'gdp_growth': ('GDP Growth (%)', percent_format),
+        'gdp_per_capita': ('GDP Per Capita (ETB)', money_format),
+        'inflation_rate': ('Inflation Rate (%)', percent_format),
+        'interest_rate': ('Interest Rate (%)', percent_format),
+        'unemployment_rate': ('Unemployment Rate (%)', percent_format),
+        'etb_usd': ('ETB/USD Exchange Rate', None),
+        'etb_eur': ('ETB/EUR Exchange Rate', None),
+        'etb_gbp': ('ETB/GBP Exchange Rate', None),
+        'etb_jpy': ('ETB/JPY Exchange Rate', None),
+        'fx_reserves': ('FX Reserves (USD)', money_format),
+        'trade_balance': ('Trade Balance (ETB)', money_format),
+        'current_account_balance': ('Current Account Balance (ETB)', money_format),
+        'total_deposits': ('Total Bank Deposits (ETB)', money_format),
+        'total_loans': ('Total Bank Loans (ETB)', money_format),
+        'npl_ratio': ('NPL Ratio (%)', percent_format)
+    }
+    
+    # Use selected variables or all if none specified
+    if not variables:
+        variables = list(all_variables.keys())
+    
+    # Write headers
+    headers = ['Date'] + [all_variables[var][0] for var in variables if var in all_variables]
+    for col, header in enumerate(headers):
+        worksheet.write(0, col, header, header_format)
+    
+    # Write data
+    for row, indicator in enumerate(macro_data, 1):
+        worksheet.write(row, 0, indicator.date.strftime('%Y-%m-%d'))
+        
+        for col, variable in enumerate(variables, 1):
+            if variable in all_variables:
+                value = getattr(indicator, variable, None)
+                if value is not None:
+                    format_type = all_variables[variable][1]
+                    if format_type:
+                        worksheet.write(row, col, float(value), format_type)
+                    else:
+                        worksheet.write(row, col, float(value))
+                else:
+                    worksheet.write(row, col, '')
+    
+    # Add summary sheet
+    summary_sheet = workbook.add_worksheet('Export Summary')
+    summary_sheet.write(0, 0, 'Macro Indicators Export Summary', header_format)
+    summary_sheet.write(1, 0, 'Total Records:')
+    summary_sheet.write(1, 1, len(macro_data))
+    summary_sheet.write(2, 0, 'Variables Exported:')
+    summary_sheet.write(2, 1, len(variables))
+    summary_sheet.write(3, 0, 'Export Date:')
+    summary_sheet.write(3, 1, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    
+    # List exported variables
+    summary_sheet.write(4, 0, 'Selected Variables:', header_format)
+    for i, var in enumerate(variables):
+        if var in all_variables:
+            summary_sheet.write(5 + i, 0, all_variables[var][0])
+    
+    workbook.close()
+    output.seek(0)
+    
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=f'macro_indicators_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+def _export_macro_csv(macro_data, variables):
+    """Export macro indicators to CSV with multi-variable support"""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Define variable mappings
+    all_variables = {
+        'gdp_growth': 'GDP Growth (%)',
+        'gdp_per_capita': 'GDP Per Capita (ETB)',
+        'inflation_rate': 'Inflation Rate (%)',
+        'interest_rate': 'Interest Rate (%)',
+        'unemployment_rate': 'Unemployment Rate (%)',
+        'etb_usd': 'ETB/USD Exchange Rate',
+        'etb_eur': 'ETB/EUR Exchange Rate',
+        'etb_gbp': 'ETB/GBP Exchange Rate',
+        'etb_jpy': 'ETB/JPY Exchange Rate',
+        'fx_reserves': 'FX Reserves (USD)',
+        'trade_balance': 'Trade Balance (ETB)',
+        'current_account_balance': 'Current Account Balance (ETB)',
+        'total_deposits': 'Total Bank Deposits (ETB)',
+        'total_loans': 'Total Bank Loans (ETB)',
+        'npl_ratio': 'NPL Ratio (%)'
+    }
+    
+    # Use selected variables or all if none specified
+    if not variables:
+        variables = list(all_variables.keys())
+    
+    # Write header
+    headers = ['Date'] + [all_variables[var] for var in variables if var in all_variables]
+    writer.writerow(headers)
+    
+    # Write data
+    for indicator in macro_data:
+        row = [indicator.date.strftime('%Y-%m-%d')]
+        for variable in variables:
+            if variable in all_variables:
+                value = getattr(indicator, variable, None)
+                row.append(value if value is not None else '')
+        writer.writerow(row)
+    
+    output.seek(0)
+    
+    response = make_response(output.getvalue())
+    response.headers['Content-Type'] = 'text/csv'
+    response.headers['Content-Disposition'] = f'attachment; filename=macro_indicators_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+    
+    return response
+
+def _export_macro_json(macro_data, variables):
+    """Export macro indicators to JSON with multi-variable support"""
+    # Define variable mappings
+    all_variables = {
+        'gdp_growth': 'GDP Growth (%)',
+        'gdp_per_capita': 'GDP Per Capita (ETB)',
+        'inflation_rate': 'Inflation Rate (%)',
+        'interest_rate': 'Interest Rate (%)',
+        'unemployment_rate': 'Unemployment Rate (%)',
+        'etb_usd': 'ETB/USD Exchange Rate',
+        'etb_eur': 'ETB/EUR Exchange Rate',
+        'etb_gbp': 'ETB/GBP Exchange Rate',
+        'etb_jpy': 'ETB/JPY Exchange Rate',
+        'fx_reserves': 'FX Reserves (USD)',
+        'trade_balance': 'Trade Balance (ETB)',
+        'current_account_balance': 'Current Account Balance (ETB)',
+        'total_deposits': 'Total Bank Deposits (ETB)',
+        'total_loans': 'Total Bank Loans (ETB)',
+        'npl_ratio': 'NPL Ratio (%)'
+    }
+    
+    # Use selected variables or all if none specified
+    if not variables:
+        variables = list(all_variables.keys())
+    
+    data = []
+    for indicator in macro_data:
+        indicator_data = {'date': indicator.date.strftime('%Y-%m-%d')}
+        for variable in variables:
+            if variable in all_variables and hasattr(indicator, variable):
+                value = getattr(indicator, variable, None)
+                indicator_data[variable] = float(value) if value is not None else None
+        data.append(indicator_data)
+    
+    export_data = {
+        'export_info': {
+            'export_date': datetime.now().isoformat(),
+            'total_records': len(data),
+            'variables_exported': [all_variables[var] for var in variables if var in all_variables],
+            'selected_variables': variables
+        },
+        'data': data
+    }
+    
+    response = make_response(json.dumps(export_data, indent=2))
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['Content-Disposition'] = f'attachment; filename=macro_indicators_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
     
     return response
 
