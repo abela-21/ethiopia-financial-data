@@ -134,7 +134,7 @@ def download_macro():
             df = df[selected_columns]
             
         if 'date' in df.columns:
-            df['date'] = pd.to_datetime(df['date']).strftime('%Y-%m-%d')
+            df['date'] = df['date'].apply(lambda x: x.strftime('%Y-%m-%d') if hasattr(x, 'strftime') else str(x))
 
         filename = f"macro_indicators_{date_from or 'start'}_to_{date_to or 'present'}"
 

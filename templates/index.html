@@ -200,10 +200,10 @@
                 </p>
                 <div class="d-flex flex-wrap justify-content-center gap-3">
                     {% if not session.user_id %}
-                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                    <a href="#" class="btn btn-primary btn-lg">
                         <i class="fas fa-user-plus me-2"></i>Create Account
                     </a>
-                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">
+                    <a href="#" class="btn btn-outline-primary btn-lg">
                         <i class="fas fa-sign-in-alt me-2"></i>Sign In
                     </a>
                     {% else %}
