@@ -39,6 +39,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'main.search' }}" 
+                       href="{{ url_for('main.search') }}">
+                        <i class="fas fa-search me-1"></i>Search
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'main.research' }}" 
                        href="{{ url_for('main.research') }}">
                         <i class="fas fa-file-alt me-1"></i>Research
@@ -162,6 +168,8 @@
             <li class="breadcrumb-item active" aria-current="page">Financial Data</li>
             {% elif request.endpoint == 'main.analytics' %}
             <li class="breadcrumb-item active" aria-current="page">Financial Analytics</li>
+            {% elif request.endpoint == 'main.search' %}
+            <li class="breadcrumb-item active" aria-current="page">Advanced Search</li>
             {% elif request.endpoint == 'main.downloads' %}
             <li class="breadcrumb-item active" aria-current="page">Data Downloads</li>
             {% elif request.endpoint == 'auth.profile' %}

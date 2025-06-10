@@ -245,6 +245,11 @@ def search_companies_api():
         logger.error(f"Error in search_companies_api: {str(e)}")
         return jsonify([])
 
+@main_bp.route('/search')
+def search():
+    """Advanced search and filtering interface"""
+    return render_template('search.html')
+
 @main_bp.route('/banking')
 def banking():
     """Banking sector analysis page"""
