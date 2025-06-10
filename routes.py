@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from models import Company, Stock, Financial, MacroIndicators, db
+from models import Company, Stock, Financial, MacroIndicators, Bank, ResearchDocument, EconomicSector, db
 from sqlalchemy import func, desc
 from datetime import datetime, timedelta
 import logging
@@ -244,3 +244,50 @@ def search_companies_api():
     except Exception as e:
         logger.error(f"Error in search_companies_api: {str(e)}")
         return jsonify([])
+
+@main_bp.route('/banking')
+def banking():
+    """Banking sector analysis page"""
+    try:
+        # Get banking sector statistics
+        total_banks = Bank.query.count()
+        total_branches = db.session.query(func.sum(Bank.branch_count)).scalar() or 0
+        total_digital_users = db.session.query(func.sum(Bank.digital_banking_users)).scalar() or 0
+        
+        banking_stats = {
+            'total_banks': total_banks,
+            'total_branches': total_branches,
+            'total_digital_users': total_digital_users
+        }
+        
+        return render_template('banking.html', banking_stats=banking_stats)
+    except Exception as e:
+        logger.error(f"Error in banking route: {str(e)}")
+        flash('Error loading banking data', 'error')
+        return render_template('banking.html', banking_stats={})
+
+@main_bp.route('/research')
+def research():
+    """Research documents page"""
+    try:
+        # Get research statistics
+        total_docs = ResearchDocument.query.count()
+        total_downloads = db.session.query(func.sum(ResearchDocument.download_count)).scalar() or 0
+        
+        # Get document type counts
+        doc_types = db.session.query(
+            ResearchDocument.document_type,
+            func.count(ResearchDocument.id)
+        ).group_by(ResearchDocument.document_type).all()
+        
+        research_stats = {
+            'total_docs': total_docs,
+            'total_downloads': total_downloads,
+            'doc_types': dict(doc_types)
+        }
+        
+        return render_template('research.html', research_stats=research_stats)
+    except Exception as e:
+        logger.error(f"Error in research route: {str(e)}")
+        flash('Error loading research data', 'error')
+        return render_template('research.html', research_stats={})

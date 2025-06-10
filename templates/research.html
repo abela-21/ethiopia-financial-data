@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Economic Research & Publications - Ethiopian Banking Intelligence{% endblock %}
+
+{% block content %}
+<!-- Research Hero Section -->
+<section class="research-hero py-5 bg-success text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4">Economic Research & Publications</h1>
+                <p class="lead mb-4">
+                    Access comprehensive economic research from Ethiopian banks, National Bank of Ethiopia, 
+                    government agencies, and international organizations covering banking sector analysis, 
+                    economic outlooks, and financial sector developments.
+                </p>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="research-stats">
+                    <div class="stat-item mb-3">
+                        <h3 class="display-6 fw-bold" id="total-docs">50+</h3>
+                        <p class="mb-0">Research Documents</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3 class="display-6 fw-bold" id="total-downloads">15K+</h3>
+                        <p class="mb-0">Total Downloads</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Research Filter Controls -->
+<section class="filter-section py-4 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Filter Research Documents</h5>
+                        <form id="research-filters" class="row g-3">
+                            <div class="col-md-3">
+                                <label for="entityType" class="form-label">Source</label>
+                                <select class="form-select" id="entityType" name="entity_type">
+                                    <option value="">All Sources</option>
+                                    <option value="bank">Banks</option>
+                                    <option value="nbe">National Bank of Ethiopia</option>
+                                    <option value="government">Government</option>
+                                    <option value="international">International</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="documentType" class="form-label">Document Type</label>
+                                <select class="form-select" id="documentType" name="document_type">
+                                    <option value="">All Types</option>
+                                    <option value="annual_report">Annual Reports</option>
+                                    <option value="quarterly_report">Quarterly Reports</option>
+                                    <option value="sector_analysis">Sector Analysis</option>
+                                    <option value="economic_outlook">Economic Outlook</option>
+                                    <option value="strategic_document">Strategic Documents</option>
+                                    <option value="governance_report">Governance Reports</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="dateRange" class="form-label">Publication Period</label>
+                                <select class="form-select" id="dateRange" name="date_range">
+                                    <option value="">All Time</option>
+                                    <option value="last_month">Last Month</option>
+                                    <option value="last_quarter">Last Quarter</option>
+                                    <option value="last_year">Last Year</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="searchQuery" class="form-label">Search</label>
+                                <input type="text" class="form-control" id="searchQuery" name="search_query" placeholder="Keywords, titles...">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Research Documents Grid -->
+<section class="research-documents py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <h2 class="h3 fw-bold">Research Library</h2>
+                <p class="text-muted">Browse and download economic research documents and publications</p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <div class="btn-group" role="group">
+                    <button class="btn btn-outline-primary active" id="grid-view">
+                        <i class="fas fa-th-large"></i> Grid
+                    </button>
+                    <button class="btn btn-outline-primary" id="list-view">
+                        <i class="fas fa-list"></i> List
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="research-grid">
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading research documents...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Research pagination">
+                    <ul class="pagination justify-content-center" id="research-pagination">
+                        <!-- Pagination will be populated by JavaScript -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Research Categories -->
+<section class="research-categories py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h2 class="display-6 fw-bold mb-3">Document Categories</h2>
+                <p class="text-muted">Explore research by category and source</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-0 category-card" data-category="annual_report">
+                    <div class="card-body text-center">
+                        <div class="icon-circle bg-primary text-white mb-3 mx-auto">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h5 class="card-title">Annual Reports</h5>
+                        <p class="card-text text-muted">Comprehensive yearly financial and operational reports from banks and institutions</p>
+                        <span class="badge bg-primary" id="annual-count">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-0 category-card" data-category="sector_analysis">
+                    <div class="card-body text-center">
+                        <div class="icon-circle bg-success text-white mb-3 mx-auto">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h5 class="card-title">Sector Analysis</h5>
+                        <p class="card-text text-muted">In-depth analysis of banking sector performance and market trends</p>
+                        <span class="badge bg-success" id="sector-count">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-0 category-card" data-category="economic_outlook">
+                    <div class="card-body text-center">
+                        <div class="icon-circle bg-warning text-white mb-3 mx-auto">
+                            <i class="fas fa-globe-africa"></i>
+                        </div>
+                        <h5 class="card-title">Economic Outlook</h5>
+                        <p class="card-text text-muted">Economic forecasts and macroeconomic policy analysis</p>
+                        <span class="badge bg-warning" id="outlook-count">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-0 category-card" data-category="quarterly_report">
+                    <div class="card-body text-center">
+                        <div class="icon-circle bg-info text-white mb-3 mx-auto">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h5 class="card-title">Quarterly Reports</h5>
+                        <p class="card-text text-muted">Regular quarterly financial performance and business updates</p>
+                        <span class="badge bg-info" id="quarterly-count">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/research.js') }}"></script>
+{% endblock %}
