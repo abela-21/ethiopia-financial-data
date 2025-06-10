@@ -11,9 +11,13 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), default="user", index=True)  # user/admin
-    is_active = db.Column(db.Boolean, default=True)
+    active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
+    
+    @property
+    def is_active(self):
+        return self.active
 
     # Relationships
     companies_created = db.relationship('Company', 
@@ -589,7 +593,7 @@ class WatchlistCompany(db.Model):
     
     # Relationships
     watchlist = db.relationship('UserWatchlist', back_populates='companies')
-    company = db.relationship('ListedCompany')
+    company = db.relationship('Company')
     
     __table_args__ = (db.UniqueConstraint('watchlist_id', 'company_id'),)
 
@@ -616,11 +620,11 @@ class UserAlert(db.Model):
     __tablename__ = 'user_alerts'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(50), db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     alert_type = db.Column(db.String(50), nullable=False)  # 'price', 'financial', 'news', 'research'
     title = db.Column(db.String(200), nullable=False)
     message = db.Column(db.Text, nullable=False)
-    company_id = db.Column(db.Integer, db.ForeignKey('listed_companies.id'))
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
     trigger_conditions = db.Column(db.Text)  # JSON with alert conditions
     is_active = db.Column(db.Boolean, default=True)
     frequency = db.Column(db.String(20), default='immediate')  # 'immediate', 'daily', 'weekly'
@@ -630,13 +634,13 @@ class UserAlert(db.Model):
     
     # Relationships
     user = db.relationship('User', backref='alerts')
-    company = db.relationship('ListedCompany')
+    company = db.relationship('Company')
 
 class UserPreference(db.Model):
     __tablename__ = 'user_preferences'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(50), db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     preference_key = db.Column(db.String(100), nullable=False)
     preference_value = db.Column(db.Text)  # JSON or string value
     category = db.Column(db.String(50))  # 'display', 'notifications', 'data'
@@ -651,7 +655,7 @@ class SavedSearch(db.Model):
     __tablename__ = 'saved_searches'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(50), db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     search_criteria = db.Column(db.Text, nullable=False)  # JSON with search parameters
