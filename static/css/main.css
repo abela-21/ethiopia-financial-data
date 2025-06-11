@@ -1,0 +1,599 @@
+/* Ethiopia Economic Data Platform - Enhanced Styling */
+
+:root {
+    /* Ethiopian Flag Colors & Professional Palette */
+    --primary-green: #009639;
+    --primary-yellow: #FFDE00;
+    --primary-red: #DA020E;
+    --deep-teal: #1B4D3E;
+    --soft-green: #2ECC71;
+    --accent-blue: #3498DB;
+    --accent-orange: #F39C12;
+    --dark-navy: #2C3E50;
+    --light-gray: #F8F9FA;
+    --medium-gray: #6C757D;
+    --white: #FFFFFF;
+    --success: #28A745;
+    --warning: #FFC107;
+    --danger: #DC3545;
+    --info: #17A2B8;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--primary-green) 0%, var(--deep-teal) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--accent-blue) 0%, var(--primary-green) 100%);
+    --gradient-warm: linear-gradient(135deg, var(--accent-orange) 0%, var(--primary-yellow) 100%);
+    
+    /* Shadows */
+    --shadow-light: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-medium: 0 4px 12px rgba(0,0,0,0.15);
+    --shadow-heavy: 0 8px 24px rgba(0,0,0,0.2);
+    
+    /* Typography */
+    --font-primary: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-heading: 'Poppins', 'Inter', sans-serif;
+}
+
+/* Base Styles */
+body {
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    color: var(--dark-navy);
+    background-color: var(--light-gray);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    color: var(--dark-navy);
+}
+
+/* Navigation Bar Enhancement */
+.economic-navbar {
+    background: var(--gradient-primary) !important;
+    box-shadow: var(--shadow-medium);
+    padding: 0.75rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: white !important;
+}
+
+.nav-link {
+    color: rgba(255,255,255,0.9) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem !important;
+    border-radius: 6px;
+    margin: 0 0.25rem;
+}
+
+.nav-link:hover {
+    color: white !important;
+    background-color: rgba(255,255,255,0.1);
+    transform: translateY(-1px);
+}
+
+/* Enhanced Card Styles */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: var(--gradient-secondary);
+    color: white;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1.25rem;
+    font-weight: 600;
+}
+
+/* Metric Cards */
+.metric-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.metric-card:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-3px);
+}
+
+.metric-card .metric-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.metric-card .metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--dark-navy);
+}
+
+.metric-card .metric-label {
+    color: var(--medium-gray);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.875rem;
+}
+
+/* Color variants for metric cards */
+.metric-card.primary .metric-icon { color: var(--primary-green); }
+.metric-card.secondary .metric-icon { color: var(--accent-blue); }
+.metric-card.success .metric-icon { color: var(--success); }
+.metric-card.warning .metric-icon { color: var(--warning); }
+.metric-card.info .metric-icon { color: var(--info); }
+
+/* Hero Sections */
+.hero-section {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 4rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="rgba(255,255,255,0.05)"><polygon points="0,0 1000,0 1000,100 0,80"/></svg>');
+    background-size: cover;
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-section h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+.hero-section .lead {
+    font-size: 1.25rem;
+    opacity: 0.95;
+    margin-bottom: 2rem;
+}
+
+/* Banking Sector Hero Enhancement */
+.banking-hero {
+    background: linear-gradient(135deg, var(--deep-teal) 0%, var(--primary-green) 50%, var(--accent-blue) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.banking-hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M1200 120L0 16.48 0 0 1200 0 1200 120z" fill="rgba(248,249,250,1)"></path></svg>');
+    background-size: cover;
+}
+
+/* Research Hero Enhancement */
+.research-hero {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--deep-teal) 70%, var(--accent-blue) 100%);
+    padding: 5rem 0;
+}
+
+/* Enhanced Filter Sections */
+.filter-section {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.filter-section h5 {
+    color: var(--dark-navy);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.form-control, .form-select {
+    border: 2px solid #E9ECEF;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(0, 150, 57, 0.25);
+}
+
+/* Enhanced Buttons */
+.btn {
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-light);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    background: linear-gradient(135deg, var(--deep-teal) 0%, var(--primary-green) 100%);
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--primary-green);
+    color: var(--primary-green);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-green);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: var(--gradient-secondary);
+    color: white;
+}
+
+.btn-group .btn {
+    margin: 0;
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-radius: 8px 0 0 8px;
+}
+
+.btn-group .btn:last-child {
+    border-radius: 0 8px 8px 0;
+}
+
+/* Dashboard Enhancements */
+.dashboard-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+    height: 100%;
+}
+
+.dashboard-card.watchlists {
+    border-left-color: var(--primary-green);
+}
+
+.dashboard-card.companies {
+    border-left-color: var(--accent-blue);
+}
+
+.dashboard-card.downloads {
+    border-left-color: var(--info);
+}
+
+.dashboard-card.alerts {
+    border-left-color: var(--warning);
+}
+
+.dashboard-card:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-3px);
+}
+
+.dashboard-card .card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.dashboard-card .card-number {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--dark-navy);
+}
+
+.dashboard-card .card-label {
+    color: var(--medium-gray);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Analytics Configuration Enhancement */
+.analytics-configuration {
+    background: var(--gradient-secondary);
+    color: white;
+    border-radius: 15px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.analytics-configuration::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.analytics-configuration .container-fluid {
+    position: relative;
+    z-index: 2;
+}
+
+.analytics-configuration h3 {
+    color: white;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.company-selection {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    backdrop-filter: blur(10px);
+}
+
+.company-selection .form-check-label {
+    color: white;
+    font-weight: 500;
+}
+
+/* ROA Performance Display */
+.roa-display {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-light);
+    border-left: 5px solid var(--success);
+}
+
+.roa-value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--success);
+    margin-bottom: 0.5rem;
+}
+
+.roa-label {
+    color: var(--medium-gray);
+    font-weight: 500;
+}
+
+.trend-indicator {
+    color: var(--success);
+    font-size: 1.5rem;
+    margin-left: 0.5rem;
+}
+
+/* Error Message Enhancement */
+.alert {
+    border: none;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-light);
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #F8D7DA 0%, #F5C6CB 100%);
+    color: #721C24;
+    border-left: 4px solid var(--danger);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #D4EDDA 0%, #C3E6CB 100%);
+    color: #155724;
+    border-left: 4px solid var(--success);
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #CCE7F0 0%, #B8DAFF 100%);
+    color: #004085;
+    border-left: 4px solid var(--info);
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #FFF3CD 0%, #FFEAA7 100%);
+    color: #856404;
+    border-left: 4px solid var(--warning);
+}
+
+/* Table Enhancements */
+.table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+}
+
+.table thead th {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 150, 57, 0.05);
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-color: #E9ECEF;
+}
+
+/* Responsive Design Enhancements */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+    
+    .metric-card {
+        margin-bottom: 1rem;
+    }
+    
+    .dashboard-card .card-number {
+        font-size: 2rem;
+    }
+    
+    .analytics-configuration {
+        padding: 1.5rem;
+    }
+}
+
+/* Loading Animations */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0,150,57,.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-green);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Utilities */
+.text-primary-green { color: var(--primary-green) !important; }
+.bg-primary-green { background-color: var(--primary-green) !important; }
+.text-deep-teal { color: var(--deep-teal) !important; }
+.bg-gradient-primary { background: var(--gradient-primary) !important; }
+
+/* Financial Data Page Enhancement */
+.financial-overview {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
+}
+
+.financial-metric {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 10px;
+    background: var(--light-gray);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.financial-metric:hover {
+    background: white;
+    box-shadow: var(--shadow-light);
+}
+
+.financial-metric .metric-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark-navy);
+}
+
+.financial-metric .metric-text {
+    color: var(--medium-gray);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Quick Actions Enhancement */
+.quick-actions .btn {
+    width: 100%;
+    text-align: left;
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.quick-actions .btn i {
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.quick-actions .btn:hover {
+    transform: translateX(5px);
+}
+
+/* Empty State Improvements */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--shadow-light);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: var(--medium-gray);
+    margin-bottom: 1rem;
+}
+
+.empty-state h5 {
+    color: var(--dark-navy);
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: var(--medium-gray);
+    margin-bottom: 2rem;
+}

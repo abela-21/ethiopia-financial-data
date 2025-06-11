@@ -27,66 +27,34 @@
         </div>
     </div>
 
-    <!-- Dashboard Stats -->
+    <!-- Enhanced Dashboard Stats -->
     <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 id="watchlistCount">0</h4>
-                            <p class="mb-0">Watchlists</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-eye fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card watchlists">
+                <i class="fas fa-eye card-icon text-primary-green"></i>
+                <div class="card-number" id="watchlistCount">0</div>
+                <div class="card-label">Watchlists</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 id="companiesCount">0</h4>
-                            <p class="mb-0">Companies Tracked</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-building fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card companies">
+                <i class="fas fa-building card-icon" style="color: #3498DB;"></i>
+                <div class="card-number" id="companiesCount">0</div>
+                <div class="card-label">Companies Tracked</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 id="downloadsCount">0</h4>
-                            <p class="mb-0">Downloads</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-download fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card downloads">
+                <i class="fas fa-download card-icon" style="color: #17A2B8;"></i>
+                <div class="card-number" id="downloadsCount">0</div>
+                <div class="card-label">Downloads</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 id="alertsCount">0</h4>
-                            <p class="mb-0">Active Alerts</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-bell fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card alerts">
+                <i class="fas fa-bell card-icon" style="color: #FFC107;"></i>
+                <div class="card-number" id="alertsCount">0</div>
+                <div class="card-label">Active Alerts</div>
             </div>
         </div>
     </div>
@@ -111,10 +79,10 @@
                 </div>
                 <div class="card-body">
                     <div id="watchlistsContainer">
-                        <div class="text-center py-5">
-                            <i class="fas fa-eye fa-3x text-muted mb-3"></i>
-                            <h6 class="text-muted">No watchlists yet</h6>
-                            <p class="text-muted">Create your first watchlist to start tracking companies</p>
+                        <div class="empty-state">
+                            <i class="fas fa-eye empty-state-icon"></i>
+                            <h5>No watchlists yet</h5>
+                            <p>Create your first watchlist to start tracking companies</p>
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createWatchlistModal">
                                 <i class="fas fa-plus me-1"></i>Create Watchlist
                             </button>
@@ -147,21 +115,19 @@
                 <div class="card-header">
                     <h5 class="mb-0">Quick Actions</h5>
                 </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="/search" class="btn btn-outline-primary">
-                            <i class="fas fa-search me-2"></i>Search Companies
-                        </a>
-                        <a href="/analytics" class="btn btn-outline-success">
-                            <i class="fas fa-chart-line me-2"></i>Analytics Dashboard
-                        </a>
-                        <a href="/financial-data" class="btn btn-outline-info">
-                            <i class="fas fa-chart-bar me-2"></i>Financial Data
-                        </a>
-                        <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#alertsModal">
-                            <i class="fas fa-bell me-2"></i>Manage Alerts
-                        </button>
-                    </div>
+                <div class="card-body quick-actions">
+                    <a href="/search" class="btn btn-outline-primary">
+                        <i class="fas fa-search"></i>Search Companies
+                    </a>
+                    <a href="/analytics" class="btn btn-outline-success">
+                        <i class="fas fa-chart-line"></i>Analytics Dashboard
+                    </a>
+                    <a href="/financial-data" class="btn btn-outline-info">
+                        <i class="fas fa-chart-bar"></i>Financial Data
+                    </a>
+                    <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#alertsModal">
+                        <i class="fas fa-bell"></i>Manage Alerts
+                    </button>
                 </div>
             </div>
 
