@@ -45,6 +45,21 @@ class SimpleCache {
 // Global cache instance
 const cache = new SimpleCache();
 
+// Scroll Functions for Analytics and Research pages
+function scrollToSection(sectionId) {
+    const element = document.getElementById(sectionId);
+    if (element) {
+        element.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
+
+function scrollToDocuments() {
+    scrollToSection('documents');
+}
+
 // Utility Functions
 const Utils = {
     // Debounce function for search and input handling
