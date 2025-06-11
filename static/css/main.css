@@ -544,27 +544,27 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .alert-danger {
-    background: linear-gradient(135deg, #F8D7DA 0%, #F5C6CB 100%);
-    color: #721C24;
-    border-left: 4px solid var(--danger);
+    background: linear-gradient(135deg, var(--ivory-cream) 0%, var(--light-silver) 100%);
+    color: var(--text-dark);
+    border-left: 4px solid var(--orange-pantone);
 }
 
 .alert-success {
-    background: linear-gradient(135deg, #D4EDDA 0%, #C3E6CB 100%);
-    color: #155724;
-    border-left: 4px solid var(--success);
+    background: linear-gradient(135deg, var(--ivory-cream) 0%, var(--light-silver) 100%);
+    color: var(--text-dark);
+    border-left: 4px solid var(--midnight-green);
 }
 
 .alert-info {
-    background: linear-gradient(135deg, #CCE7F0 0%, #B8DAFF 100%);
-    color: #004085;
-    border-left: 4px solid var(--info);
+    background: linear-gradient(135deg, var(--ivory-cream) 0%, var(--light-silver) 100%);
+    color: var(--text-dark);
+    border-left: 4px solid var(--midnight-green);
 }
 
 .alert-warning {
-    background: linear-gradient(135deg, #FFF3CD 0%, #FFEAA7 100%);
-    color: #856404;
-    border-left: 4px solid var(--warning);
+    background: linear-gradient(135deg, var(--sand-yellow) 0%, var(--ivory-cream) 100%);
+    color: var(--text-dark);
+    border-left: 4px solid var(--orange-pantone);
 }
 
 /* Table Enhancements */
