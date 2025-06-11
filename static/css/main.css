@@ -1,27 +1,32 @@
 /* Ethiopia Economic Data Platform - Enhanced Styling */
 
 :root {
-    /* Ethiopian Flag Colors & Professional Palette */
-    --primary-green: #009639;
-    --primary-yellow: #FFDE00;
-    --primary-red: #DA020E;
-    --deep-teal: #1B4D3E;
-    --soft-green: #2ECC71;
-    --accent-blue: #3498DB;
-    --accent-orange: #F39C12;
-    --dark-navy: #2C3E50;
-    --light-gray: #F8F9FA;
-    --medium-gray: #6C757D;
-    --white: #FFFFFF;
-    --success: #28A745;
-    --warning: #FFC107;
-    --danger: #DC3545;
-    --info: #17A2B8;
+    /* Official Platform Colors */
+    --midnight-green: #075056;
+    --ivory-cream: #FDF6E3;
+    --gunmetal: #233038;
+    --orange-pantone: #FF5B04;
+    --sand-yellow: #F4D47C;
+    --light-silver: #D3DBDD;
     
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, var(--primary-green) 0%, var(--deep-teal) 100%);
-    --gradient-secondary: linear-gradient(135deg, var(--accent-blue) 0%, var(--primary-green) 100%);
-    --gradient-warm: linear-gradient(135deg, var(--accent-orange) 0%, var(--primary-yellow) 100%);
+    /* Primary palette assignments */
+    --primary-color: var(--midnight-green);
+    --secondary-color: var(--orange-pantone);
+    --accent-color: var(--sand-yellow);
+    --background-light: var(--ivory-cream);
+    --text-dark: var(--gunmetal);
+    --neutral-light: var(--light-silver);
+    
+    /* Semantic color assignments */
+    --success: var(--midnight-green);
+    --warning: var(--orange-pantone);
+    --danger: #DC3545;
+    --info: var(--midnight-green);
+    
+    /* Gradients using platform colors */
+    --gradient-primary: linear-gradient(135deg, var(--midnight-green) 0%, var(--gunmetal) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--orange-pantone) 0%, var(--sand-yellow) 100%);
+    --gradient-warm: linear-gradient(135deg, var(--sand-yellow) 0%, var(--ivory-cream) 100%);
     
     /* Shadows */
     --shadow-light: 0 2px 4px rgba(0,0,0,0.1);
@@ -37,14 +42,14 @@
 body {
     font-family: var(--font-primary);
     line-height: 1.6;
-    color: var(--dark-navy);
-    background-color: var(--light-gray);
+    color: var(--text-dark);
+    background-color: var(--background-light);
 }
 
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     font-weight: 600;
-    color: var(--dark-navy);
+    color: var(--text-dark);
 }
 
 /* Navigation Bar Enhancement */
@@ -123,23 +128,23 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: var(--dark-navy);
+    color: var(--text-dark);
 }
 
 .metric-card .metric-label {
-    color: var(--medium-gray);
+    color: var(--gunmetal);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-size: 0.875rem;
 }
 
-/* Color variants for metric cards */
-.metric-card.primary .metric-icon { color: var(--primary-green); }
-.metric-card.secondary .metric-icon { color: var(--accent-blue); }
-.metric-card.success .metric-icon { color: var(--success); }
-.metric-card.warning .metric-icon { color: var(--warning); }
-.metric-card.info .metric-icon { color: var(--info); }
+/* Color variants for metric cards using platform colors */
+.metric-card.primary .metric-icon { color: var(--midnight-green); }
+.metric-card.secondary .metric-icon { color: var(--orange-pantone); }
+.metric-card.success .metric-icon { color: var(--midnight-green); }
+.metric-card.warning .metric-icon { color: var(--orange-pantone); }
+.metric-card.info .metric-icon { color: var(--midnight-green); }
 
 /* Enhanced Error Alert Styling */
 .alert-danger {
@@ -183,49 +188,49 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .quick-actions .btn-outline-primary {
-    color: var(--primary-green);
-    border-color: var(--primary-green);
+    color: var(--midnight-green);
+    border-color: var(--midnight-green);
 }
 
 .quick-actions .btn-outline-primary:hover {
-    background-color: var(--primary-green);
+    background-color: var(--midnight-green);
     color: white;
     transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
 }
 
 .quick-actions .btn-outline-success {
-    color: var(--success);
-    border-color: var(--success);
+    color: var(--midnight-green);
+    border-color: var(--midnight-green);
 }
 
 .quick-actions .btn-outline-success:hover {
-    background-color: var(--success);
+    background-color: var(--midnight-green);
     color: white;
     transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
 }
 
 .quick-actions .btn-outline-info {
-    color: var(--info);
-    border-color: var(--info);
+    color: var(--orange-pantone);
+    border-color: var(--orange-pantone);
 }
 
 .quick-actions .btn-outline-info:hover {
-    background-color: var(--info);
+    background-color: var(--orange-pantone);
     color: white;
     transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
 }
 
 .quick-actions .btn-outline-warning {
-    color: var(--warning);
-    border-color: var(--warning);
+    color: var(--sand-yellow);
+    border-color: var(--sand-yellow);
 }
 
 .quick-actions .btn-outline-warning:hover {
-    background-color: var(--warning);
-    color: white;
+    background-color: var(--sand-yellow);
+    color: var(--text-dark);
     transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
 }
@@ -396,19 +401,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dashboard-card.watchlists {
-    border-left-color: var(--primary-green);
+    border-left-color: var(--midnight-green);
 }
 
 .dashboard-card.companies {
-    border-left-color: var(--accent-blue);
+    border-left-color: var(--orange-pantone);
 }
 
 .dashboard-card.downloads {
-    border-left-color: var(--info);
+    border-left-color: var(--midnight-green);
 }
 
 .dashboard-card.alerts {
-    border-left-color: var(--warning);
+    border-left-color: var(--sand-yellow);
 }
 
 .dashboard-card:hover {
@@ -423,32 +428,32 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0.8;
 }
 
-/* Enhanced Dashboard Icon Colors */
+/* Enhanced Dashboard Icon Colors using platform palette */
 .dashboard-card.watchlists .card-icon {
-    color: var(--primary-green);
+    color: var(--midnight-green);
 }
 
 .dashboard-card.companies .card-icon {
-    color: var(--accent-blue);
+    color: var(--orange-pantone);
 }
 
 .dashboard-card.downloads .card-icon {
-    color: var(--info);
+    color: var(--midnight-green);
 }
 
 .dashboard-card.alerts .card-icon {
-    color: var(--warning);
+    color: var(--sand-yellow);
 }
 
 .dashboard-card .card-number {
     font-size: 3rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: var(--dark-navy);
+    color: var(--text-dark);
 }
 
 .dashboard-card .card-label {
-    color: var(--medium-gray);
+    color: var(--gunmetal);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -508,23 +513,23 @@ h1, h2, h3, h4, h5, h6 {
     padding: 2rem;
     text-align: center;
     box-shadow: var(--shadow-light);
-    border-left: 5px solid var(--success);
+    border-left: 5px solid var(--midnight-green);
 }
 
 .roa-value {
     font-size: 3rem;
     font-weight: 700;
-    color: var(--success);
+    color: var(--midnight-green);
     margin-bottom: 0.5rem;
 }
 
 .roa-label {
-    color: var(--medium-gray);
+    color: var(--gunmetal);
     font-weight: 500;
 }
 
 .trend-indicator {
-    color: var(--success);
+    color: var(--midnight-green);
     font-size: 1.5rem;
     margin-left: 0.5rem;
 }
