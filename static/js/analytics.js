@@ -20,6 +20,23 @@ class AnalyticsDashboard {
             await this.loadDashboardStats();
             this.setupEventListeners();
             this.renderCompanySelectors();
+            
+            // Auto-select first 3 companies and generate initial analytics
+            if (this.companies.length >= 3) {
+                this.selectedCompanies = [this.companies[0].id, this.companies[1].id, this.companies[2].id];
+                
+                // Check the first 3 company checkboxes
+                this.selectedCompanies.forEach(companyId => {
+                    const checkbox = document.getElementById(`company_${companyId}`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                });
+                
+                // Generate initial analytics with the selected companies
+                await this.updateAnalytics();
+            }
+            
             console.log('Analytics Dashboard initialized successfully');
         } catch (error) {
             console.error('Failed to initialize analytics dashboard:', error);
@@ -320,7 +337,7 @@ class AnalyticsDashboard {
             const data = companies.map(company => {
                 const latestPeriod = Object.keys(metricsData[company].metrics)[0];
                 return metricsData[company].metrics[latestPeriod] ? 
-                       metricsData[company].metrics[latestPeriod][metric] : 0;
+                       metricsData[company].metrics[latestPeriod][metric] / 1000000 : 0; // Convert to millions
             });
 
             datasets.push({
@@ -335,7 +352,7 @@ class AnalyticsDashboard {
         this.charts.comparison = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: companies,
+                labels: companies.map(name => name.split(' ')[0]), // Shorten company names
                 datasets: datasets
             },
             options: {
@@ -344,7 +361,11 @@ class AnalyticsDashboard {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Financial Metrics Comparison'
+                        text: 'Financial Metrics Comparison (Millions ETB)',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
                     },
                     legend: {
                         display: true,
@@ -354,10 +375,20 @@ class AnalyticsDashboard {
                 scales: {
                     y: {
                         beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Amount (Millions ETB)'
+                        },
                         ticks: {
                             callback: function(value) {
-                                return value.toLocaleString();
+                                return value.toLocaleString() + 'M';
                             }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Companies'
                         }
                     }
                 }
@@ -423,13 +454,16 @@ class AnalyticsDashboard {
             data: {
                 labels: trendData.map(point => point.period),
                 datasets: [{
-                    label: 'Revenue Trend',
-                    data: trendData.map(point => point.total_revenue),
+                    label: 'Revenue (Millions ETB)',
+                    data: trendData.map(point => point.total_revenue / 1000000),
                     backgroundColor: 'rgba(7, 80, 86, 0.1)',
                     borderColor: '#075056',
                     borderWidth: 3,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointBackgroundColor: '#075056',
+                    pointBorderColor: '#075056',
+                    pointRadius: 6
                 }]
             },
             options: {
@@ -438,16 +472,34 @@ class AnalyticsDashboard {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Revenue Trend Analysis'
+                        text: 'Revenue Trend Analysis',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Revenue (Millions ETB)'
+                        },
                         ticks: {
                             callback: function(value) {
-                                return value.toLocaleString();
+                                return value.toLocaleString() + 'M';
                             }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Period'
                         }
                     }
                 }
@@ -487,12 +539,32 @@ class AnalyticsDashboard {
         if (button) {
             if (show) {
                 button.disabled = true;
-                button.innerHTML = '<i class="bi bi-spinner-border spinner-border-sm me-2"></i>Generating...';
+                button.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>Generating...';
             } else {
                 button.disabled = false;
                 button.innerHTML = '<i class="bi bi-graph-up-arrow me-2"></i>Generate Analytics';
             }
         }
+
+        // Show loading on chart containers
+        const chartContainers = [
+            document.getElementById('comparisonChart'),
+            document.getElementById('sectorChart'),
+            document.getElementById('trendChart')
+        ];
+
+        chartContainers.forEach(canvas => {
+            if (canvas) {
+                const container = canvas.closest('.chart-container');
+                if (container) {
+                    if (show) {
+                        container.style.opacity = '0.5';
+                    } else {
+                        container.style.opacity = '1';
+                    }
+                }
+            }
+        });
     }
 
     showError(message) {
