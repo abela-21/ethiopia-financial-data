@@ -4,25 +4,31 @@
 
 {% block content %}
 <!-- Banking Hero Section -->
-<section class="banking-hero py-5 bg-primary text-white">
+<section class="banking-hero">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h1 class="display-4 fw-bold mb-4">Ethiopian Banking Sector</h1>
-                <p class="lead mb-4">
+                <h1 class="display-4 fw-bold mb-4 text-white">Ethiopian Banking Sector</h1>
+                <p class="lead mb-4 text-white">
                     Comprehensive analysis of Ethiopia's 18 licensed banks including financial metrics, 
                     NBE ratings, digital banking adoption, and branch network coverage.
                 </p>
             </div>
             <div class="col-lg-4 text-center">
-                <div class="banking-stats">
-                    <div class="stat-item mb-3">
-                        <h3 class="display-6 fw-bold">18</h3>
-                        <p class="mb-0">Licensed Banks</p>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="metric-card primary">
+                            <i class="fas fa-university metric-icon"></i>
+                            <div class="metric-value">18</div>
+                            <div class="metric-label">Licensed Banks</div>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <h3 class="display-6 fw-bold">7,000+</h3>
-                        <p class="mb-0">Bank Branches</p>
+                    <div class="col-6">
+                        <div class="metric-card secondary">
+                            <i class="fas fa-building metric-icon"></i>
+                            <div class="metric-value">7,000+</div>
+                            <div class="metric-label">Bank Branches</div>
+                        </div>
                     </div>
                 </div>
             </div>
