@@ -47,10 +47,9 @@ class EthiopianDataMigration:
         with self.app.app_context():
             try:
                 # Clear in correct order due to foreign keys
-                db.session.execute(text("DELETE FROM bank_financial_metrics"))
-                db.session.execute(text("DELETE FROM research_documents"))
-                db.session.execute(text("DELETE FROM banks"))
-                db.session.execute(text("DELETE FROM economic_sectors"))
+                db.session.execute(text("DELETE FROM bank_financial_metric"))
+                db.session.execute(text("DELETE FROM research_document"))
+                db.session.execute(text("DELETE FROM bank"))
                 db.session.execute(text("DELETE FROM macro_indicators WHERE source = 'ethiopian_data'"))
                 
                 db.session.commit()
