@@ -1,142 +1,341 @@
 /**
- * Financial Analytics Dashboard
- * Interactive charts and analysis for Ethiopian listed companies
+ * Complete Analytics Dashboard JavaScript
+ * Handles all interactive charts, data fetching, and user interactions
  */
 
-class FinancialAnalytics {
+class AnalyticsDashboard {
     constructor() {
-        this.companies = [];
-        this.analyticsData = {};
-        this.charts = {};
         this.selectedCompanies = [];
-        this.selectedMetrics = ['total_revenue', 'net_income'];
-        this.selectedPeriod = '1Y';
-        this.baseApiUrl = '/api/financial';
+        this.currentMetrics = ['revenue', 'net_income', 'total_assets'];
+        this.currentPeriod = '1Y';
+        this.charts = {};
+        this.companies = [];
         
         this.init();
     }
-    
+
     async init() {
-        await this.loadCompanies();
-        this.renderCompanySelectors();
-        this.setupEventListeners();
-        await this.loadInitialAnalytics();
-        this.initializeCharts();
+        try {
+            await this.loadCompanies();
+            await this.loadDashboardStats();
+            this.setupEventListeners();
+            this.renderCompanySelectors();
+            console.log('Analytics Dashboard initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize analytics dashboard:', error);
+            this.showError('Failed to load analytics dashboard');
+        }
     }
-    
+
     async loadCompanies() {
         try {
-            const response = await fetch(`${this.baseApiUrl}/companies`);
+            const response = await fetch('/api/analytics/companies');
             const data = await response.json();
             
-            if (data.data) {
-                this.companies = data.data;
-                this.selectedCompanies = this.companies.slice(0, 3).map(c => c.id); // Select first 3 by default
+            if (data.success) {
+                this.companies = data.companies;
+                console.log(`Loaded ${this.companies.length} companies`);
+            } else {
+                throw new Error(data.error || 'Failed to load companies');
             }
         } catch (error) {
             console.error('Error loading companies:', error);
+            throw error;
         }
     }
-    
+
+    async loadDashboardStats() {
+        try {
+            const response = await fetch('/api/analytics/dashboard-stats');
+            const data = await response.json();
+            
+            if (data.success) {
+                this.updateDashboardStats(data.stats);
+            } else {
+                console.warn('Failed to load dashboard stats:', data.error);
+            }
+        } catch (error) {
+            console.error('Error loading dashboard stats:', error);
+        }
+    }
+
+    updateDashboardStats(stats) {
+        // Update ROA display
+        const roaElement = document.querySelector('.roa-display');
+        if (roaElement) {
+            roaElement.innerHTML = `
+                <div style="color: white; font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem;">
+                    ${stats.avg_roa}% <span style="color: white; font-size: 1.5rem; margin-left: 0.5rem;">↗</span>
+                </div>
+                <div style="color: white; font-weight: 500; margin-bottom: 1rem;">ROA: ${stats.avg_roa}%</div>
+                <p class="mt-2 mb-0" style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Average return on assets</p>
+            `;
+        }
+
+        // Update company count in insights
+        const insightsElement = document.querySelector('.analytics-preview');
+        if (insightsElement) {
+            insightsElement.innerHTML = `
+                <h6 class="fw-bold mb-3">Quick Insights</h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="fw-semibold">Active Companies</span>
+                    <span class="text-primary">${stats.total_companies}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="fw-semibold">Financial Records</span>
+                    <span class="text-success">${stats.total_records}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="fw-semibold">Market Volatility</span>
+                    <span class="text-warning">${stats.market_volatility}</span>
+                </div>
+                <small class="text-muted">Last updated: ${stats.last_updated}</small>
+            `;
+        }
+    }
+
     renderCompanySelectors() {
         const container = document.getElementById('companySelectors');
-        if (!container) return;
-        
+        if (!container || this.companies.length === 0) return;
+
         container.innerHTML = '';
-        
+
+        // Group companies by industry for better organization
+        const companiesByIndustry = {};
         this.companies.forEach(company => {
-            const col = document.createElement('div');
-            col.className = 'col-12 mb-2';
+            const industry = company.industry || 'Other';
+            if (!companiesByIndustry[industry]) {
+                companiesByIndustry[industry] = [];
+            }
+            companiesByIndustry[industry].push(company);
+        });
+
+        // Create checkboxes for each company
+        Object.keys(companiesByIndustry).forEach(industry => {
+            const industryDiv = document.createElement('div');
+            industryDiv.className = 'col-12 mb-3';
             
-            const isSelected = this.selectedCompanies.includes(company.id);
-            
-            col.innerHTML = `
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="${company.id}" 
-                           id="company${company.id}" ${isSelected ? 'checked' : ''}>
-                    <label class="form-check-label" for="company${company.id}">
-                        <strong>${company.name}</strong> (${company.ticker_symbol})
-                        <br><small class="text-light">${company.sector} • Market Cap: ${company.market_cap_formatted}</small>
+            const industryHeader = document.createElement('h6');
+            industryHeader.textContent = industry;
+            industryHeader.className = 'text-white mb-2';
+            industryDiv.appendChild(industryHeader);
+
+            companiesByIndustry[industry].forEach(company => {
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'form-check mb-1';
+                
+                checkboxDiv.innerHTML = `
+                    <input class="form-check-input company-checkbox" type="checkbox" 
+                           value="${company.id}" id="company_${company.id}">
+                    <label class="form-check-label text-white-50" for="company_${company.id}">
+                        ${company.name} (${company.symbol})
                     </label>
-                </div>
-            `;
-            
-            container.appendChild(col);
+                `;
+                
+                industryDiv.appendChild(checkboxDiv);
+            });
+
+            container.appendChild(industryDiv);
+        });
+
+        // Add event listeners to checkboxes
+        const checkboxes = container.querySelectorAll('.company-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                this.handleCompanySelection(e);
+            });
         });
     }
-    
-    async loadInitialAnalytics() {
-        await this.loadAnalyticsData();
-        this.updateQuickInsights();
-        this.updatePerformanceRankings();
-        this.updateKPIMetrics();
+
+    handleCompanySelection(event) {
+        const companyId = parseInt(event.target.value);
+        
+        if (event.target.checked) {
+            if (!this.selectedCompanies.includes(companyId)) {
+                this.selectedCompanies.push(companyId);
+            }
+        } else {
+            this.selectedCompanies = this.selectedCompanies.filter(id => id !== companyId);
+        }
+
+        console.log('Selected companies:', this.selectedCompanies);
     }
-    
-    async loadAnalyticsData() {
-        try {
-            // Load financial data for selected companies
-            const promises = this.selectedCompanies.map(async (companyId) => {
-                const response = await fetch(`${this.baseApiUrl}/companies/${companyId}/metrics`);
-                const data = await response.json();
-                return { companyId, data: data.data || [] };
+
+    setupEventListeners() {
+        // Period selector
+        const periodInputs = document.querySelectorAll('input[name="period"]');
+        periodInputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+                this.currentPeriod = e.target.value;
+                console.log('Period changed to:', this.currentPeriod);
             });
-            
-            const results = await Promise.all(promises);
-            
-            // Organize data by company
-            this.analyticsData = {};
-            results.forEach(result => {
-                this.analyticsData[result.companyId] = result.data;
+        });
+
+        // Metric selector
+        const metricSelector = document.getElementById('metricSelector');
+        if (metricSelector) {
+            metricSelector.addEventListener('change', (e) => {
+                this.currentMetrics = Array.from(e.target.selectedOptions).map(option => option.value);
+                console.log('Metrics changed to:', this.currentMetrics);
             });
-            
-        } catch (error) {
-            console.error('Error loading analytics data:', error);
+        }
+
+        // Generate analytics button
+        const generateBtn = document.querySelector('button[onclick="updateAnalytics()"]');
+        if (generateBtn) {
+            generateBtn.removeAttribute('onclick');
+            generateBtn.addEventListener('click', () => {
+                this.updateAnalytics();
+            });
         }
     }
-    
-    initializeCharts() {
-        this.createComparisonChart();
-        this.createTrendCharts();
-        this.createSectorBenchmarkChart();
+
+    async updateAnalytics() {
+        if (this.selectedCompanies.length === 0) {
+            this.showError('Please select at least one company');
+            return;
+        }
+
+        try {
+            this.showLoading(true);
+            
+            // Load financial metrics
+            await this.loadFinancialMetrics();
+            
+            // Generate comparison if multiple companies selected
+            if (this.selectedCompanies.length >= 2) {
+                await this.generateComparison();
+            }
+            
+            // Generate trend analysis for first selected company
+            if (this.selectedCompanies.length >= 1) {
+                await this.generateTrendAnalysis(this.selectedCompanies[0]);
+            }
+            
+            this.showLoading(false);
+            this.showSuccess('Analytics updated successfully');
+            
+        } catch (error) {
+            console.error('Error updating analytics:', error);
+            this.showError('Failed to update analytics');
+            this.showLoading(false);
+        }
     }
-    
-    createComparisonChart() {
-        const ctx = document.getElementById('comparisonChart');
-        if (!ctx) return;
-        
-        const datasets = this.selectedMetrics.map((metric, index) => {
-            const data = this.selectedCompanies.map(companyId => {
-                const company = this.companies.find(c => c.id === companyId);
-                const metrics = this.analyticsData[companyId] || [];
-                const metricData = metrics.find(m => m.metric_name === metric);
-                return metricData ? parseFloat(metricData.metric_value) : 0;
+
+    async loadFinancialMetrics() {
+        try {
+            const response = await fetch('/api/analytics/metrics', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    company_ids: this.selectedCompanies,
+                    metrics: this.currentMetrics,
+                    period: this.currentPeriod
+                })
             });
+
+            const data = await response.json();
             
-            const colors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1'];
+            if (data.success) {
+                this.renderMetricsChart(data.data);
+            } else {
+                throw new Error(data.error || 'Failed to load financial metrics');
+            }
+        } catch (error) {
+            console.error('Error loading financial metrics:', error);
+            throw error;
+        }
+    }
+
+    async generateComparison() {
+        try {
+            const response = await fetch('/api/analytics/comparison', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    company_ids: this.selectedCompanies
+                })
+            });
+
+            const data = await response.json();
             
-            return {
-                label: this.formatMetricName(metric),
-                data: data,
-                backgroundColor: colors[index % colors.length] + '20',
-                borderColor: colors[index % colors.length],
-                borderWidth: 2,
-                type: index === 0 ? 'bar' : 'bar'
-            };
-        });
-        
-        const labels = this.selectedCompanies.map(companyId => {
-            const company = this.companies.find(c => c.id === companyId);
-            return company ? company.ticker_symbol : 'Unknown';
-        });
-        
+            if (data.success) {
+                this.renderComparisonChart(data.comparison);
+            } else {
+                throw new Error(data.error || 'Failed to generate comparison');
+            }
+        } catch (error) {
+            console.error('Error generating comparison:', error);
+            throw error;
+        }
+    }
+
+    async generateTrendAnalysis(companyId) {
+        try {
+            const response = await fetch('/api/analytics/trends', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    company_id: companyId,
+                    metric: 'total_revenue'
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.renderTrendChart(data.trends);
+            } else {
+                throw new Error(data.error || 'Failed to generate trend analysis');
+            }
+        } catch (error) {
+            console.error('Error generating trend analysis:', error);
+            throw error;
+        }
+    }
+
+    renderMetricsChart(metricsData) {
+        const canvas = document.getElementById('comparisonChart');
+        if (!canvas) return;
+
+        // Destroy existing chart
         if (this.charts.comparison) {
             this.charts.comparison.destroy();
         }
+
+        const ctx = canvas.getContext('2d');
         
+        // Prepare data for chart
+        const companies = Object.keys(metricsData);
+        const datasets = [];
+        
+        // Create dataset for each metric
+        this.currentMetrics.forEach((metric, index) => {
+            const data = companies.map(company => {
+                const latestPeriod = Object.keys(metricsData[company].metrics)[0];
+                return metricsData[company].metrics[latestPeriod] ? 
+                       metricsData[company].metrics[latestPeriod][metric] : 0;
+            });
+
+            datasets.push({
+                label: this.formatMetricName(metric),
+                data: data,
+                backgroundColor: this.getChartColor(index, 0.6),
+                borderColor: this.getChartColor(index, 1),
+                borderWidth: 2
+            });
+        });
+
         this.charts.comparison = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: labels,
+                labels: companies,
                 datasets: datasets
             },
             options: {
@@ -148,6 +347,7 @@ class FinancialAnalytics {
                         text: 'Financial Metrics Comparison'
                     },
                     legend: {
+                        display: true,
                         position: 'top'
                     }
                 },
@@ -156,135 +356,7 @@ class FinancialAnalytics {
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return this.formatCurrency(value);
-                            }.bind(this)
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                }
-            }
-        });
-    }
-    
-    createTrendCharts() {
-        this.createRevenueTrendChart();
-        this.createProfitabilityTrendChart();
-        this.createAssetTrendChart();
-        this.createMarketTrendChart();
-    }
-    
-    createRevenueTrendChart() {
-        const ctx = document.getElementById('revenueTrendChart');
-        if (!ctx) return;
-        
-        const datasets = this.selectedCompanies.map((companyId, index) => {
-            const company = this.companies.find(c => c.id === companyId);
-            const metrics = this.analyticsData[companyId] || [];
-            const revenueMetric = metrics.find(m => m.metric_name === 'total_revenue');
-            
-            // Generate trend data (simulated quarterly data)
-            const trendData = this.generateTrendData(revenueMetric ? parseFloat(revenueMetric.metric_value) : 0);
-            
-            const colors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1'];
-            
-            return {
-                label: company ? company.ticker_symbol : 'Unknown',
-                data: trendData,
-                borderColor: colors[index % colors.length],
-                backgroundColor: colors[index % colors.length] + '20',
-                tension: 0.4,
-                fill: false
-            };
-        });
-        
-        const labels = this.generateTimeLabels();
-        
-        if (this.charts.revenueTrend) {
-            this.charts.revenueTrend.destroy();
-        }
-        
-        this.charts.revenueTrend = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Revenue Growth Trends'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        ticks: {
-                            callback: function(value) {
-                                return this.formatCurrency(value);
-                            }.bind(this)
-                        }
-                    }
-                }
-            }
-        });
-    }
-    
-    createProfitabilityTrendChart() {
-        const ctx = document.getElementById('profitabilityTrendChart');
-        if (!ctx) return;
-        
-        const datasets = this.selectedCompanies.map((companyId, index) => {
-            const company = this.companies.find(c => c.id === companyId);
-            const metrics = this.analyticsData[companyId] || [];
-            const roaMetric = metrics.find(m => m.metric_name === 'return_on_assets');
-            
-            const trendData = this.generateTrendData(roaMetric ? parseFloat(roaMetric.metric_value) : 0, 0.8, 1.2);
-            
-            const colors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1'];
-            
-            return {
-                label: company ? company.ticker_symbol : 'Unknown',
-                data: trendData,
-                borderColor: colors[index % colors.length],
-                backgroundColor: colors[index % colors.length] + '20',
-                tension: 0.4,
-                fill: false
-            };
-        });
-        
-        const labels = this.generateTimeLabels();
-        
-        if (this.charts.profitabilityTrend) {
-            this.charts.profitabilityTrend.destroy();
-        }
-        
-        this.charts.profitabilityTrend = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Profitability Trends (ROA %)'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value.toFixed(1) + '%';
+                                return value.toLocaleString();
                             }
                         }
                     }
@@ -292,176 +364,35 @@ class FinancialAnalytics {
             }
         });
     }
-    
-    createAssetTrendChart() {
-        const ctx = document.getElementById('assetTrendChart');
-        if (!ctx) return;
-        
-        const datasets = this.selectedCompanies.map((companyId, index) => {
-            const company = this.companies.find(c => c.id === companyId);
-            const metrics = this.analyticsData[companyId] || [];
-            const assetsMetric = metrics.find(m => m.metric_name === 'total_assets');
-            
-            const trendData = this.generateTrendData(assetsMetric ? parseFloat(assetsMetric.metric_value) : 0);
-            
-            const colors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1'];
-            
-            return {
-                label: company ? company.ticker_symbol : 'Unknown',
-                data: trendData,
-                borderColor: colors[index % colors.length],
-                backgroundColor: colors[index % colors.length] + '20',
-                tension: 0.4,
-                fill: false
-            };
-        });
-        
-        const labels = this.generateTimeLabels();
-        
-        if (this.charts.assetTrend) {
-            this.charts.assetTrend.destroy();
+
+    renderComparisonChart(comparisonData) {
+        const canvas = document.getElementById('sectorChart');
+        if (!canvas) return;
+
+        // Destroy existing chart
+        if (this.charts.sector) {
+            this.charts.sector.destroy();
         }
+
+        const ctx = canvas.getContext('2d');
         
-        this.charts.assetTrend = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Total Assets Growth'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        ticks: {
-                            callback: function(value) {
-                                return this.formatCurrency(value);
-                            }.bind(this)
-                        }
-                    }
-                }
-            }
-        });
-    }
-    
-    createMarketTrendChart() {
-        const ctx = document.getElementById('marketTrendChart');
-        if (!ctx) return;
-        
-        const datasets = this.selectedCompanies.map((companyId, index) => {
-            const company = this.companies.find(c => c.id === companyId);
-            const marketCap = company ? company.market_cap : 0;
-            
-            const trendData = this.generateTrendData(marketCap, 0.9, 1.15);
-            
-            const colors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1'];
-            
-            return {
-                label: company ? company.ticker_symbol : 'Unknown',
-                data: trendData,
-                borderColor: colors[index % colors.length],
-                backgroundColor: colors[index % colors.length] + '20',
-                tension: 0.4,
-                fill: false
-            };
-        });
-        
-        const labels = this.generateTimeLabels();
-        
-        if (this.charts.marketTrend) {
-            this.charts.marketTrend.destroy();
-        }
-        
-        this.charts.marketTrend = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Market Capitalization Trends'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        ticks: {
-                            callback: function(value) {
-                                return this.formatCurrency(value);
-                            }.bind(this)
-                        }
-                    }
-                }
-            }
-        });
-    }
-    
-    createSectorBenchmarkChart() {
-        const ctx = document.getElementById('sectorBenchmarkChart');
-        if (!ctx) return;
-        
-        // Group companies by sector and calculate averages
-        const sectorData = {};
-        this.companies.forEach(company => {
-            if (!sectorData[company.sector]) {
-                sectorData[company.sector] = {
-                    companies: [],
-                    totalRevenue: 0,
-                    totalAssets: 0,
-                    count: 0
-                };
-            }
-            
-            const metrics = this.analyticsData[company.id] || [];
-            const revenueMetric = metrics.find(m => m.metric_name === 'total_revenue');
-            const assetsMetric = metrics.find(m => m.metric_name === 'total_assets');
-            
-            sectorData[company.sector].companies.push(company);
-            sectorData[company.sector].totalRevenue += revenueMetric ? parseFloat(revenueMetric.metric_value) : 0;
-            sectorData[company.sector].totalAssets += assetsMetric ? parseFloat(assetsMetric.metric_value) : 0;
-            sectorData[company.sector].count++;
-        });
-        
-        const labels = Object.keys(sectorData);
-        const revenueData = labels.map(sector => sectorData[sector].totalRevenue / sectorData[sector].count);
-        const assetsData = labels.map(sector => sectorData[sector].totalAssets / sectorData[sector].count);
-        
-        if (this.charts.sectorBenchmark) {
-            this.charts.sectorBenchmark.destroy();
-        }
-        
-        this.charts.sectorBenchmark = new Chart(ctx, {
+        this.charts.sector = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Average Revenue',
-                        data: revenueData,
-                        borderColor: '#007bff',
-                        backgroundColor: '#007bff20',
-                        pointBackgroundColor: '#007bff'
-                    },
-                    {
-                        label: 'Average Assets',
-                        data: assetsData,
-                        borderColor: '#28a745',
-                        backgroundColor: '#28a74520',
-                        pointBackgroundColor: '#28a745'
-                    }
-                ]
+                labels: ['Revenue', 'Net Income', 'Total Assets', 'ROA', 'ROE'],
+                datasets: comparisonData.map((company, index) => ({
+                    label: company.name,
+                    data: [
+                        company.total_revenue / 1000000, // Convert to millions
+                        company.net_income / 1000000,
+                        company.total_assets / 1000000,
+                        company.roa,
+                        company.roe
+                    ],
+                    backgroundColor: this.getChartColor(index, 0.2),
+                    borderColor: this.getChartColor(index, 1),
+                    borderWidth: 2
+                }))
             },
             options: {
                 responsive: true,
@@ -469,322 +400,147 @@ class FinancialAnalytics {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Sector Performance Benchmark'
+                        text: 'Company Performance Comparison'
+                    }
+                }
+            }
+        });
+    }
+
+    renderTrendChart(trendData) {
+        const canvas = document.getElementById('trendChart');
+        if (!canvas) return;
+
+        // Destroy existing chart
+        if (this.charts.trend) {
+            this.charts.trend.destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
+        
+        this.charts.trend = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: trendData.map(point => point.period),
+                datasets: [{
+                    label: 'Revenue Trend',
+                    data: trendData.map(point => point.total_revenue),
+                    backgroundColor: 'rgba(7, 80, 86, 0.1)',
+                    borderColor: '#075056',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Revenue Trend Analysis'
                     }
                 },
                 scales: {
-                    r: {
-                        beginAtZero: true
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString();
+                            }
+                        }
                     }
                 }
             }
         });
     }
-    
-    updateQuickInsights() {
-        const container = document.getElementById('quickInsights');
-        if (!container || this.selectedCompanies.length === 0) return;
-        
-        const insights = this.calculateQuickInsights();
-        
-        container.innerHTML = insights.map(insight => `
-            <div class="performance-indicator ${insight.type}">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="fw-semibold">${insight.title}</span>
-                    <span class="trend-arrow ${insight.trend}">${insight.arrow}</span>
-                </div>
-                <div class="text-${insight.color} h5 mb-1">${insight.value}</div>
-                <small class="text-muted">${insight.description}</small>
-            </div>
-        `).join('');
-    }
-    
-    calculateQuickInsights() {
-        const insights = [];
-        
-        // Calculate top performer
-        let topPerformer = null;
-        let highestROA = 0;
-        
-        this.selectedCompanies.forEach(companyId => {
-            const company = this.companies.find(c => c.id === companyId);
-            const metrics = this.analyticsData[companyId] || [];
-            const roaMetric = metrics.find(m => m.metric_name === 'return_on_assets');
-            
-            if (roaMetric && parseFloat(roaMetric.metric_value) > highestROA) {
-                highestROA = parseFloat(roaMetric.metric_value);
-                topPerformer = company;
-            }
-        });
-        
-        if (topPerformer) {
-            insights.push({
-                title: `${topPerformer.name} Performance`,
-                value: `ROA: ${highestROA.toFixed(1)}%`,
-                description: 'Leading return on assets performance',
-                trend: 'trend-up',
-                arrow: '↗',
-                color: 'success',
-                type: ''
-            });
-        }
-        
-        // Calculate sector growth
-        const avgGrowth = this.calculateAverageSectorGrowth();
-        insights.push({
-            title: 'Sector Growth Rate',
-            value: `${avgGrowth.toFixed(1)}%`,
-            description: 'Average revenue growth across selected companies',
-            trend: avgGrowth > 5 ? 'trend-up' : 'trend-flat',
-            arrow: avgGrowth > 5 ? '↗' : '→',
-            color: avgGrowth > 5 ? 'success' : 'warning',
-            type: avgGrowth > 5 ? '' : 'neutral'
-        });
-        
-        // Market volatility assessment
-        insights.push({
-            title: 'Market Stability',
-            value: 'Stable Trends',
-            description: 'Consistent performance patterns observed',
-            trend: 'trend-flat',
-            arrow: '→',
-            color: 'info',
-            type: 'neutral'
-        });
-        
-        return insights;
-    }
-    
-    calculateAverageSectorGrowth() {
-        // Simulated growth calculation based on available data
-        let totalGrowth = 0;
-        let count = 0;
-        
-        this.selectedCompanies.forEach(companyId => {
-            const metrics = this.analyticsData[companyId] || [];
-            const revenueMetric = metrics.find(m => m.metric_name === 'total_revenue');
-            
-            if (revenueMetric) {
-                // Simulate growth rate based on revenue size
-                const revenue = parseFloat(revenueMetric.metric_value);
-                const growthRate = Math.min(15, Math.max(2, (revenue / 1000000000) * 5));
-                totalGrowth += growthRate;
-                count++;
-            }
-        });
-        
-        return count > 0 ? totalGrowth / count : 8.2;
-    }
-    
-    updatePerformanceRankings() {
-        const container = document.getElementById('performanceRankings');
-        if (!container) return;
-        
-        const rankings = this.calculatePerformanceRankings();
-        
-        container.innerHTML = rankings.map((ranking, index) => `
-            <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-light">
-                <div>
-                    <div class="fw-bold">${index + 1}. ${ranking.company}</div>
-                    <small class="text-light">${ranking.metric}</small>
-                </div>
-                <div class="text-end">
-                    <div class="h6 mb-0">${ranking.value}</div>
-                    <small class="text-${ranking.changeColor}">${ranking.change}</small>
-                </div>
-            </div>
-        `).join('');
-    }
-    
-    calculatePerformanceRankings() {
-        const rankings = [];
-        
-        this.selectedCompanies.forEach(companyId => {
-            const company = this.companies.find(c => c.id === companyId);
-            const metrics = this.analyticsData[companyId] || [];
-            
-            const roaMetric = metrics.find(m => m.metric_name === 'return_on_assets');
-            const revenueMetric = metrics.find(m => m.metric_name === 'total_revenue');
-            
-            if (company) {
-                rankings.push({
-                    company: company.ticker_symbol,
-                    metric: 'Return on Assets',
-                    value: roaMetric ? `${parseFloat(roaMetric.metric_value).toFixed(1)}%` : 'N/A',
-                    change: '+0.2%',
-                    changeColor: 'success'
-                });
-                
-                if (revenueMetric) {
-                    rankings.push({
-                        company: company.ticker_symbol,
-                        metric: 'Total Revenue',
-                        value: this.formatCurrency(parseFloat(revenueMetric.metric_value)),
-                        change: '+5.8%',
-                        changeColor: 'success'
-                    });
-                }
-            }
-        });
-        
-        return rankings.slice(0, 6); // Top 6 entries
-    }
-    
-    updateKPIMetrics() {
-        const container = document.getElementById('kpiMetrics');
-        if (!container) return;
-        
-        const kpis = this.calculateKPIMetrics();
-        
-        container.innerHTML = kpis.map(kpi => `
-            <div class="benchmark-card mb-3">
-                <div class="benchmark-value text-${kpi.color}">${kpi.value}</div>
-                <div class="text-muted small">${kpi.label}</div>
-                <div class="text-${kpi.trendColor} small mt-1">
-                    <i class="bi bi-arrow-${kpi.trendDirection}"></i> ${kpi.trend}
-                </div>
-            </div>
-        `).join('');
-    }
-    
-    calculateKPIMetrics() {
-        return [
-            {
-                label: 'Average ROA',
-                value: '12.3%',
-                color: 'primary',
-                trend: '+0.8%',
-                trendColor: 'success',
-                trendDirection: 'up'
-            },
-            {
-                label: 'Revenue Growth',
-                value: '8.5%',
-                color: 'success',
-                trend: '+2.1%',
-                trendColor: 'success',
-                trendDirection: 'up'
-            },
-            {
-                label: 'Asset Efficiency',
-                value: '74%',
-                color: 'warning',
-                trend: '-1.2%',
-                trendColor: 'danger',
-                trendDirection: 'down'
-            },
-            {
-                label: 'Market Position',
-                value: 'Strong',
-                color: 'info',
-                trend: 'Stable',
-                trendColor: 'muted',
-                trendDirection: 'right'
-            }
+
+    getChartColor(index, alpha = 1) {
+        const colors = [
+            `rgba(7, 80, 86, ${alpha})`,      // Midnight Green
+            `rgba(255, 91, 4, ${alpha})`,     // Orange Pantone
+            `rgba(244, 212, 124, ${alpha})`,  // Sand Yellow
+            `rgba(35, 48, 56, ${alpha})`,     // Gunmetal
+            `rgba(211, 219, 221, ${alpha})`,  // Light Silver
+            `rgba(253, 246, 227, ${alpha})`   // Ivory Cream
         ];
+        return colors[index % colors.length];
     }
-    
-    generateTrendData(baseValue, minMultiplier = 0.85, maxMultiplier = 1.2) {
-        const points = 8;
-        const data = [];
-        
-        for (let i = 0; i < points; i++) {
-            const multiplier = minMultiplier + (Math.random() * (maxMultiplier - minMultiplier));
-            const trendFactor = 1 + (i * 0.05); // Slight upward trend
-            data.push(baseValue * multiplier * trendFactor);
-        }
-        
-        return data;
-    }
-    
-    generateTimeLabels() {
-        const labels = [];
-        const now = new Date();
-        
-        for (let i = 7; i >= 0; i--) {
-            const date = new Date(now);
-            date.setMonth(date.getMonth() - (i * 3)); // Quarterly data
-            labels.push(date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }));
-        }
-        
-        return labels;
-    }
-    
-    formatMetricName(name) {
-        return name.replace(/_/g, ' ')
-                   .replace(/\b\w/g, l => l.toUpperCase())
-                   .replace(/Roa/g, 'ROA')
-                   .replace(/Roe/g, 'ROE');
-    }
-    
-    formatCurrency(value) {
-        if (value >= 1000000000) {
-            return (value / 1000000000).toFixed(1) + 'B ETB';
-        } else if (value >= 1000000) {
-            return (value / 1000000).toFixed(1) + 'M ETB';
-        } else if (value >= 1000) {
-            return (value / 1000).toFixed(1) + 'K ETB';
-        }
-        return value.toFixed(0) + ' ETB';
-    }
-    
-    setupEventListeners() {
-        // Company selection changes
-        document.addEventListener('change', (e) => {
-            if (e.target.type === 'checkbox' && e.target.id.startsWith('company')) {
-                this.updateSelectedCompanies();
-            }
-        });
-        
-        // Metric selection changes
-        const metricSelector = document.getElementById('metricSelector');
-        if (metricSelector) {
-            metricSelector.addEventListener('change', () => {
-                this.selectedMetrics = Array.from(metricSelector.selectedOptions).map(option => option.value);
-            });
-        }
-        
-        // Period selection changes
-        document.addEventListener('change', (e) => {
-            if (e.target.name === 'period') {
-                this.selectedPeriod = e.target.value;
-            }
-        });
-        
-        // Global update function
-        window.updateAnalytics = () => this.updateAnalytics();
-        window.scrollToSection = (sectionId) => {
-            const element = document.getElementById(sectionId);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
-            }
+
+    formatMetricName(metric) {
+        const names = {
+            'revenue': 'Revenue',
+            'total_revenue': 'Total Revenue',
+            'net_income': 'Net Income',
+            'total_assets': 'Total Assets',
+            'return_on_assets': 'Return on Assets (%)',
+            'return_on_equity': 'Return on Equity (%)',
+            'market_cap': 'Market Capitalization'
         };
+        return names[metric] || metric.replace('_', ' ').toUpperCase();
     }
-    
-    updateSelectedCompanies() {
-        const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="company"]');
-        this.selectedCompanies = Array.from(checkboxes)
-            .filter(cb => cb.checked)
-            .map(cb => parseInt(cb.value));
-    }
-    
-    async updateAnalytics() {
-        this.updateSelectedCompanies();
+
+    showLoading(show) {
+        const button = document.querySelector('button[onclick="updateAnalytics()"]') || 
+                      document.querySelector('.btn[onclick="updateAnalytics()"]');
         
-        if (this.selectedCompanies.length === 0) {
-            alert('Please select at least one company for analysis.');
-            return;
+        if (button) {
+            if (show) {
+                button.disabled = true;
+                button.innerHTML = '<i class="bi bi-spinner-border spinner-border-sm me-2"></i>Generating...';
+            } else {
+                button.disabled = false;
+                button.innerHTML = '<i class="bi bi-graph-up-arrow me-2"></i>Generate Analytics';
+            }
         }
+    }
+
+    showError(message) {
+        this.showNotification(message, 'error');
+    }
+
+    showSuccess(message) {
+        this.showNotification(message, 'success');
+    }
+
+    showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
         
-        await this.loadAnalyticsData();
-        this.updateQuickInsights();
-        this.updatePerformanceRankings();
-        this.updateKPIMetrics();
-        this.initializeCharts();
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
     }
 }
 
-// Initialize when DOM is loaded
+// Scroll functions for navigation
+function scrollToSection(sectionId) {
+    const element = document.getElementById(sectionId);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    window.analyticsManager = new FinancialAnalytics();
+    window.analyticsManager = new AnalyticsDashboard();
 });
+
+// Legacy function for backward compatibility
+function updateAnalytics() {
+    if (window.analyticsManager) {
+        window.analyticsManager.updateAnalytics();
+    }
+}

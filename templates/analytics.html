@@ -247,7 +247,7 @@
                     <div class="analytics-card p-4">
                         <h5 class="fw-bold mb-3">Revenue Trends</h5>
                         <div class="chart-container" style="height: 300px;">
-                            <canvas id="revenueTrendChart"></canvas>
+                            <canvas id="trendChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -292,9 +292,9 @@
             <div class="row">
                 <div class="col-lg-8">
                     <div class="analytics-card p-4">
-                        <h5 class="fw-bold mb-4">Sector Performance Matrix</h5>
-                        <div class="chart-container">
-                            <canvas id="sectorBenchmarkChart"></canvas>
+                        <h5 class="fw-bold mb-4">Company Comparison Radar</h5>
+                        <div class="chart-container" style="height: 400px;">
+                            <canvas id="sectorChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -310,4 +310,9 @@
         </div>
     </section>
 
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
 {% endblock %}

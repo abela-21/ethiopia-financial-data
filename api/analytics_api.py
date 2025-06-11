@@ -224,7 +224,7 @@ def sector_performance():
         sector_data = db.session.query(
             Company.industry,
             func.count(Company.id).label('company_count'),
-            func.avg(Financial.total_revenue).label('avg_revenue'),
+            func.avg(Financial.revenue).label('avg_revenue'),
             func.avg(Financial.net_income).label('avg_income'),
             func.avg(Financial.total_assets).label('avg_assets')
         ).join(Financial).filter(
@@ -260,7 +260,7 @@ def dashboard_stats():
     """Get key statistics for analytics dashboard"""
     try:
         # Get basic counts
-        total_companies = Company.query.filter(Company.symbol.isnot(None)).count()
+        total_companies = Company.query.filter(Company.ticker.isnot(None)).count()
         total_financial_records = Financial.query.count()
         
         # Get average ROA from latest financial data
