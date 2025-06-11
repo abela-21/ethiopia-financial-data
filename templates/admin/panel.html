@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Ethiopia Economic Intelligence{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #FDF6E3 0%, #F4D47C 100%); min-height: 100vh;">
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h1 class="display-5 fw-bold" style="color: #075056;">
+                            <i class="fas fa-cogs me-3"></i>Admin Panel
+                        </h1>
+                        <p class="lead text-muted">Platform management and user administration</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-warning text-dark fs-6">Administrator</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-5">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <div class="icon-circle mx-auto mb-3" style="width: 60px; height: 60px; background: #075056; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-users fa-lg text-white"></i>
+                        </div>
+                        <h3 class="fw-bold" style="color: #075056;">{{ admin_stats.total_users }}</h3>
+                        <p class="text-muted mb-0">Total Users</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <div class="icon-circle mx-auto mb-3" style="width: 60px; height: 60px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user-check fa-lg text-white"></i>
+                        </div>
+                        <h3 class="fw-bold text-success">{{ admin_stats.active_users }}</h3>
+                        <p class="text-muted mb-0">Active Users</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <div class="icon-circle mx-auto mb-3" style="width: 60px; height: 60px; background: #FF5B04; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user-shield fa-lg text-white"></i>
+                        </div>
+                        <h3 class="fw-bold" style="color: #FF5B04;">{{ admin_stats.admin_users }}</h3>
+                        <p class="text-muted mb-0">Administrators</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <div class="icon-circle mx-auto mb-3" style="width: 60px; height: 60px; background: #6c757d; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-calendar-day fa-lg text-white"></i>
+                        </div>
+                        <h3 class="fw-bold text-secondary">{{ admin_stats.recent_users|length }}</h3>
+                        <p class="text-muted mb-0">Recent Signups</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Actions -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card-header" style="background: #075056; color: white; border-radius: 15px 15px 0 0;">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tools me-2"></i>Management Actions
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <button class="btn btn-outline-primary w-100" onclick="viewAllUsers()">
+                                    <i class="fas fa-users me-2"></i>View All Users
+                                </button>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <button class="btn btn-outline-success w-100" onclick="exportUserData()">
+                                    <i class="fas fa-download me-2"></i>Export User Data
+                                </button>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <button class="btn btn-outline-info w-100" onclick="viewPlatformStats()">
+                                    <i class="fas fa-chart-bar me-2"></i>Platform Statistics
+                                </button>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <button class="btn btn-outline-warning w-100" onclick="manageData()">
+                                    <i class="fas fa-database me-2"></i>Manage Data
+                                </button>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <button class="btn btn-outline-secondary w-100" onclick="systemLogs()">
+                                    <i class="fas fa-file-alt me-2"></i>System Logs
+                                </button>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <button class="btn btn-outline-danger w-100" onclick="systemMaintenance()">
+                                    <i class="fas fa-cogs me-2"></i>Maintenance
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Users Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card-header" style="background: #233038; color: white; border-radius: 15px 15px 0 0;">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>Recent User Registrations
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead style="background: #f8f9fa;">
+                                    <tr>
+                                        <th class="border-0 px-4 py-3">User</th>
+                                        <th class="border-0 px-4 py-3">Email</th>
+                                        <th class="border-0 px-4 py-3">Role</th>
+                                        <th class="border-0 px-4 py-3">Joined</th>
+                                        <th class="border-0 px-4 py-3">Status</th>
+                                        <th class="border-0 px-4 py-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in admin_stats.recent_users %}
+                                    <tr>
+                                        <td class="px-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm me-3" style="width: 40px; height: 40px; background: #075056; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-user text-white"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">{{ user.first_name }} {{ user.last_name }}</div>
+                                                    <small class="text-muted">{{ user.username }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3">{{ user.email }}</td>
+                                        <td class="px-4 py-3">
+                                            {% if user.role == 'admin' %}
+                                            <span class="badge bg-warning text-dark">Admin</span>
+                                            {% else %}
+                                            <span class="badge bg-primary">User</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <small>{{ user.created_at.strftime('%B %d, %Y') }}</small>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            {% if user.active %}
+                                            <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary btn-sm" onclick="viewUser({{ user.id }})">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary btn-sm" onclick="editUser({{ user.id }})">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light text-center" style="border-radius: 0 0 15px 15px;">
+                        <button class="btn btn-primary" onclick="viewAllUsers()">
+                            <i class="fas fa-users me-2"></i>View All Users
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Admin panel functionality
+function viewAllUsers() {
+    alert('View All Users functionality will be implemented');
+}
+
+function exportUserData() {
+    alert('Export User Data functionality will be implemented');
+}
+
+function viewPlatformStats() {
+    alert('Platform Statistics functionality will be implemented');
+}
+
+function manageData() {
+    alert('Data Management functionality will be implemented');
+}
+
+function systemLogs() {
+    alert('System Logs functionality will be implemented');
+}
+
+function systemMaintenance() {
+    alert('System Maintenance functionality will be implemented');
+}
+
+function viewUser(userId) {
+    alert('View User ' + userId + ' functionality will be implemented');
+}
+
+function editUser(userId) {
+    alert('Edit User ' + userId + ' functionality will be implemented');
+}
+</script>
+{% endblock %}

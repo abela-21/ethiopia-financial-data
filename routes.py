@@ -216,6 +216,39 @@ def downloads():
         flash('Error loading downloads page', 'error')
         return render_template('downloads.html', stats={}, industries=[])
 
+@main_bp.route('/admin')
+@login_required
+def admin_panel():
+    """Admin panel for platform management"""
+    from models import User
+    
+    # Check admin permissions
+    if not current_user.role == 'admin':
+        flash('Access denied. Admin privileges required.', 'error')
+        return redirect(url_for('main.index'))
+    
+    try:
+        # Get user statistics
+        total_users = User.query.count()
+        active_users = User.query.filter_by(active=True).count()
+        admin_users = User.query.filter_by(role='admin').count()
+        
+        # Get recent users (last 10)
+        recent_users = User.query.order_by(User.created_at.desc()).limit(10).all()
+        
+        admin_stats = {
+            'total_users': total_users,
+            'active_users': active_users,
+            'admin_users': admin_users,
+            'recent_users': recent_users
+        }
+        
+        return render_template('admin/panel.html', admin_stats=admin_stats)
+    except Exception as e:
+        logger.error(f"Error in admin_panel route: {str(e)}")
+        flash('Error loading admin panel', 'error')
+        return redirect(url_for('main.dashboard'))
+
 @main_bp.route('/api/search/companies')
 def search_companies_api():
     """API endpoint for company search"""
