@@ -77,22 +77,22 @@
 {% block content %}
 
     <!-- Hero Section -->
-    <section class="hero-section py-5">
+    <section class="analytics-hero py-5" style="background-color: #FDF6E3;">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-8">
-                    <h1 class="display-4 fw-bold text-white mb-4">
+                    <h1 class="display-4 fw-bold mb-4" style="color: #075056;">
                         Financial Analytics Dashboard
                     </h1>
-                    <p class="lead text-white-50 mb-4">
+                    <p class="lead mb-4" style="color: #233038;">
                         Advanced analytics and visualization for Ethiopian listed companies. Compare performance, 
                         analyze trends, and benchmark against sector averages with interactive charts and insights.
                     </p>
                     <div class="d-flex gap-3">
-                        <button class="btn btn-primary btn-lg" onclick="scrollToSection('comparison')">
+                        <button class="btn btn-lg" style="background-color: #075056; color: white; border: none;" onclick="scrollToSection('comparison')">
                             <i class="bi bi-bar-chart me-2"></i>Company Comparison
                         </button>
-                        <button class="btn btn-outline-light btn-lg" onclick="scrollToSection('trends')">
+                        <button class="btn btn-lg" style="background-color: transparent; color: #075056; border: 2px solid #075056;" onclick="scrollToSection('trends')">
                             <i class="bi bi-graph-up me-2"></i>Trend Analysis
                         </button>
                     </div>
@@ -157,12 +157,12 @@
                         </button>
                     </div>
                     <div class="col-lg-6">
-                        <div class="roa-display">
-                            <div class="roa-value">2.4%
-                                <span class="trend-indicator">↗</span>
+                        <div class="roa-display" style="background: none; border: none; text-align: left;">
+                            <div style="color: white; font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem;">
+                                2.4% <span style="color: white; font-size: 1.5rem; margin-left: 0.5rem;">↗</span>
                             </div>
-                            <div class="roa-label">ROA: 2.4%</div>
-                            <p class="mt-2 mb-0" style="color: #6c757d; font-size: 0.9rem;">Leading return on assets performance</p>
+                            <div style="color: white; font-weight: 500; margin-bottom: 1rem;">ROA: 2.4%</div>
+                            <p class="mt-2 mb-0" style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Leading return on assets performance</p>
                         </div>
                         
                         <div class="mt-4">
