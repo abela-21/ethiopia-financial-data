@@ -14,7 +14,7 @@ def admin_required(f):
     """Decorator to require admin access"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
+        if not current_user.is_authenticated or current_user.role != 'admin':
             flash('Admin access required.', 'error')
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
@@ -623,15 +623,19 @@ def get_indicator_api(indicator_id):
     try:
         indicator = MacroIndicators.query.get_or_404(indicator_id)
         
+        # Extract year and quarter from date
+        year = indicator.date.year if indicator.date else None
+        quarter = ((indicator.date.month - 1) // 3) + 1 if indicator.date else None
+        
         indicator_data = {
             'id': indicator.id,
             'date': indicator.date.strftime('%Y-%m-%d') if indicator.date else '',
-            'year': indicator.year,
-            'quarter': indicator.quarter,
-            'gdp_growth_rate': float(indicator.gdp_growth_rate) if indicator.gdp_growth_rate else None,
+            'year': year,
+            'quarter': quarter,
+            'gdp_growth_rate': float(indicator.gdp_growth) if indicator.gdp_growth else None,
             'inflation_rate': float(indicator.inflation_rate) if indicator.inflation_rate else None,
-            'exchange_rate_usd': float(indicator.exchange_rate_usd) if indicator.exchange_rate_usd else None,
-            'central_bank_rate': float(indicator.central_bank_rate) if indicator.central_bank_rate else None,
+            'exchange_rate_usd': float(indicator.etb_usd) if indicator.etb_usd else None,
+            'central_bank_rate': float(indicator.interest_rate) if indicator.interest_rate else None,
             'unemployment_rate': float(indicator.unemployment_rate) if indicator.unemployment_rate else None
         }
         
@@ -661,24 +665,18 @@ def update_indicator_api(indicator_id):
         if 'date' in data:
             from datetime import datetime
             indicator.date = datetime.strptime(data['date'], '%Y-%m-%d').date()
-        
-        if 'year' in data:
-            indicator.year = data['year']
-            
-        if 'quarter' in data:
-            indicator.quarter = data['quarter']
             
         if 'gdp_growth_rate' in data:
-            indicator.gdp_growth_rate = data['gdp_growth_rate']
+            indicator.gdp_growth = data['gdp_growth_rate']
             
         if 'inflation_rate' in data:
             indicator.inflation_rate = data['inflation_rate']
             
         if 'exchange_rate_usd' in data:
-            indicator.exchange_rate_usd = data['exchange_rate_usd']
+            indicator.etb_usd = data['exchange_rate_usd']
             
         if 'central_bank_rate' in data:
-            indicator.central_bank_rate = data['central_bank_rate']
+            indicator.interest_rate = data['central_bank_rate']
             
         if 'unemployment_rate' in data:
             indicator.unemployment_rate = data['unemployment_rate']
