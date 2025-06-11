@@ -16,10 +16,15 @@ class AnalyticsDashboard {
 
     async init() {
         try {
+            console.log('Starting analytics initialization...');
+            
             await this.loadCompanies();
             await this.loadDashboardStats();
             this.setupEventListeners();
             this.renderCompanySelectors();
+            
+            // Create test charts for all canvas elements
+            this.createTestCharts();
             
             // Auto-select first 3 companies and generate initial analytics
             if (this.companies.length >= 3) {
@@ -34,7 +39,9 @@ class AnalyticsDashboard {
                 });
                 
                 // Generate initial analytics with the selected companies
-                await this.updateAnalytics();
+                setTimeout(() => {
+                    this.updateAnalytics();
+                }, 1000);
             }
             
             console.log('Analytics Dashboard initialized successfully');
@@ -42,6 +49,94 @@ class AnalyticsDashboard {
             console.error('Failed to initialize analytics dashboard:', error);
             this.showError('Failed to load analytics dashboard');
         }
+    }
+
+    createTestCharts() {
+        // Create comparison chart
+        const comparisonCanvas = document.getElementById('comparisonChart');
+        if (comparisonCanvas) {
+            const ctx1 = comparisonCanvas.getContext('2d');
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['CBE', 'Ethiopian Airlines', 'Awash Bank'],
+                    datasets: [{
+                        label: 'Revenue (Millions ETB)',
+                        data: [10847, 6029, 3785],
+                        backgroundColor: ['#075056', '#FF5B04', '#F4D47C'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Revenue Comparison', color: '#075056' }
+                    }
+                }
+            });
+        }
+
+        // Create trend chart
+        const trendCanvas = document.getElementById('trendChart');
+        if (trendCanvas) {
+            const ctx2 = trendCanvas.getContext('2d');
+            new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ['2023-Q1', '2023-Q2', '2023-Q3', '2023-Q4', '2024-Q1'],
+                    datasets: [{
+                        label: 'CBE Revenue Growth',
+                        data: [8500, 9200, 9800, 10847, 11200],
+                        borderColor: '#075056',
+                        backgroundColor: 'rgba(7, 80, 86, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Revenue Trend', color: '#075056' }
+                    }
+                }
+            });
+        }
+
+        // Create radar chart
+        const sectorCanvas = document.getElementById('sectorChart');
+        if (sectorCanvas) {
+            const ctx3 = sectorCanvas.getContext('2d');
+            new Chart(ctx3, {
+                type: 'radar',
+                data: {
+                    labels: ['Revenue', 'Assets', 'ROA', 'ROE', 'Growth'],
+                    datasets: [
+                        {
+                            label: 'CBE',
+                            data: [90, 85, 75, 80, 85],
+                            borderColor: '#075056',
+                            backgroundColor: 'rgba(7, 80, 86, 0.2)'
+                        },
+                        {
+                            label: 'Ethiopian Airlines',
+                            data: [70, 75, 85, 90, 80],
+                            borderColor: '#FF5B04',
+                            backgroundColor: 'rgba(255, 91, 4, 0.2)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Performance Comparison', color: '#075056' }
+                    }
+                }
+            });
+        }
+
+        console.log('All test charts created');
     }
 
     async loadCompanies() {
@@ -635,6 +730,14 @@ function scrollToSection(sectionId) {
 
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing analytics dashboard...');
+    console.log('Chart.js available:', typeof Chart !== 'undefined');
+    
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js library not loaded!');
+        return;
+    }
+    
     window.analyticsManager = new AnalyticsDashboard();
 });
 
