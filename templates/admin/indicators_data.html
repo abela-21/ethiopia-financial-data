@@ -174,13 +174,213 @@
     </div>
 </section>
 
+<!-- View Indicator Modal -->
+<div class="modal fade" id="viewIndicatorModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Economic Indicator Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="viewIndicatorContent">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Indicator Modal -->
+<div class="modal fade" id="editIndicatorModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Economic Indicator</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="editIndicatorContent">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveIndicator()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function viewIndicator(indicatorId) {
-    alert('Economic Indicator Details\n\nViewing detailed information for indicator ID: ' + indicatorId + '\n\nThis feature will show:\n• Complete economic metrics\n• Historical trends\n• Data sources\n• Comparison charts\n\nFeature coming soon!');
+    $('#viewIndicatorModal').modal('show');
+    
+    fetch(`/admin/api/indicator/${indicatorId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const indicator = data.indicator;
+                const content = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">BASIC INFORMATION</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>ID:</strong></td><td>${indicator.id}</td></tr>
+                                <tr><td><strong>Date:</strong></td><td>${indicator.date}</td></tr>
+                                <tr><td><strong>Year:</strong></td><td>${indicator.year}</td></tr>
+                                <tr><td><strong>Quarter:</strong></td><td>Q${indicator.quarter}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">ECONOMIC METRICS</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>GDP Growth:</strong></td><td>${indicator.gdp_growth_rate ? (indicator.gdp_growth_rate * 100).toFixed(1) + '%' : 'N/A'}</td></tr>
+                                <tr><td><strong>Inflation Rate:</strong></td><td>${indicator.inflation_rate ? (indicator.inflation_rate * 100).toFixed(1) + '%' : 'N/A'}</td></tr>
+                                <tr><td><strong>Exchange Rate:</strong></td><td>${indicator.exchange_rate_usd ? indicator.exchange_rate_usd.toFixed(2) + ' ETB' : 'N/A'}</td></tr>
+                                <tr><td><strong>Central Bank Rate:</strong></td><td>${indicator.central_bank_rate ? (indicator.central_bank_rate * 100).toFixed(1) + '%' : 'N/A'}</td></tr>
+                                <tr><td><strong>Unemployment:</strong></td><td>${indicator.unemployment_rate ? (indicator.unemployment_rate * 100).toFixed(1) + '%' : 'N/A'}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('viewIndicatorContent').innerHTML = content;
+            } else {
+                document.getElementById('viewIndicatorContent').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Error loading indicator details: ${data.error}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            document.getElementById('viewIndicatorContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Error loading indicator details
+                </div>
+            `;
+        });
 }
 
 function editIndicator(indicatorId) {
-    alert('Edit Economic Indicator\n\nEditing indicator ID: ' + indicatorId + '\n\nThis feature will allow:\n• Update economic values\n• Modify reporting dates\n• Change data sources\n• Verify accuracy\n\nFeature coming soon!');
+    $('#editIndicatorModal').modal('show');
+    
+    fetch(`/admin/api/indicator/${indicatorId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const indicator = data.indicator;
+                const content = `
+                    <form id="editIndicatorForm">
+                        <input type="hidden" id="indicatorId" value="${indicator.id}">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Date</label>
+                                <input type="date" class="form-control" id="date" value="${indicator.date}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Year</label>
+                                <input type="number" class="form-control" id="year" value="${indicator.year}" min="2000" max="2030" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Quarter</label>
+                                <select class="form-control" id="quarter" required>
+                                    <option value="1" ${indicator.quarter == 1 ? 'selected' : ''}>Q1</option>
+                                    <option value="2" ${indicator.quarter == 2 ? 'selected' : ''}>Q2</option>
+                                    <option value="3" ${indicator.quarter == 3 ? 'selected' : ''}>Q3</option>
+                                    <option value="4" ${indicator.quarter == 4 ? 'selected' : ''}>Q4</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">GDP Growth Rate (%)</label>
+                                <input type="number" class="form-control" id="gdp_growth_rate" value="${indicator.gdp_growth_rate ? (indicator.gdp_growth_rate * 100).toFixed(2) : ''}" step="0.01" placeholder="e.g., 8.5">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Inflation Rate (%)</label>
+                                <input type="number" class="form-control" id="inflation_rate" value="${indicator.inflation_rate ? (indicator.inflation_rate * 100).toFixed(2) : ''}" step="0.01" placeholder="e.g., 15.2">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Exchange Rate (ETB per USD)</label>
+                                <input type="number" class="form-control" id="exchange_rate_usd" value="${indicator.exchange_rate_usd || ''}" step="0.01" placeholder="e.g., 55.50">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Central Bank Rate (%)</label>
+                                <input type="number" class="form-control" id="central_bank_rate" value="${indicator.central_bank_rate ? (indicator.central_bank_rate * 100).toFixed(2) : ''}" step="0.01" placeholder="e.g., 7.0">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Unemployment Rate (%)</label>
+                                <input type="number" class="form-control" id="unemployment_rate" value="${indicator.unemployment_rate ? (indicator.unemployment_rate * 100).toFixed(2) : ''}" step="0.01" placeholder="e.g., 19.1">
+                            </div>
+                        </div>
+                    </form>
+                `;
+                document.getElementById('editIndicatorContent').innerHTML = content;
+            } else {
+                document.getElementById('editIndicatorContent').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Error loading indicator data: ${data.error}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            document.getElementById('editIndicatorContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Error loading indicator data
+                </div>
+            `;
+        });
+}
+
+function saveIndicator() {
+    const form = document.getElementById('editIndicatorForm');
+    if (!form) return;
+    
+    const formData = {
+        id: document.getElementById('indicatorId').value,
+        date: document.getElementById('date').value,
+        year: parseInt(document.getElementById('year').value),
+        quarter: parseInt(document.getElementById('quarter').value),
+        gdp_growth_rate: document.getElementById('gdp_growth_rate').value ? parseFloat(document.getElementById('gdp_growth_rate').value) / 100 : null,
+        inflation_rate: document.getElementById('inflation_rate').value ? parseFloat(document.getElementById('inflation_rate').value) / 100 : null,
+        exchange_rate_usd: document.getElementById('exchange_rate_usd').value ? parseFloat(document.getElementById('exchange_rate_usd').value) : null,
+        central_bank_rate: document.getElementById('central_bank_rate').value ? parseFloat(document.getElementById('central_bank_rate').value) / 100 : null,
+        unemployment_rate: document.getElementById('unemployment_rate').value ? parseFloat(document.getElementById('unemployment_rate').value) / 100 : null
+    };
+    
+    fetch(`/admin/api/indicator/${formData.id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#editIndicatorModal').modal('hide');
+            location.reload(); // Refresh the page to show updated data
+        } else {
+            alert('Error saving indicator: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error saving indicator: ' + error.message);
+    });
 }
 </script>
 {% endblock %}

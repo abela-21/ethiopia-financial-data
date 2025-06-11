@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import login_required, current_user
 from models import Company, Stock, Financial, MacroIndicators, Bank, ResearchDocument, EconomicSector, db
+from functools import wraps
 from sqlalchemy import func, desc
 from datetime import datetime, timedelta
 import logging
@@ -8,6 +9,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 main_bp = Blueprint('main', __name__)
+
+def admin_required(f):
+    """Decorator to require admin access"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            flash('Admin access required.', 'error')
+            return redirect(url_for('auth.login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @main_bp.route('/')
 def index():
@@ -601,5 +612,90 @@ def financial_data():
         logger.error(f"Error in financial_data route: {str(e)}")
         flash('Error loading financial data', 'error')
         return render_template('financial_data.html', financial_stats={})
+
+
+# API endpoints for data management actions
+@main_bp.route('/admin/api/indicator/<int:indicator_id>', methods=['GET'])
+@login_required
+@admin_required
+def get_indicator_api(indicator_id):
+    """API endpoint to get economic indicator details"""
+    try:
+        indicator = MacroIndicators.query.get_or_404(indicator_id)
+        
+        indicator_data = {
+            'id': indicator.id,
+            'date': indicator.date.strftime('%Y-%m-%d') if indicator.date else '',
+            'year': indicator.year,
+            'quarter': indicator.quarter,
+            'gdp_growth_rate': float(indicator.gdp_growth_rate) if indicator.gdp_growth_rate else None,
+            'inflation_rate': float(indicator.inflation_rate) if indicator.inflation_rate else None,
+            'exchange_rate_usd': float(indicator.exchange_rate_usd) if indicator.exchange_rate_usd else None,
+            'central_bank_rate': float(indicator.central_bank_rate) if indicator.central_bank_rate else None,
+            'unemployment_rate': float(indicator.unemployment_rate) if indicator.unemployment_rate else None
+        }
+        
+        return jsonify({
+            'success': True,
+            'indicator': indicator_data
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting indicator {indicator_id}: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@main_bp.route('/admin/api/indicator/<int:indicator_id>', methods=['PUT'])
+@login_required
+@admin_required
+def update_indicator_api(indicator_id):
+    """API endpoint to update economic indicator"""
+    try:
+        indicator = MacroIndicators.query.get_or_404(indicator_id)
+        data = request.get_json()
+        
+        # Update fields
+        if 'date' in data:
+            from datetime import datetime
+            indicator.date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+        
+        if 'year' in data:
+            indicator.year = data['year']
+            
+        if 'quarter' in data:
+            indicator.quarter = data['quarter']
+            
+        if 'gdp_growth_rate' in data:
+            indicator.gdp_growth_rate = data['gdp_growth_rate']
+            
+        if 'inflation_rate' in data:
+            indicator.inflation_rate = data['inflation_rate']
+            
+        if 'exchange_rate_usd' in data:
+            indicator.exchange_rate_usd = data['exchange_rate_usd']
+            
+        if 'central_bank_rate' in data:
+            indicator.central_bank_rate = data['central_bank_rate']
+            
+        if 'unemployment_rate' in data:
+            indicator.unemployment_rate = data['unemployment_rate']
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Economic indicator updated successfully'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error updating indicator {indicator_id}: {str(e)}")
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 

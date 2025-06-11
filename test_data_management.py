@@ -1,57 +1,221 @@
 #!/usr/bin/env python3
 """
-Test script to verify admin data management functionality
+Test economic indicators review and edit functionality
 """
 
-from app import create_app
-from models import User, Company, Financial, Bank, ResearchDocument, MacroIndicators
-import logging
+import requests
+import json
+from urllib.parse import urljoin
 
-def test_data_management():
-    """Test data management functionality"""
-    app = create_app()
+BASE_URL = "http://localhost:5000"
+ADMIN_EMAIL = "admin@ethiopia-economic.com"
+ADMIN_PASSWORD = "EthiopiaAdmin2024!"
+
+def login_admin():
+    """Login as admin and return session"""
+    session = requests.Session()
     
-    with app.app_context():
-        print("📊 ADMIN DATA MANAGEMENT - LIVE DATA STATISTICS:")
-        print("=" * 60)
+    # Get login page first
+    login_page = session.get(urljoin(BASE_URL, "/auth/login"))
+    if login_page.status_code != 200:
+        print(f"❌ Failed to access login page: {login_page.status_code}")
+        return None
+    
+    # Login
+    login_data = {
+        'email': ADMIN_EMAIL,
+        'password': ADMIN_PASSWORD
+    }
+    
+    login_response = session.post(
+        urljoin(BASE_URL, "/auth/login"),
+        data=login_data,
+        allow_redirects=False
+    )
+    
+    if login_response.status_code in [302, 303]:
+        print("✅ Admin login successful")
+        return session
+    else:
+        print(f"❌ Admin login failed: {login_response.status_code}")
+        return None
+
+def test_indicator_api_endpoints():
+    """Test the indicator API endpoints for view and edit"""
+    
+    print("🧪 TESTING ECONOMIC INDICATORS REVIEW & EDIT FUNCTIONALITY")
+    print("=" * 70)
+    
+    # Login as admin
+    session = login_admin()
+    if not session:
+        return False
+    
+    print()
+    
+    # Step 1: Access the economic indicators page
+    print("📊 Step 1: Accessing economic indicators data page...")
+    indicators_page = session.get(urljoin(BASE_URL, "/admin/data/economic-indicators"))
+    
+    if indicators_page.status_code == 200:
+        print("✅ Economic indicators page loaded successfully")
         
-        # Get actual data counts
-        companies_count = Company.query.count()
-        financial_count = Financial.query.count()
-        banks_count = Bank.query.count()
-        research_count = ResearchDocument.query.count()
-        indicators_count = MacroIndicators.query.count()
-        users_count = User.query.count()
+        # Check if page contains the expected elements
+        if 'viewIndicator(' in indicators_page.text and 'editIndicator(' in indicators_page.text:
+            print("✅ Review and edit buttons are present in the table")
+        else:
+            print("❌ Review and edit buttons missing from table")
+            return False
+    else:
+        print(f"❌ Failed to load indicators page: {indicators_page.status_code}")
+        return False
+    
+    print()
+    
+    # Step 2: Test getting first indicator via API
+    print("🔍 Step 2: Testing indicator details API (Review functionality)...")
+    
+    # Try to get indicator with ID 1
+    api_response = session.get(urljoin(BASE_URL, "/admin/api/indicator/1"))
+    
+    if api_response.status_code == 200:
+        try:
+            api_data = api_response.json()
+            if api_data.get('success'):
+                indicator = api_data['indicator']
+                print("✅ Indicator API working - Retrieved indicator details:")
+                print(f"   - ID: {indicator['id']}")
+                print(f"   - Date: {indicator['date']}")
+                print(f"   - Year: {indicator['year']}")
+                print(f"   - Quarter: Q{indicator['quarter']}")
+                print(f"   - GDP Growth: {indicator['gdp_growth_rate']}")
+                print(f"   - Inflation: {indicator['inflation_rate']}")
+                
+                # Step 3: Test updating the indicator
+                print()
+                print("✏️ Step 3: Testing indicator update API (Edit functionality)...")
+                
+                # Prepare update data (small change to test)
+                update_data = {
+                    'id': indicator['id'],
+                    'date': indicator['date'],
+                    'year': indicator['year'],
+                    'quarter': indicator['quarter'],
+                    'gdp_growth_rate': indicator['gdp_growth_rate'],
+                    'inflation_rate': indicator['inflation_rate'],
+                    'exchange_rate_usd': indicator['exchange_rate_usd'],
+                    'central_bank_rate': indicator['central_bank_rate'],
+                    'unemployment_rate': indicator['unemployment_rate']
+                }
+                
+                # Test the update endpoint
+                update_response = session.put(
+                    urljoin(BASE_URL, f"/admin/api/indicator/{indicator['id']}"),
+                    json=update_data,
+                    headers={'Content-Type': 'application/json'}
+                )
+                
+                if update_response.status_code == 200:
+                    try:
+                        update_result = update_response.json()
+                        if update_result.get('success'):
+                            print("✅ Indicator update API working - Changes saved successfully")
+                            return True
+                        else:
+                            print(f"❌ Update failed: {update_result.get('error', 'Unknown error')}")
+                            return False
+                    except:
+                        print("❌ Update response not valid JSON")
+                        return False
+                else:
+                    print(f"❌ Update API failed: {update_response.status_code}")
+                    print(f"   Response: {update_response.text[:200]}")
+                    return False
+                
+            else:
+                print(f"❌ API returned error: {api_data.get('error', 'Unknown error')}")
+                return False
+        except:
+            print("❌ API response not valid JSON")
+            return False
+    else:
+        print(f"❌ Indicator API failed: {api_response.status_code}")
+        return False
+
+def test_modal_functionality():
+    """Test that the modal HTML elements are properly structured"""
+    
+    print()
+    print("🎭 TESTING MODAL FUNCTIONALITY")
+    print("=" * 70)
+    
+    session = login_admin()
+    if not session:
+        return False
+    
+    # Get the indicators page
+    indicators_page = session.get(urljoin(BASE_URL, "/admin/data/economic-indicators"))
+    
+    if indicators_page.status_code == 200:
+        page_content = indicators_page.text
         
-        print(f"   Companies: {companies_count}")
-        print(f"   Financial Records: {financial_count}")
-        print(f"   Banks: {banks_count}")
-        print(f"   Research Documents: {research_count}")
-        print(f"   Economic Indicators: {indicators_count}")
-        print(f"   Users: {users_count}")
+        # Check for modal elements
+        modal_checks = [
+            ('viewIndicatorModal', 'View modal container'),
+            ('editIndicatorModal', 'Edit modal container'),
+            ('viewIndicatorContent', 'View modal content area'),
+            ('editIndicatorContent', 'Edit modal content area'),
+            ('editIndicatorForm', 'Edit form template'),
+            ('saveIndicator()', 'Save function')
+        ]
+        
+        print("🔍 Checking modal elements:")
+        all_present = True
+        
+        for element, description in modal_checks:
+            if element in page_content:
+                print(f"✅ {description} - Found")
+            else:
+                print(f"❌ {description} - Missing")
+                all_present = False
+        
+        return all_present
+    else:
+        print(f"❌ Could not load page to check modals: {indicators_page.status_code}")
+        return False
+
+def run_complete_test():
+    """Run complete test suite"""
+    
+    print("🚀 RUNNING COMPLETE ECONOMIC INDICATORS TEST SUITE")
+    print("=" * 70)
+    
+    # Test API endpoints
+    api_test = test_indicator_api_endpoints()
+    
+    # Test modal functionality  
+    modal_test = test_modal_functionality()
+    
+    print()
+    print("📋 FINAL TEST RESULTS:")
+    print("=" * 70)
+    
+    if api_test and modal_test:
+        print("🎉 ALL TESTS PASSED!")
+        print("✅ Review functionality: Working")
+        print("✅ Edit functionality: Working") 
+        print("✅ Modal interfaces: Working")
+        print("✅ API endpoints: Working")
         print()
-        
-        # Sample recent data
-        print("🏢 RECENT COMPANIES (Top 5):")
-        recent_companies = Company.query.order_by(Company.id.desc()).limit(5).all()
-        for i, company in enumerate(recent_companies, 1):
-            print(f"   {i}. {company.name} ({company.ticker}) - {company.industry}")
-        print()
-        
-        print("📈 RECENT FINANCIAL DATA (Top 5):")
-        recent_financial = Financial.query.order_by(Financial.year.desc()).limit(5).all()
-        for i, financial in enumerate(recent_financial, 1):
-            company_name = financial.company.name if financial.company else 'Unknown Company'
-            revenue_str = f"${financial.revenue:,.0f}" if financial.revenue else 'N/A'
-            print(f"   {i}. {company_name} ({financial.year}) - Revenue: {revenue_str}")
-        print()
-        
-        print("📚 RECENT RESEARCH (Top 5):")
-        recent_research = ResearchDocument.query.order_by(ResearchDocument.publication_date.desc()).limit(5).all()
-        for i, research in enumerate(recent_research, 1):
-            date_str = research.publication_date.strftime('%B %Y') if research.publication_date else 'N/A'
-            title_short = research.title[:50] + '...' if len(research.title) > 50 else research.title
-            print(f"   {i}. {title_short} ({date_str})")
+        print("The economic indicators review and edit features are fully functional.")
+        return True
+    else:
+        print("❌ SOME TESTS FAILED:")
+        if not api_test:
+            print("   - API endpoints need attention")
+        if not modal_test:
+            print("   - Modal interfaces need attention")
+        return False
 
 if __name__ == '__main__':
-    test_data_management()
+    run_complete_test()
