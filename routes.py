@@ -253,7 +253,7 @@ def admin_panel():
 @login_required
 def admin_manage_data():
     """Admin data management interface"""
-    from models import User, Company, FinancialData, Bank, EthiopianBank, ResearchDocument, EconomicIndicator
+    from models import User, Company, Financial, Bank, ResearchDocument, MacroIndicators
     
     # Check admin permissions
     if not current_user.role == 'admin':
@@ -264,16 +264,16 @@ def admin_manage_data():
         # Get data statistics
         data_stats = {
             'companies': Company.query.count(),
-            'financial_records': FinancialData.query.count(),
-            'banks': EthiopianBank.query.count(),
+            'financial_records': Financial.query.count(),
+            'banks': Bank.query.count(),
             'research_docs': ResearchDocument.query.count(),
-            'economic_indicators': EconomicIndicator.query.count(),
+            'economic_indicators': MacroIndicators.query.count(),
             'users': User.query.count()
         }
         
         # Get recent activity
         recent_companies = Company.query.order_by(Company.id.desc()).limit(5).all()
-        recent_financial = FinancialData.query.order_by(FinancialData.year.desc()).limit(5).all()
+        recent_financial = Financial.query.order_by(Financial.year.desc()).limit(5).all()
         recent_research = ResearchDocument.query.order_by(ResearchDocument.publication_date.desc()).limit(5).all()
         
         return render_template('admin/manage_data.html', 
@@ -320,7 +320,7 @@ def admin_view_financial():
         page = request.args.get('page', 1, type=int)
         per_page = 20
         
-        financial_data = FinancialData.query.join(Company).paginate(
+        financial_data = Financial.query.join(Company).paginate(
             page=page, per_page=per_page, error_out=False
         )
         
