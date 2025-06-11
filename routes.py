@@ -346,14 +346,15 @@ def analytics():
         
         # Calculate average ROA from latest financial data
         latest_year = db.session.query(func.max(Financial.year)).scalar()
-        avg_roa = db.session.query(
-            func.avg(
-                func.case(
-                    (Financial.total_assets > 0, Financial.net_income / Financial.total_assets * 100),
-                    else_=0
-                )
-            )
-        ).filter(Financial.year == latest_year).scalar()
+        
+        # Get companies with financial data for ROA calculation
+        roa_query = db.session.query(
+            func.avg(Financial.net_income / Financial.total_assets * 100)
+        ).filter(
+            Financial.year == latest_year,
+            Financial.total_assets > 0
+        )
+        avg_roa = roa_query.scalar()
         
         avg_roa = round(float(avg_roa or 2.4), 1)
         
