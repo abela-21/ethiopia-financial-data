@@ -3,8 +3,8 @@
 {% block title %}Economic Research & Publications - Ethiopian Banking Intelligence{% endblock %}
 
 {% block content %}
-<!-- Research Hero Section -->
-<section class="research-hero py-5 bg-success text-white">
+<!-- Enhanced Research Hero Section -->
+<section class="research-hero">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
@@ -14,16 +14,27 @@
                     government agencies, and international organizations covering banking sector analysis, 
                     economic outlooks, and financial sector developments.
                 </p>
+                <div class="d-flex gap-3">
+                    <button class="btn btn-light btn-lg" onclick="scrollToDocuments()">
+                        <i class="fas fa-file-alt me-2"></i>Browse Research
+                    </button>
+                </div>
             </div>
             <div class="col-lg-4 text-center">
-                <div class="research-stats">
-                    <div class="stat-item mb-3">
-                        <h3 class="display-6 fw-bold" id="total-docs">50+</h3>
-                        <p class="mb-0">Research Documents</p>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="metric-card primary">
+                            <i class="fas fa-file-alt metric-icon"></i>
+                            <div class="metric-value" id="total-docs">50+</div>
+                            <div class="metric-label">Research Documents</div>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <h3 class="display-6 fw-bold" id="total-downloads">15K+</h3>
-                        <p class="mb-0">Total Downloads</p>
+                    <div class="col-6">
+                        <div class="metric-card success">
+                            <i class="fas fa-download metric-icon"></i>
+                            <div class="metric-value" id="total-downloads">15K+</div>
+                            <div class="metric-label">Total Downloads</div>
+                        </div>
                     </div>
                 </div>
             </div>
