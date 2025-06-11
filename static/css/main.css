@@ -43,7 +43,7 @@ body {
     font-family: var(--font-primary);
     line-height: 1.6;
     color: var(--text-dark);
-    background-color: var(--background-light);
+    background-color: var(--background-light) !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -148,13 +148,14 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Enhanced Error Alert Styling */
 .alert-danger {
-    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-    border: 1px solid #f5c6cb;
+    background: linear-gradient(135deg, var(--ivory-cream) 0%, var(--light-silver) 100%);
+    border: 1px solid var(--orange-pantone);
     border-radius: 12px;
-    color: #721c24;
+    color: var(--text-dark);
     padding: 1rem 1.5rem;
     font-weight: 500;
     box-shadow: var(--shadow-light);
+    border-left: 4px solid var(--orange-pantone);
 }
 
 .alert-danger .btn-close {
