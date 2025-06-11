@@ -18,6 +18,13 @@
             position: relative;
             height: 400px;
             margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .chart-container canvas {
+            background: transparent !important;
+            border-radius: 5px;
         }
         .metric-selector {
             background: linear-gradient(135deg, #075056 0%, #233038 100%);
@@ -213,10 +220,10 @@
             
             <div class="row">
                 <div class="col-lg-8">
-                    <div class="analytics-card p-4">
-                        <h5 class="fw-bold mb-4">Financial Metrics Comparison</h5>
-                        <div class="chart-container">
-                            <canvas id="comparisonChart"></canvas>
+                    <div class="analytics-card p-4" style="background: white;">
+                        <h5 class="fw-bold mb-4" style="color: #075056;">Financial Metrics Comparison</h5>
+                        <div class="chart-container" style="background: white; min-height: 400px;">
+                            <canvas id="comparisonChart" style="background: white !important;"></canvas>
                         </div>
                     </div>
                 </div>
@@ -244,10 +251,10 @@
             
             <div class="row">
                 <div class="col-lg-6 mb-4">
-                    <div class="analytics-card p-4">
-                        <h5 class="fw-bold mb-3">Revenue Trends</h5>
-                        <div class="chart-container" style="height: 300px;">
-                            <canvas id="trendChart"></canvas>
+                    <div class="analytics-card p-4" style="background: white;">
+                        <h5 class="fw-bold mb-3" style="color: #075056;">Revenue Trends</h5>
+                        <div class="chart-container" style="height: 300px; background: white;">
+                            <canvas id="trendChart" style="background: white !important;"></canvas>
                         </div>
                     </div>
                 </div>
@@ -291,10 +298,10 @@
             
             <div class="row">
                 <div class="col-lg-8">
-                    <div class="analytics-card p-4">
-                        <h5 class="fw-bold mb-4">Company Comparison Radar</h5>
-                        <div class="chart-container" style="height: 400px;">
-                            <canvas id="sectorChart"></canvas>
+                    <div class="analytics-card p-4" style="background: white;">
+                        <h5 class="fw-bold mb-4" style="color: #075056;">Company Comparison Radar</h5>
+                        <div class="chart-container" style="height: 400px; background: white;">
+                            <canvas id="sectorChart" style="background: white !important;"></canvas>
                         </div>
                     </div>
                 </div>

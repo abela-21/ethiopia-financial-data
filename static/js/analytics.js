@@ -319,7 +319,12 @@ class AnalyticsDashboard {
 
     renderMetricsChart(metricsData) {
         const canvas = document.getElementById('comparisonChart');
-        if (!canvas) return;
+        if (!canvas) {
+            console.error('Canvas element comparisonChart not found');
+            return;
+        }
+
+        console.log('Rendering metrics chart with data:', metricsData);
 
         // Destroy existing chart
         if (this.charts.comparison) {
@@ -327,6 +332,10 @@ class AnalyticsDashboard {
         }
 
         const ctx = canvas.getContext('2d');
+        
+        // Set canvas background to white
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         // Prepare data for chart
         const companies = Object.keys(metricsData);
@@ -358,10 +367,12 @@ class AnalyticsDashboard {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                backgroundColor: 'white',
                 plugins: {
                     title: {
                         display: true,
                         text: 'Financial Metrics Comparison (Millions ETB)',
+                        color: '#075056',
                         font: {
                             size: 16,
                             weight: 'bold'
@@ -369,7 +380,10 @@ class AnalyticsDashboard {
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: '#075056'
+                        }
                     }
                 },
                 scales: {
@@ -377,23 +391,37 @@ class AnalyticsDashboard {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Amount (Millions ETB)'
+                            text: 'Amount (Millions ETB)',
+                            color: '#075056'
                         },
                         ticks: {
+                            color: '#075056',
                             callback: function(value) {
                                 return value.toLocaleString() + 'M';
                             }
+                        },
+                        grid: {
+                            color: 'rgba(7, 80, 86, 0.1)'
                         }
                     },
                     x: {
                         title: {
                             display: true,
-                            text: 'Companies'
+                            text: 'Companies',
+                            color: '#075056'
+                        },
+                        ticks: {
+                            color: '#075056'
+                        },
+                        grid: {
+                            color: 'rgba(7, 80, 86, 0.1)'
                         }
                     }
                 }
             }
         });
+        
+        console.log('Chart created successfully:', this.charts.comparison);
     }
 
     renderComparisonChart(comparisonData) {
