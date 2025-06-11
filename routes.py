@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from flask_login import login_required, current_user
 from models import Company, Stock, Financial, MacroIndicators, Bank, ResearchDocument, EconomicSector, db
 from sqlalchemy import func, desc
 from datetime import datetime, timedelta
@@ -243,6 +244,7 @@ def search_companies_api():
         return jsonify([])
 
 @main_bp.route('/dashboard')
+@login_required
 def dashboard():
     """User personalized dashboard"""
     # Create a mock user context for testing
@@ -255,6 +257,7 @@ def dashboard():
     return render_template('dashboard.html', current_user=g.current_user)
 
 @main_bp.route('/search')
+@login_required
 def search():
     """Advanced search and filtering interface"""
     return render_template('search.html')
@@ -307,6 +310,7 @@ def research():
         return render_template('research.html', research_stats={})
 
 @main_bp.route('/financial-data')
+@login_required
 def financial_data():
     """Financial data downloads page for Ethiopian listed companies"""
     try:
