@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request, send_file, make_response
+from flask_login import login_required, current_user
 from models import db, Company, Stock, Financial, Bank, BankFinancialMetric, EconomicSector, ResearchDocument
 from datetime import datetime, timedelta
 import pandas as pd
@@ -57,6 +58,7 @@ def get_export_formats():
     return jsonify(formats)
 
 @export_bp.route('/companies', methods=['POST'])
+@login_required
 def export_companies():
     """Export company data with advanced filtering and formatting"""
     try:
@@ -99,6 +101,7 @@ def export_companies():
         return jsonify({'error': 'Export failed'}), 500
 
 @export_bp.route('/financial-data', methods=['POST'])
+@login_required
 def export_financial_data():
     """Export financial data with comprehensive analysis"""
     try:

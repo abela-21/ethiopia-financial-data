@@ -181,6 +181,7 @@ def macro():
         return render_template('macro.html', latest_indicators=[], historical_data=[])
 
 @main_bp.route('/downloads')
+@login_required
 def downloads():
     """Downloads page"""
     try:

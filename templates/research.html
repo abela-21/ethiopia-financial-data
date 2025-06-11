@@ -18,6 +18,11 @@
                     <button class="btn btn-light btn-lg" onclick="scrollToDocuments()">
                         <i class="fas fa-file-alt me-2"></i>Browse Research
                     </button>
+                    {% if not session.user_id %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-download me-2"></i>Login for Downloads
+                    </a>
+                    {% endif %}
                 </div>
             </div>
             <div class="col-lg-4 text-center">

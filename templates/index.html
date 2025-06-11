@@ -8,16 +8,36 @@
     <div class="container">
         <div class="row align-items-center min-vh-75">
             <div class="col-lg-6">
+                {% if session.user_id %}
+                <h1 class="display-4 fw-bold text-primary mb-4">
+                    Welcome back, {{ session.first_name }}!
+                </h1>
+                <p class="lead mb-4">
+                    Access your personalized dashboard, export financial data, and download research documents. 
+                    Your account provides full access to Ethiopia's premier economic data platform.
+                </p>
+                <div class="d-flex gap-3 mb-4">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-tachometer-alt me-2"></i>My Dashboard
+                    </a>
+                    <a href="{{ url_for('main.financial_data') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-chart-bar me-2"></i>Financial Data
+                    </a>
+                    <a href="{{ url_for('main.downloads') }}" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-download me-2"></i>My Downloads
+                    </a>
+                </div>
+                {% else %}
                 <h1 class="display-4 fw-bold text-primary mb-4">
                     Ethiopia's Economic Data Intelligence Platform
                 </h1>
                 <p class="lead mb-4">
                     Comprehensive banking sector analysis, economic research, and financial intelligence for Ethiopia. 
-                    Empowering researchers, consultants, analysts, and portfolio managers with authentic data insights.
+                    Sign up to access financial data exports, research downloads, and personalized analytics.
                 </p>
                 <div class="d-flex gap-3 mb-4">
-                    <a href="{{ url_for('main.financial_data') }}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-chart-bar me-2"></i>Financial Data
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Get Started Free
                     </a>
                     <a href="/banking" class="btn btn-outline-primary btn-lg">
                         <i class="fas fa-university me-2"></i>Banking Sector
@@ -26,6 +46,12 @@
                         <i class="fas fa-chart-line me-2"></i>Economic Overview
                     </a>
                 </div>
+                <div class="alert alert-info bg-transparent border-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Free Access:</strong> Browse research titles and banking data. 
+                    <a href="{{ url_for('auth.login') }}" class="alert-link">Login</a> for downloads and full financial data access.
+                </div>
+                {% endif %}
             </div>
             <div class="col-lg-6">
                 <div class="position-relative">
