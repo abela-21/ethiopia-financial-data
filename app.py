@@ -81,11 +81,9 @@ def create_app():
     # Register blueprints
     from routes import main_bp
     from api import api_bp
-    from api.analytics_api import analytics_api
     
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
-    app.register_blueprint(analytics_api)
     
     # Error handlers
     from utils.errors import register_error_handlers
