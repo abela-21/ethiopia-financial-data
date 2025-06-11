@@ -78,12 +78,27 @@ def create_app():
                        UserAlert, UserPreference, SavedSearch,
                        ExternalDataSource, DataIntegration, RealTimeQuote, CurrencyRate, DataExportLog)
     
+    # Initialize Flask-Login
+    from flask_login import LoginManager
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Please log in to access this page.'
+    login_manager.login_message_category = 'info'
+    
+    @login_manager.user_loader
+    def load_user(user_id):
+        from models import User
+        return User.query.get(int(user_id))
+    
     # Register blueprints
     from routes import main_bp
     from api import api_bp
+    from auth_routes import auth_bp
     
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(auth_bp, url_prefix='/auth')
     
     # Error handlers
     from utils.errors import register_error_handlers
