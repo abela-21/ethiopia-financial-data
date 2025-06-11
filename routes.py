@@ -249,6 +249,112 @@ def admin_panel():
         flash('Error loading admin panel', 'error')
         return redirect(url_for('main.dashboard'))
 
+@main_bp.route('/admin/manage-data')
+@login_required
+def admin_manage_data():
+    """Admin data management interface"""
+    from models import User, Company, FinancialData, Bank, EthiopianBank, ResearchDocument, EconomicIndicator
+    
+    # Check admin permissions
+    if not current_user.role == 'admin':
+        flash('Access denied. Admin privileges required.', 'error')
+        return redirect(url_for('main.index'))
+    
+    try:
+        # Get data statistics
+        data_stats = {
+            'companies': Company.query.count(),
+            'financial_records': FinancialData.query.count(),
+            'banks': EthiopianBank.query.count(),
+            'research_docs': ResearchDocument.query.count(),
+            'economic_indicators': EconomicIndicator.query.count(),
+            'users': User.query.count()
+        }
+        
+        # Get recent activity
+        recent_companies = Company.query.order_by(Company.id.desc()).limit(5).all()
+        recent_financial = FinancialData.query.order_by(FinancialData.year.desc()).limit(5).all()
+        recent_research = ResearchDocument.query.order_by(ResearchDocument.publication_date.desc()).limit(5).all()
+        
+        return render_template('admin/manage_data.html', 
+                             data_stats=data_stats,
+                             recent_companies=recent_companies,
+                             recent_financial=recent_financial,
+                             recent_research=recent_research)
+    except Exception as e:
+        logger.error(f"Error in admin_manage_data route: {str(e)}")
+        flash('Error loading data management panel', 'error')
+        return redirect(url_for('main.admin_panel'))
+
+@main_bp.route('/admin/data/companies')
+@login_required
+def admin_view_companies():
+    """View and manage companies data"""
+    if not current_user.role == 'admin':
+        flash('Access denied. Admin privileges required.', 'error')
+        return redirect(url_for('main.index'))
+    
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        
+        companies = Company.query.paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        return render_template('admin/companies_data.html', companies=companies)
+    except Exception as e:
+        logger.error(f"Error in admin_view_companies: {str(e)}")
+        flash('Error loading companies data', 'error')
+        return redirect(url_for('main.admin_manage_data'))
+
+@main_bp.route('/admin/data/financial')
+@login_required
+def admin_view_financial():
+    """View and manage financial data"""
+    if not current_user.role == 'admin':
+        flash('Access denied. Admin privileges required.', 'error')
+        return redirect(url_for('main.index'))
+    
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        
+        financial_data = FinancialData.query.join(Company).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        return render_template('admin/financial_data.html', financial_data=financial_data)
+    except Exception as e:
+        logger.error(f"Error in admin_view_financial: {str(e)}")
+        flash('Error loading financial data', 'error')
+        return redirect(url_for('main.admin_manage_data'))
+
+@main_bp.route('/admin/data/refresh', methods=['POST'])
+@login_required
+def admin_refresh_data():
+    """Refresh platform data from migration scripts"""
+    if not current_user.role == 'admin':
+        return jsonify({'error': 'Access denied'}), 403
+    
+    try:
+        # Import and run data migration
+        from data_migration import EthiopianDataMigration
+        
+        migration = EthiopianDataMigration()
+        migration.run_full_migration()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Data refresh completed successfully'
+        })
+    except Exception as e:
+        logger.error(f"Error in admin_refresh_data: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Data refresh failed: {str(e)}'
+        }), 500
+
 @main_bp.route('/api/search/companies')
 def search_companies_api():
     """API endpoint for company search"""

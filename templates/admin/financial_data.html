@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Financial Data - Ethiopia Economic Intelligence{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #FDF6E3 0%, #F4D47C 100%); min-height: 100vh;">
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h1 class="display-5 fw-bold" style="color: #075056;">
+                            <i class="fas fa-chart-line me-3"></i>Financial Data
+                        </h1>
+                        <p class="lead text-muted">View and manage financial records and metrics</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('main.admin_manage_data') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Data Management
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Summary -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <h3 class="fw-bold" style="color: #075056;">{{ financial_data.total }}</h3>
+                        <p class="text-muted mb-0">Total Records</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <h3 class="fw-bold text-success">{{ financial_data.pages }}</h3>
+                        <p class="text-muted mb-0">Total Pages</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <h3 class="fw-bold text-info">{{ financial_data.page }}</h3>
+                        <p class="text-muted mb-0">Current Page</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <h3 class="fw-bold text-warning">{{ financial_data.per_page }}</h3>
+                        <p class="text-muted mb-0">Per Page</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Data Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold mb-0" style="color: #075056;">Financial Records</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if financial_data.items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Company</th>
+                                        <th>Year</th>
+                                        <th>Revenue</th>
+                                        <th>Net Income</th>
+                                        <th>Total Assets</th>
+                                        <th>ROE</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in financial_data.items %}
+                                    <tr>
+                                        <td><span class="badge bg-secondary">{{ record.id }}</span></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="icon-circle me-3" style="width: 35px; height: 35px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-chart-line fa-sm text-white"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold">{{ record.company.name if record.company else 'N/A' }}</h6>
+                                                    <small class="text-muted">{{ record.company.ticker if record.company and record.company.ticker else 'No ticker' }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-primary">{{ record.year }}</span></td>
+                                        <td>
+                                            {% if record.revenue %}
+                                                <span class="fw-bold text-success">${{ "{:,.0f}".format(record.revenue) }}</span>
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if record.net_income %}
+                                                {% if record.net_income >= 0 %}
+                                                    <span class="fw-bold text-success">${{ "{:,.0f}".format(record.net_income) }}</span>
+                                                {% else %}
+                                                    <span class="fw-bold text-danger">${{ "{:,.0f}".format(record.net_income) }}</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if record.total_assets %}
+                                                ${{ "{:,.0f}".format(record.total_assets) }}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if record.roe %}
+                                                {% if record.roe >= 0.15 %}
+                                                    <span class="badge bg-success">{{ "{:.1%}".format(record.roe) }}</span>
+                                                {% elif record.roe >= 0.10 %}
+                                                    <span class="badge bg-warning">{{ "{:.1%}".format(record.roe) }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">{{ "{:.1%}".format(record.roe) }}</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" onclick="viewFinancialRecord({{ record.id }})">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary" onclick="editFinancialRecord({{ record.id }})">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if financial_data.pages > 1 %}
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if financial_data.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.admin_view_financial', page=financial_data.prev_num) }}">Previous</a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for page_num in financial_data.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                                    {% if page_num %}
+                                        {% if page_num != financial_data.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('main.admin_view_financial', page=page_num) }}">{{ page_num }}</a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                        {% endif %}
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">…</span>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if financial_data.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.admin_view_financial', page=financial_data.next_num) }}">Next</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No financial data found</h5>
+                            <p class="text-muted">There are no financial records in the database.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function viewFinancialRecord(recordId) {
+    alert('Financial Record Details\n\nViewing detailed financial information for record ID: ' + recordId + '\n\nThis feature will show:\n• Complete financial statements\n• Financial ratios analysis\n• Year-over-year comparisons\n• Performance metrics\n\nFeature coming soon!');
+}
+
+function editFinancialRecord(recordId) {
+    alert('Edit Financial Record\n\nEditing financial record ID: ' + recordId + '\n\nThis feature will allow:\n• Update financial figures\n• Modify calculated ratios\n• Adjust reporting periods\n• Verify data accuracy\n\nFeature coming soon!');
+}
+</script>
+{% endblock %}

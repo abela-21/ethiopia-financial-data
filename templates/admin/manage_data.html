@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Data Management - Ethiopia Economic Intelligence{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #FDF6E3 0%, #F4D47C 100%); min-height: 100vh;">
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h1 class="display-5 fw-bold" style="color: #075056;">
+                            <i class="fas fa-database me-3"></i>Data Management
+                        </h1>
+                        <p class="lead text-muted">Manage platform data, statistics, and content</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('main.admin_panel') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Admin Panel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Statistics -->
+        <div class="row mb-5">
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <div class="icon-circle mx-auto mb-3" style="width: 50px; height: 50px; background: #075056; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-building fa-sm text-white"></i>
+                        </div>
+                        <h4 class="fw-bold" style="color: #075056;">{{ data_stats.companies }}</h4>
+                        <p class="text-muted mb-0 small">Companies</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <div class="icon-circle mx-auto mb-3" style="width: 50px; height: 50px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-chart-line fa-sm text-white"></i>
+                        </div>
+                        <h4 class="fw-bold text-success">{{ data_stats.financial_records }}</h4>
+                        <p class="text-muted mb-0 small">Financial Records</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <div class="icon-circle mx-auto mb-3" style="width: 50px; height: 50px; background: #FF5B04; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-university fa-sm text-white"></i>
+                        </div>
+                        <h4 class="fw-bold" style="color: #FF5B04;">{{ data_stats.banks }}</h4>
+                        <p class="text-muted mb-0 small">Banks</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <div class="icon-circle mx-auto mb-3" style="width: 50px; height: 50px; background: #6f42c1; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-file-alt fa-sm text-white"></i>
+                        </div>
+                        <h4 class="fw-bold" style="color: #6f42c1;">{{ data_stats.research_docs }}</h4>
+                        <p class="text-muted mb-0 small">Research Docs</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <div class="icon-circle mx-auto mb-3" style="width: 50px; height: 50px; background: #dc3545; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-chart-bar fa-sm text-white"></i>
+                        </div>
+                        <h4 class="fw-bold text-danger">{{ data_stats.economic_indicators }}</h4>
+                        <p class="text-muted mb-0 small">Economic Indicators</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <div class="icon-circle mx-auto mb-3" style="width: 50px; height: 50px; background: #17a2b8; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-users fa-sm text-white"></i>
+                        </div>
+                        <h4 class="fw-bold text-info">{{ data_stats.users }}</h4>
+                        <p class="text-muted mb-0 small">Users</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Actions -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h3 class="fw-bold mb-4" style="color: #075056;">Data Management Actions</h3>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <i class="fas fa-building fa-2x mb-3" style="color: #075056;"></i>
+                        <h5 class="fw-bold">Companies Data</h5>
+                        <p class="text-muted">View and manage company listings, profiles, and information</p>
+                        <a href="{{ url_for('main.admin_view_companies') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-eye me-2"></i>View Companies
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-2x mb-3" style="color: #28a745;"></i>
+                        <h5 class="fw-bold">Financial Data</h5>
+                        <p class="text-muted">Manage financial records, metrics, and historical data</p>
+                        <a href="{{ url_for('main.admin_view_financial') }}" class="btn btn-outline-success">
+                            <i class="fas fa-chart-bar me-2"></i>View Financial Data
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <i class="fas fa-sync-alt fa-2x mb-3" style="color: #FF5B04;"></i>
+                        <h5 class="fw-bold">Refresh Data</h5>
+                        <p class="text-muted">Run data migration to update platform with latest information</p>
+                        <button class="btn btn-outline-warning" onclick="refreshPlatformData()">
+                            <i class="fas fa-refresh me-2"></i>Refresh All Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-body text-center">
+                        <i class="fas fa-download fa-2x mb-3" style="color: #6f42c1;"></i>
+                        <h5 class="fw-bold">Export Data</h5>
+                        <p class="text-muted">Export platform data for backup or analysis purposes</p>
+                        <button class="btn btn-outline-secondary" onclick="exportPlatformData()">
+                            <i class="fas fa-download me-2"></i>Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <h5 class="fw-bold" style="color: #075056;">
+                            <i class="fas fa-building me-2"></i>Recent Companies
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_companies %}
+                            {% for company in recent_companies %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <div class="icon-circle" style="width: 40px; height: 40px; background: #075056; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-building fa-sm text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0 fw-bold">{{ company.name }}</h6>
+                                    <small class="text-muted">{{ company.ticker }} - {{ company.industry }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No companies found</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <h5 class="fw-bold" style="color: #28a745;">
+                            <i class="fas fa-chart-line me-2"></i>Recent Financial Data
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_financial %}
+                            {% for financial in recent_financial %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <div class="icon-circle" style="width: 40px; height: 40px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-chart-line fa-sm text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0 fw-bold">{{ financial.company.name if financial.company else 'N/A' }}</h6>
+                                    <small class="text-muted">{{ financial.year }} - Revenue: {{ "${:,.0f}".format(financial.revenue) if financial.revenue else 'N/A' }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No financial data found</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <h5 class="fw-bold" style="color: #6f42c1;">
+                            <i class="fas fa-file-alt me-2"></i>Recent Research
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_research %}
+                            {% for research in recent_research %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <div class="icon-circle" style="width: 40px; height: 40px; background: #6f42c1; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-file-alt fa-sm text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0 fw-bold">{{ research.title[:30] }}...</h6>
+                                    <small class="text-muted">{{ research.publication_date.strftime('%B %Y') if research.publication_date else 'N/A' }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No research documents found</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 id="loadingText">Processing...</h5>
+                <p class="text-muted mb-0">Please wait while we process your request</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function refreshPlatformData() {
+    // Show loading modal
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    document.getElementById('loadingText').textContent = 'Refreshing Platform Data...';
+    loadingModal.show();
+    
+    fetch('{{ url_for("main.admin_refresh_data") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingModal.hide();
+        if (data.success) {
+            alert('✅ Data refresh completed successfully!\n\nPlatform data has been updated with the latest information.');
+            location.reload();
+        } else {
+            alert('❌ Data refresh failed: ' + data.error);
+        }
+    })
+    .catch(error => {
+        loadingModal.hide();
+        alert('❌ Error refreshing data: ' + error.message);
+    });
+}
+
+function exportPlatformData() {
+    alert('📊 Data Export Feature\n\nThis will export platform data in multiple formats:\n\n• Company listings (CSV/Excel)\n• Financial data (CSV/Excel)\n• Research documents metadata\n• User statistics\n\nFeature coming soon!');
+}
+</script>
+{% endblock %}
