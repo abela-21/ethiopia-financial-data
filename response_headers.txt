@@ -1,0 +1,20 @@
+HTTP/1.1 302 FOUND
+Server: gunicorn
+Date: Wed, 11 Jun 2025 11:46:36 GMT
+Connection: close
+Content-Type: text/html; charset=utf-8
+Content-Length: 207
+Location: /dashboard
+Access-Control-Allow-Origin: *
+Vary: Cookie
+Set-Cookie: session=.eJw9kMtOxDAMRX-lZF1Q0qSPdAUfgVigUWU7jhpNH6hpV6P5dwyFWcX3-sS5zk0NcYI8clb9500VuxwqH0ScsyrVB0-0zlwg0LUs3sKclid1uV9KubZxHlW_bweLSkH1ijpvLbeOOTS-ihpBG2JskboQDKCuAtYtQm2105WOwChMhw7q0ESwgaOtHfiAGox3LTqMbBvybWNq7a02ljpdC0nSbbQJAsSqokjGekMSeDgyb2caI5JnSJPU8JP8lfcxrV8JnpnWZZ0TvchyQsW05X1YYGZBf5cUU37l4b3LULG2deL_YSIfT5mz_oPP9v0bcbZr7w.aElsnA.qGYt-HIHhvhskJ45w72w5dsP5F0; HttpOnly; Path=/
+
+HTTP/1.1 405 METHOD NOT ALLOWED
+Server: gunicorn
+Date: Wed, 11 Jun 2025 11:46:36 GMT
+Connection: close
+Content-Type: text/html; charset=utf-8
+Allow: OPTIONS, GET, HEAD
+Content-Length: 153
+Access-Control-Allow-Origin: *
+
