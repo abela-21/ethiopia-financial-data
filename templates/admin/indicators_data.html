@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Economic Indicators - Ethiopia Economic Intelligence{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #FDF6E3 0%, #F4D47C 100%); min-height: 100vh;">
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h1 class="display-5 fw-bold" style="color: #075056;">
+                            <i class="fas fa-chart-bar me-3"></i>Economic Indicators
+                        </h1>
+                        <p class="lead text-muted">Ethiopian macroeconomic indicators and metrics</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('main.admin_manage_data') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Data Management
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Economic Indicators Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold mb-0" style="color: #075056;">Economic Indicators ({{ indicators.total }} total)</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if indicators.items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>GDP Growth</th>
+                                        <th>Inflation Rate</th>
+                                        <th>Exchange Rate (USD)</th>
+                                        <th>Interest Rate</th>
+                                        <th>Unemployment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for indicator in indicators.items %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="icon-circle me-3" style="width: 35px; height: 35px; background: #dc3545; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-chart-bar fa-sm text-white"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold">{{ indicator.date.strftime('%B %Y') if indicator.date else 'N/A' }}</h6>
+                                                    <small class="text-muted">{{ indicator.date.strftime('%Y-%m-%d') if indicator.date else 'No date' }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if indicator.gdp_growth_rate %}
+                                                {% if indicator.gdp_growth_rate >= 0.05 %}
+                                                    <span class="badge bg-success">{{ "{:.1%}".format(indicator.gdp_growth_rate) }}</span>
+                                                {% elif indicator.gdp_growth_rate >= 0 %}
+                                                    <span class="badge bg-warning">{{ "{:.1%}".format(indicator.gdp_growth_rate) }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">{{ "{:.1%}".format(indicator.gdp_growth_rate) }}</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if indicator.inflation_rate %}
+                                                {% if indicator.inflation_rate <= 0.05 %}
+                                                    <span class="badge bg-success">{{ "{:.1%}".format(indicator.inflation_rate) }}</span>
+                                                {% elif indicator.inflation_rate <= 0.10 %}
+                                                    <span class="badge bg-warning">{{ "{:.1%}".format(indicator.inflation_rate) }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">{{ "{:.1%}".format(indicator.inflation_rate) }}</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if indicator.exchange_rate_usd %}
+                                                {{ "{:.2f}".format(indicator.exchange_rate_usd) }} ETB
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if indicator.central_bank_rate %}
+                                                {{ "{:.1%}".format(indicator.central_bank_rate) }}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if indicator.unemployment_rate %}
+                                                {{ "{:.1%}".format(indicator.unemployment_rate) }}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" onclick="viewIndicator({{ indicator.id }})">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary" onclick="editIndicator({{ indicator.id }})">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if indicators.pages > 1 %}
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if indicators.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.admin_view_economic_indicators', page=indicators.prev_num) }}">Previous</a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for page_num in indicators.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                                    {% if page_num %}
+                                        {% if page_num != indicators.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('main.admin_view_economic_indicators', page=page_num) }}">{{ page_num }}</a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                        {% endif %}
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">…</span>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if indicators.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.admin_view_economic_indicators', page=indicators.next_num) }}">Next</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No economic indicators found</h5>
+                            <p class="text-muted">No economic indicators are currently in the database.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function viewIndicator(indicatorId) {
+    alert('Economic Indicator Details\n\nViewing detailed information for indicator ID: ' + indicatorId + '\n\nThis feature will show:\n• Complete economic metrics\n• Historical trends\n• Data sources\n• Comparison charts\n\nFeature coming soon!');
+}
+
+function editIndicator(indicatorId) {
+    alert('Edit Economic Indicator\n\nEditing indicator ID: ' + indicatorId + '\n\nThis feature will allow:\n• Update economic values\n• Modify reporting dates\n• Change data sources\n• Verify accuracy\n\nFeature coming soon!');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Listed Companies - Ethiopia Economic Intelligence{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #FDF6E3 0%, #F4D47C 100%); min-height: 100vh;">
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h1 class="display-5 fw-bold" style="color: #075056;">
+                            <i class="fas fa-list me-3"></i>Listed Companies
+                        </h1>
+                        <p class="lead text-muted">Ethiopian Stock Exchange listed companies</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('main.admin_manage_data') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Data Management
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Listed Companies Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold mb-0" style="color: #075056;">ESX Listed Companies ({{ listed_companies.total }} total)</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if listed_companies.items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Company Name</th>
+                                        <th>Ticker Symbol</th>
+                                        <th>Sector</th>
+                                        <th>Market Cap</th>
+                                        <th>Listing Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for company in listed_companies.items %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="icon-circle me-3" style="width: 35px; height: 35px; background: #20c997; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-list fa-sm text-white"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold">{{ company.name }}</h6>
+                                                    <small class="text-muted">{{ company.headquarters or 'Addis Ababa' }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-primary">{{ company.ticker_symbol }}</span></td>
+                                        <td>{{ company.sector }}</td>
+                                        <td>
+                                            {% if company.market_cap %}
+                                                ETB {{ "{:,.0f}".format(company.market_cap) }}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ company.listing_date.strftime('%B %d, %Y') if company.listing_date else 'N/A' }}</td>
+                                        <td>
+                                            {% if company.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" onclick="viewListedCompany({{ company.id }})">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary" onclick="editListedCompany({{ company.id }})">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if listed_companies.pages > 1 %}
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if listed_companies.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.admin_view_listed_companies', page=listed_companies.prev_num) }}">Previous</a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for page_num in listed_companies.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                                    {% if page_num %}
+                                        {% if page_num != listed_companies.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('main.admin_view_listed_companies', page=page_num) }}">{{ page_num }}</a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                        {% endif %}
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">…</span>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if listed_companies.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.admin_view_listed_companies', page=listed_companies.next_num) }}">Next</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-list fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No listed companies found</h5>
+                            <p class="text-muted">No companies are currently listed on the Ethiopian Stock Exchange.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function viewListedCompany(companyId) {
+    alert('Listed Company Details\n\nViewing detailed information for company ID: ' + companyId + '\n\nThis feature will show:\n• Stock performance\n• Financial statements\n• Trading history\n• Market metrics\n\nFeature coming soon!');
+}
+
+function editListedCompany(companyId) {
+    alert('Edit Listed Company\n\nEditing company ID: ' + companyId + '\n\nThis feature will allow:\n• Update listing information\n• Modify market data\n• Change trading status\n• Update corporate details\n\nFeature coming soon!');
+}
+</script>
+{% endblock %}

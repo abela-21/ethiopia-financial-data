@@ -433,6 +433,8 @@ def admin_view_economic_indicators():
 @login_required
 def admin_view_listed_companies():
     """View and manage listed companies"""
+    from models import ListedCompany
+    
     if not current_user.role == 'admin':
         flash('Access denied. Admin privileges required.', 'error')
         return redirect(url_for('main.index'))
@@ -455,6 +457,8 @@ def admin_view_listed_companies():
 @login_required
 def admin_view_users():
     """View and manage users"""
+    from models import User
+    
     if not current_user.role == 'admin':
         flash('Access denied. Admin privileges required.', 'error')
         return redirect(url_for('main.index'))
