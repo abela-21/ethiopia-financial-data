@@ -377,8 +377,8 @@ def analytics():
             }) for sp in sector_performance])
         }
         
-        return render_template('analytics.html', analytics_stats=analytics_stats)
+        return render_template('analytics_new.html', analytics_stats=analytics_stats)
     except Exception as e:
         logger.error(f"Error in analytics route: {str(e)}")
         flash('Error loading analytics dashboard', 'error')
-        return render_template('analytics.html', analytics_stats={})
+        return render_template('analytics_new.html', analytics_stats={})
