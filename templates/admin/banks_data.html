@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Banks Data - Ethiopia Economic Intelligence{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background: linear-gradient(135deg, #FDF6E3 0%, #F4D47C 100%); min-height: 100vh;">
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h1 class="display-5 fw-bold" style="color: #075056;">
+                            <i class="fas fa-university me-3"></i>Banks Data
+                        </h1>
+                        <p class="lead text-muted">Ethiopian banking sector institutions and profiles</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('main.admin_manage_data') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Data Management
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banks Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold mb-0" style="color: #075056;">Ethiopian Banks ({{ banks.total }} total)</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if banks.items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Bank Name</th>
+                                        <th>License Number</th>
+                                        <th>Type</th>
+                                        <th>Ownership</th>
+                                        <th>Branches</th>
+                                        <th>Established</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for bank in banks.items %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="icon-circle me-3" style="width: 35px; height: 35px; background: #FF5B04; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-university fa-sm text-white"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold">{{ bank.name }}</h6>
+                                                    <small class="text-muted">{{ bank.headquarters_location or 'Addis Ababa' }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-primary">{{ bank.license_number or 'N/A' }}</span></td>
+                                        <td>{{ bank.bank_type or 'Commercial' }}</td>
+                                        <td>
+                                            {% if bank.ownership_type == 'State' %}
+                                                <span class="badge bg-success">{{ bank.ownership_type }}</span>
+                                            {% elif bank.ownership_type == 'Private' %}
+                                                <span class="badge bg-info">{{ bank.ownership_type }}</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">{{ bank.ownership_type or 'Mixed' }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ bank.branch_count or 'N/A' }}</td>
+                                        <td>{{ bank.establishment_date.strftime('%Y') if bank.establishment_date else 'N/A' }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" onclick="viewBank({{ bank.id }})">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary" onclick="editBank({{ bank.id }})">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if banks.pages > 1 %}
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if banks.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.admin_view_banks', page=banks.prev_num) }}">Previous</a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for page_num in banks.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                                    {% if page_num %}
+                                        {% if page_num != banks.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('main.admin_view_banks', page=page_num) }}">{{ page_num }}</a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                        {% endif %}
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">…</span>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if banks.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.admin_view_banks', page=banks.next_num) }}">Next</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-university fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No banks found</h5>
+                            <p class="text-muted">No banking institutions are currently in the database.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function viewBank(bankId) {
+    alert('Bank Details\n\nViewing detailed information for bank ID: ' + bankId + '\n\nThis feature will show:\n• Complete bank profile\n• Financial metrics\n• Branch network\n• Performance indicators\n\nFeature coming soon!');
+}
+
+function editBank(bankId) {
+    alert('Edit Bank\n\nEditing bank ID: ' + bankId + '\n\nThis feature will allow:\n• Update bank information\n• Modify contact details\n• Change operational status\n• Update branch count\n\nFeature coming soon!');
+}
+</script>
+{% endblock %}

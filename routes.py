@@ -253,7 +253,9 @@ def admin_panel():
 @login_required
 def admin_manage_data():
     """Admin data management interface"""
-    from models import User, Company, Financial, Bank, ResearchDocument, MacroIndicators
+    from models import (User, Company, Financial, Bank, ResearchDocument, MacroIndicators, 
+                       ListedCompany, CompanyFinancialMetric, FinancialStatement, 
+                       BankFinancialMetric, EconomicDataSource, DocumentCategory)
     
     # Check admin permissions
     if not current_user.role == 'admin':
@@ -261,14 +263,20 @@ def admin_manage_data():
         return redirect(url_for('main.index'))
     
     try:
-        # Get data statistics
+        # Get comprehensive data statistics
         data_stats = {
             'companies': Company.query.count(),
             'financial_records': Financial.query.count(),
             'banks': Bank.query.count(),
             'research_docs': ResearchDocument.query.count(),
             'economic_indicators': MacroIndicators.query.count(),
-            'users': User.query.count()
+            'users': User.query.count(),
+            'listed_companies': ListedCompany.query.count(),
+            'company_metrics': CompanyFinancialMetric.query.count(),
+            'financial_statements': FinancialStatement.query.count(),
+            'bank_metrics': BankFinancialMetric.query.count(),
+            'data_sources': EconomicDataSource.query.count(),
+            'document_categories': DocumentCategory.query.count()
         }
         
         # Get recent activity
@@ -354,6 +362,116 @@ def admin_refresh_data():
             'success': False,
             'error': f'Data refresh failed: {str(e)}'
         }), 500
+
+@main_bp.route('/admin/data/banks')
+@login_required
+def admin_view_banks():
+    """View and manage banks data"""
+    if not current_user.role == 'admin':
+        flash('Access denied. Admin privileges required.', 'error')
+        return redirect(url_for('main.index'))
+    
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        
+        banks = Bank.query.paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        return render_template('admin/banks_data.html', banks=banks)
+    except Exception as e:
+        logger.error(f"Error in admin_view_banks: {str(e)}")
+        flash('Error loading banks data', 'error')
+        return redirect(url_for('main.admin_manage_data'))
+
+@main_bp.route('/admin/data/research')
+@login_required
+def admin_view_research():
+    """View and manage research documents"""
+    if not current_user.role == 'admin':
+        flash('Access denied. Admin privileges required.', 'error')
+        return redirect(url_for('main.index'))
+    
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        
+        research = ResearchDocument.query.paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        return render_template('admin/research_data.html', research=research)
+    except Exception as e:
+        logger.error(f"Error in admin_view_research: {str(e)}")
+        flash('Error loading research data', 'error')
+        return redirect(url_for('main.admin_manage_data'))
+
+@main_bp.route('/admin/data/economic-indicators')
+@login_required
+def admin_view_economic_indicators():
+    """View and manage economic indicators"""
+    if not current_user.role == 'admin':
+        flash('Access denied. Admin privileges required.', 'error')
+        return redirect(url_for('main.index'))
+    
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        
+        indicators = MacroIndicators.query.paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        return render_template('admin/indicators_data.html', indicators=indicators)
+    except Exception as e:
+        logger.error(f"Error in admin_view_economic_indicators: {str(e)}")
+        flash('Error loading economic indicators', 'error')
+        return redirect(url_for('main.admin_manage_data'))
+
+@main_bp.route('/admin/data/listed-companies')
+@login_required
+def admin_view_listed_companies():
+    """View and manage listed companies"""
+    if not current_user.role == 'admin':
+        flash('Access denied. Admin privileges required.', 'error')
+        return redirect(url_for('main.index'))
+    
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        
+        listed_companies = ListedCompany.query.paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        return render_template('admin/listed_companies_data.html', listed_companies=listed_companies)
+    except Exception as e:
+        logger.error(f"Error in admin_view_listed_companies: {str(e)}")
+        flash('Error loading listed companies', 'error')
+        return redirect(url_for('main.admin_manage_data'))
+
+@main_bp.route('/admin/data/users')
+@login_required
+def admin_view_users():
+    """View and manage users"""
+    if not current_user.role == 'admin':
+        flash('Access denied. Admin privileges required.', 'error')
+        return redirect(url_for('main.index'))
+    
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        
+        users = User.query.paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        return render_template('admin/users_data.html', users=users)
+    except Exception as e:
+        logger.error(f"Error in admin_view_users: {str(e)}")
+        flash('Error loading users data', 'error')
+        return redirect(url_for('main.admin_manage_data'))
 
 @main_bp.route('/api/search/companies')
 def search_companies_api():
