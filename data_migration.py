@@ -762,19 +762,16 @@ class EthiopianDataMigration:
                         """)).scalar()
                     
                     # Create macro indicator record
-                    macro_indicator = MacroIndicators(
-                        date=datetime.now().date(),
-                        gdp_growth=float(gdp_growth) if gdp_growth else None,
-                        inflation_rate=float(inflation) if inflation else None,
-                        unemployment_rate=float(unemployment) if unemployment else None,
-                        exports=float(exports) if exports else None,
-                        imports=float(imports) if imports else None,
-                        trade_balance=float(exports - imports) if exports and imports else None,
-                        fdi_inflow=float(fdi) if fdi else None,
-                        etb_usd=float(exchange_rate) if exchange_rate else None,
-                        created_at=datetime.now(),
-                        updated_at=datetime.now()
-                    )
+                    macro_indicator = MacroIndicators()
+                    macro_indicator.date = datetime.now().date()
+                    macro_indicator.gdp_growth = float(gdp_growth) if gdp_growth else None
+                    macro_indicator.inflation_rate = float(inflation) if inflation else None
+                    macro_indicator.unemployment_rate = float(unemployment) if unemployment else None
+                    macro_indicator.exports = float(exports) if exports else None
+                    macro_indicator.imports = float(imports) if imports else None
+                    macro_indicator.trade_balance = float(exports - imports) if exports and imports else None
+                    macro_indicator.fdi_inflow = float(fdi) if fdi else None
+                    macro_indicator.etb_usd = float(exchange_rate) if exchange_rate else None
                     
                     db.session.add(macro_indicator)
                     db.session.commit()
