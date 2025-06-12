@@ -186,9 +186,14 @@
                         <i class="fas fa-building fa-2x mb-3" style="color: #075056;"></i>
                         <h5 class="fw-bold">Companies Data</h5>
                         <p class="text-muted">View and manage company listings, profiles, and information</p>
-                        <a href="{{ url_for('main.admin_view_companies') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-eye me-2"></i>View Companies
-                        </a>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('main.admin_view_companies') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-eye me-2"></i>View Companies
+                            </a>
+                            <button class="btn btn-primary" onclick="showAddCompanyModal()">
+                                <i class="fas fa-plus me-2"></i>Add New Company
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -199,9 +204,14 @@
                         <i class="fas fa-chart-line fa-2x mb-3" style="color: #28a745;"></i>
                         <h5 class="fw-bold">Financial Data</h5>
                         <p class="text-muted">Manage financial records, metrics, and historical data</p>
-                        <a href="{{ url_for('main.admin_view_financial') }}" class="btn btn-outline-success">
-                            <i class="fas fa-chart-bar me-2"></i>View Financial Data
-                        </a>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('main.admin_view_financial') }}" class="btn btn-outline-success">
+                                <i class="fas fa-chart-bar me-2"></i>View Financial Data
+                            </a>
+                            <button class="btn btn-success" onclick="showAddFinancialModal()">
+                                <i class="fas fa-plus me-2"></i>Add New Statement
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -212,9 +222,14 @@
                         <i class="fas fa-university fa-2x mb-3" style="color: #FF5B04;"></i>
                         <h5 class="fw-bold">Banks Data</h5>
                         <p class="text-muted">Manage Ethiopian banking sector data and profiles</p>
-                        <a href="{{ url_for('main.admin_view_banks') }}" class="btn btn-outline-warning">
-                            <i class="fas fa-university me-2"></i>View Banks
-                        </a>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('main.admin_view_banks') }}" class="btn btn-outline-warning">
+                                <i class="fas fa-university me-2"></i>View Banks
+                            </a>
+                            <button class="btn btn-warning" onclick="showAddBankModal()">
+                                <i class="fas fa-plus me-2"></i>Add New Bank
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -225,9 +240,14 @@
                         <i class="fas fa-file-alt fa-2x mb-3" style="color: #6f42c1;"></i>
                         <h5 class="fw-bold">Research Documents</h5>
                         <p class="text-muted">Manage research papers and economic reports</p>
-                        <a href="{{ url_for('main.admin_view_research') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-file-alt me-2"></i>View Research
-                        </a>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('main.admin_view_research') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-file-alt me-2"></i>View Research
+                            </a>
+                            <button class="btn btn-secondary" onclick="showAddResearchModal()">
+                                <i class="fas fa-plus me-2"></i>Add New Document
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -238,9 +258,14 @@
                         <i class="fas fa-chart-bar fa-2x mb-3" style="color: #dc3545;"></i>
                         <h5 class="fw-bold">Economic Indicators</h5>
                         <p class="text-muted">Manage macroeconomic indicators and metrics</p>
-                        <a href="{{ url_for('main.admin_view_economic_indicators') }}" class="btn btn-outline-danger">
-                            <i class="fas fa-chart-bar me-2"></i>View Indicators
-                        </a>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('main.admin_view_economic_indicators') }}" class="btn btn-outline-danger">
+                                <i class="fas fa-chart-bar me-2"></i>View Indicators
+                            </a>
+                            <button class="btn btn-danger" onclick="showAddEconomicIndicatorModal()">
+                                <i class="fas fa-plus me-2"></i>Add New Indicator
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -251,9 +276,14 @@
                         <i class="fas fa-list fa-2x mb-3" style="color: #20c997;"></i>
                         <h5 class="fw-bold">Listed Companies</h5>
                         <p class="text-muted">Manage Ethiopian Stock Exchange listed companies</p>
-                        <a href="{{ url_for('main.admin_view_listed_companies') }}" class="btn btn-outline-info">
-                            <i class="fas fa-list me-2"></i>View Listed Companies
-                        </a>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('main.admin_view_listed_companies') }}" class="btn btn-outline-info">
+                                <i class="fas fa-list me-2"></i>View Listed Companies
+                            </a>
+                            <button class="btn btn-info" onclick="showAddListedCompanyModal()">
+                                <i class="fas fa-plus me-2"></i>Add New Listed Company
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -264,9 +294,14 @@
                         <i class="fas fa-users fa-2x mb-3" style="color: #17a2b8;"></i>
                         <h5 class="fw-bold">Users Management</h5>
                         <p class="text-muted">Manage user accounts and access permissions</p>
-                        <a href="{{ url_for('main.admin_view_users') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-users me-2"></i>View Users
-                        </a>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('main.admin_view_users') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-users me-2"></i>View Users
+                            </a>
+                            <button class="btn btn-primary" onclick="showAddUserModal()">
+                                <i class="fas fa-plus me-2"></i>Add New User
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -387,6 +422,473 @@
                 </div>
                 <h5 id="loadingText">Processing...</h5>
                 <p class="text-muted mb-0">Please wait while we process your request</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Company Modal -->
+<div class="modal fade" id="addCompanyModal" tabindex="-1" aria-labelledby="addCompanyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #075056 0%, #233038 100%); color: white;">
+                <h5 class="modal-title" id="addCompanyModalLabel">
+                    <i class="fas fa-building me-2"></i>Add New Company
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCompanyForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Company Name</label>
+                            <input type="text" class="form-control" id="companyName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ticker Symbol</label>
+                            <input type="text" class="form-control" id="tickerSymbol" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Sector</label>
+                            <select class="form-control" id="sector" required>
+                                <option value="">Select Sector</option>
+                                <option value="Banking">Banking</option>
+                                <option value="Insurance">Insurance</option>
+                                <option value="Manufacturing">Manufacturing</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Agriculture">Agriculture</option>
+                                <option value="Technology">Technology</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Industry</label>
+                            <input type="text" class="form-control" id="industry" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Market Cap (ETB)</label>
+                            <input type="number" class="form-control" id="marketCap" step="0.01">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Shares Outstanding</label>
+                            <input type="number" class="form-control" id="sharesOutstanding">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="companyDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveNewCompany()">
+                    <i class="fas fa-save me-2"></i>Save Company
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Financial Statement Modal -->
+<div class="modal fade" id="addFinancialModal" tabindex="-1" aria-labelledby="addFinancialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                <h5 class="modal-title" id="addFinancialModalLabel">
+                    <i class="fas fa-chart-line me-2"></i>Add New Financial Statement
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addFinancialForm">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Company</label>
+                            <select class="form-control" id="financialCompanyId" required>
+                                <option value="">Select Company</option>
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Statement Type</label>
+                            <select class="form-control" id="statementType" required>
+                                <option value="income_statement">Income Statement</option>
+                                <option value="balance_sheet">Balance Sheet</option>
+                                <option value="cash_flow">Cash Flow</option>
+                                <option value="banking_metrics">Banking Metrics</option>
+                                <option value="financial_metrics">Financial Metrics</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Reporting Period</label>
+                            <input type="text" class="form-control" id="reportingPeriod" placeholder="e.g., Q1-2024" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Fiscal Year</label>
+                            <input type="number" class="form-control" id="fiscalYear" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Period Start Date</label>
+                            <input type="date" class="form-control" id="periodStartDate" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Period End Date</label>
+                            <input type="date" class="form-control" id="periodEndDate" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Income Statement Fields -->
+                    <div id="incomeStatementFields" class="financial-fields">
+                        <h6 class="text-success mb-3">Income Statement Data</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Revenue (ETB)</label>
+                                <input type="number" class="form-control" id="revenue" step="0.01">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Net Income (ETB)</label>
+                                <input type="number" class="form-control" id="netIncome" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Balance Sheet Fields -->
+                    <div id="balanceSheetFields" class="financial-fields" style="display: none;">
+                        <h6 class="text-primary mb-3">Balance Sheet Data</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Total Assets (ETB)</label>
+                                <input type="number" class="form-control" id="totalAssets" step="0.01">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Total Liabilities (ETB)</label>
+                                <input type="number" class="form-control" id="totalLiabilities" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="saveNewFinancialStatement()">
+                    <i class="fas fa-save me-2"></i>Save Statement
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Economic Indicator Modal -->
+<div class="modal fade" id="addEconomicIndicatorModal" tabindex="-1" aria-labelledby="addEconomicIndicatorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white;">
+                <h5 class="modal-title" id="addEconomicIndicatorModalLabel">
+                    <i class="fas fa-chart-bar me-2"></i>Add New Economic Indicator
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addEconomicIndicatorForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control" id="indicatorDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Category</label>
+                            <select class="form-control" id="indicatorCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Key Indicators">Key Indicators</option>
+                                <option value="GDP & Growth">GDP & Growth</option>
+                                <option value="Trade & FX">Trade & FX</option>
+                                <option value="Banking">Banking</option>
+                                <option value="Government">Government</option>
+                                <option value="Commodities">Commodities</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Key Economic Indicators -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">GDP (Billion ETB)</label>
+                            <input type="number" class="form-control" id="gdp" step="0.01">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Inflation Rate (%)</label>
+                            <input type="number" class="form-control" id="inflationRate" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Exchange Rate (ETB/USD)</label>
+                            <input type="number" class="form-control" id="exchangeRate" step="0.01">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Population (Millions)</label>
+                            <input type="number" class="form-control" id="population" step="0.01">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="saveNewEconomicIndicator()">
+                    <i class="fas fa-save me-2"></i>Save Indicator
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Bank Modal -->
+<div class="modal fade" id="addBankModal" tabindex="-1" aria-labelledby="addBankModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #FF5B04 0%, #fd7e14 100%); color: white;">
+                <h5 class="modal-title" id="addBankModalLabel">
+                    <i class="fas fa-university me-2"></i>Add New Bank
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addBankForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Bank Name</label>
+                            <input type="text" class="form-control" id="bankName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bank Type</label>
+                            <select class="form-control" id="bankType" required>
+                                <option value="">Select Type</option>
+                                <option value="Commercial Bank">Commercial Bank</option>
+                                <option value="Development Bank">Development Bank</option>
+                                <option value="Microfinance">Microfinance Institution</option>
+                                <option value="Islamic Bank">Islamic Bank</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Headquarters</label>
+                            <input type="text" class="form-control" id="headquarters" value="Addis Ababa">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Established Year</label>
+                            <input type="number" class="form-control" id="establishedYear" min="1900" max="2024">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="bankDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" onclick="saveNewBank()">
+                    <i class="fas fa-save me-2"></i>Save Bank
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Research Document Modal -->
+<div class="modal fade" id="addResearchModal" tabindex="-1" aria-labelledby="addResearchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #6f42c1 0%, #563d7c 100%); color: white;">
+                <h5 class="modal-title" id="addResearchModalLabel">
+                    <i class="fas fa-file-alt me-2"></i>Add New Research Document
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addResearchForm">
+                    <div class="mb-3">
+                        <label class="form-label">Document Title</label>
+                        <input type="text" class="form-control" id="researchTitle" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Author/Organization</label>
+                            <input type="text" class="form-control" id="researchAuthor" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Publication Date</label>
+                            <input type="date" class="form-control" id="publicationDate" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Category</label>
+                            <select class="form-control" id="researchCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Banking Research">Banking Research</option>
+                                <option value="Economic Analysis">Economic Analysis</option>
+                                <option value="Market Report">Market Report</option>
+                                <option value="Policy Brief">Policy Brief</option>
+                                <option value="Sector Study">Sector Study</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Document Type</label>
+                            <select class="form-control" id="documentType" required>
+                                <option value="">Select Type</option>
+                                <option value="Research Paper">Research Paper</option>
+                                <option value="White Paper">White Paper</option>
+                                <option value="Annual Report">Annual Report</option>
+                                <option value="Quarterly Report">Quarterly Report</option>
+                                <option value="Market Analysis">Market Analysis</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Summary/Abstract</label>
+                        <textarea class="form-control" id="researchSummary" rows="4"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Document URL/Link</label>
+                        <input type="url" class="form-control" id="documentUrl">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" onclick="saveNewResearch()">
+                    <i class="fas fa-save me-2"></i>Save Document
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Listed Company Modal -->
+<div class="modal fade" id="addListedCompanyModal" tabindex="-1" aria-labelledby="addListedCompanyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%); color: white;">
+                <h5 class="modal-title" id="addListedCompanyModalLabel">
+                    <i class="fas fa-list me-2"></i>Add New Listed Company
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addListedCompanyForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Company Name</label>
+                            <input type="text" class="form-control" id="listedCompanyName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ticker Symbol</label>
+                            <input type="text" class="form-control" id="listedTickerSymbol" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Sector</label>
+                            <input type="text" class="form-control" id="listedSector" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Industry</label>
+                            <input type="text" class="form-control" id="listedIndustry" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Listing Date</label>
+                            <input type="date" class="form-control" id="listingDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Market Cap (ETB)</label>
+                            <input type="number" class="form-control" id="listedMarketCap" step="0.01">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="listedDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-info" onclick="saveNewListedCompany()">
+                    <i class="fas fa-save me-2"></i>Save Listed Company
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;">
+                <h5 class="modal-title" id="addUserModalLabel">
+                    <i class="fas fa-users me-2"></i>Add New User
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="userEmail" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" id="userPassword" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">User Role</label>
+                            <select class="form-control" id="userRole" required>
+                                <option value="">Select Role</option>
+                                <option value="user">Regular User</option>
+                                <option value="admin">Administrator</option>
+                                <option value="analyst">Data Analyst</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Organization</label>
+                        <input type="text" class="form-control" id="userOrganization">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveNewUser()">
+                    <i class="fas fa-save me-2"></i>Save User
+                </button>
             </div>
         </div>
     </div>
