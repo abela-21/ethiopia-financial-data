@@ -88,22 +88,22 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if indicator.exchange_rate_usd %}
-                                                {{ "{:.2f}".format(indicator.exchange_rate_usd) }} ETB
+                                            {% if indicator.etb_usd %}
+                                                {{ "{:.2f}".format(indicator.etb_usd) }} ETB
                                             {% else %}
                                                 <span class="text-muted">N/A</span>
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if indicator.central_bank_rate %}
-                                                {{ "{:.1%}".format(indicator.central_bank_rate) }}
+                                            {% if indicator.interest_rate %}
+                                                {{ "{:.1f}%".format(indicator.interest_rate) }}
                                             {% else %}
                                                 <span class="text-muted">N/A</span>
                                             {% endif %}
                                         </td>
                                         <td>
                                             {% if indicator.unemployment_rate %}
-                                                {{ "{:.1%}".format(indicator.unemployment_rate) }}
+                                                {{ "{:.1f}%".format(indicator.unemployment_rate) }}
                                             {% else %}
                                                 <span class="text-muted">N/A</span>
                                             {% endif %}
@@ -235,18 +235,16 @@ function viewIndicator(indicatorId) {
                             <table class="table table-sm">
                                 <tr><td><strong>ID:</strong></td><td>${indicator.id}</td></tr>
                                 <tr><td><strong>Date:</strong></td><td>${indicator.date}</td></tr>
-                                <tr><td><strong>Year:</strong></td><td>${indicator.year}</td></tr>
-                                <tr><td><strong>Quarter:</strong></td><td>Q${indicator.quarter}</td></tr>
                             </table>
                         </div>
                         <div class="col-md-6">
                             <h6 class="text-muted mb-2">ECONOMIC METRICS</h6>
                             <table class="table table-sm">
-                                <tr><td><strong>GDP Growth:</strong></td><td>${indicator.gdp_growth_rate ? (indicator.gdp_growth_rate * 100).toFixed(1) + '%' : 'N/A'}</td></tr>
-                                <tr><td><strong>Inflation Rate:</strong></td><td>${indicator.inflation_rate ? (indicator.inflation_rate * 100).toFixed(1) + '%' : 'N/A'}</td></tr>
-                                <tr><td><strong>Exchange Rate:</strong></td><td>${indicator.exchange_rate_usd ? indicator.exchange_rate_usd.toFixed(2) + ' ETB' : 'N/A'}</td></tr>
-                                <tr><td><strong>Central Bank Rate:</strong></td><td>${indicator.central_bank_rate ? (indicator.central_bank_rate * 100).toFixed(1) + '%' : 'N/A'}</td></tr>
-                                <tr><td><strong>Unemployment:</strong></td><td>${indicator.unemployment_rate ? (indicator.unemployment_rate * 100).toFixed(1) + '%' : 'N/A'}</td></tr>
+                                <tr><td><strong>GDP Growth:</strong></td><td>${indicator.gdp_growth ? indicator.gdp_growth.toFixed(1) + '%' : 'N/A'}</td></tr>
+                                <tr><td><strong>Inflation Rate:</strong></td><td>${indicator.inflation_rate ? indicator.inflation_rate.toFixed(1) + '%' : 'N/A'}</td></tr>
+                                <tr><td><strong>Exchange Rate:</strong></td><td>${indicator.etb_usd ? indicator.etb_usd.toFixed(2) + ' ETB' : 'N/A'}</td></tr>
+                                <tr><td><strong>Interest Rate:</strong></td><td>${indicator.interest_rate ? indicator.interest_rate.toFixed(1) + '%' : 'N/A'}</td></tr>
+                                <tr><td><strong>Unemployment:</strong></td><td>${indicator.unemployment_rate ? indicator.unemployment_rate.toFixed(1) + '%' : 'N/A'}</td></tr>
                             </table>
                         </div>
                     </div>
@@ -284,40 +282,27 @@ function editIndicator(indicatorId) {
                         <input type="hidden" id="indicatorId" value="${indicator.id}">
                         
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label class="form-label">Date</label>
                                 <input type="date" class="form-control" id="date" value="${indicator.date}" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Year</label>
-                                <input type="number" class="form-control" id="year" value="${indicator.year}" min="2000" max="2030" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Quarter</label>
-                                <select class="form-control" id="quarter" required>
-                                    <option value="1" ${indicator.quarter == 1 ? 'selected' : ''}>Q1</option>
-                                    <option value="2" ${indicator.quarter == 2 ? 'selected' : ''}>Q2</option>
-                                    <option value="3" ${indicator.quarter == 3 ? 'selected' : ''}>Q3</option>
-                                    <option value="4" ${indicator.quarter == 4 ? 'selected' : ''}>Q4</option>
-                                </select>
                             </div>
                         </div>
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">GDP Growth Rate (%)</label>
-                                <input type="number" class="form-control" id="gdp_growth_rate" value="${indicator.gdp_growth_rate ? (indicator.gdp_growth_rate * 100).toFixed(2) : ''}" step="0.01" placeholder="e.g., 8.5">
+                                <input type="number" class="form-control" id="gdp_growth" value="${indicator.gdp_growth || ''}" step="0.01" placeholder="e.g., 8.5">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Inflation Rate (%)</label>
-                                <input type="number" class="form-control" id="inflation_rate" value="${indicator.inflation_rate ? (indicator.inflation_rate * 100).toFixed(2) : ''}" step="0.01" placeholder="e.g., 15.2">
+                                <input type="number" class="form-control" id="inflation_rate" value="${indicator.inflation_rate || ''}" step="0.01" placeholder="e.g., 15.2">
                             </div>
                         </div>
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Exchange Rate (ETB per USD)</label>
-                                <input type="number" class="form-control" id="exchange_rate_usd" value="${indicator.exchange_rate_usd || ''}" step="0.01" placeholder="e.g., 55.50">
+                                <input type="number" class="form-control" id="etb_usd" value="${indicator.etb_usd || ''}" step="0.01" placeholder="e.g., 55.50">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Central Bank Rate (%)</label>
