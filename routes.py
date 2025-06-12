@@ -339,7 +339,8 @@ def admin_view_financial():
         page = request.args.get('page', 1, type=int)
         per_page = 20
         
-        financial_data = Financial.query.join(Company).paginate(
+        from models import FinancialStatement
+        financial_data = FinancialStatement.query.order_by(desc(FinancialStatement.period_end_date)).paginate(
             page=page, per_page=per_page, error_out=False
         )
         

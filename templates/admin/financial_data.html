@@ -75,74 +75,83 @@
                                     <tr>
                                         <th>ID</th>
                                         <th>Company</th>
-                                        <th>Year</th>
+                                        <th>Period</th>
+                                        <th>Statement Type</th>
                                         <th>Revenue</th>
                                         <th>Net Income</th>
                                         <th>Total Assets</th>
-                                        <th>ROE</th>
+                                        <th>Filing Date</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for record in financial_data.items %}
+                                    {% for statement in financial_data.items %}
                                     <tr>
-                                        <td><span class="badge bg-secondary">{{ record.id }}</span></td>
+                                        <td><span class="badge bg-secondary">{{ statement.id }}</span></td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <div class="icon-circle me-3" style="width: 35px; height: 35px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                                    <i class="fas fa-chart-line fa-sm text-white"></i>
+                                                <div class="icon-circle me-3" style="width: 35px; height: 35px; background: #075056; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-building fa-sm text-white"></i>
                                                 </div>
                                                 <div>
-                                                    <h6 class="mb-0 fw-bold">{{ record.company.name if record.company else 'N/A' }}</h6>
-                                                    <small class="text-muted">{{ record.company.ticker if record.company and record.company.ticker else 'No ticker' }}</small>
+                                                    <h6 class="mb-0 fw-bold">{{ statement.company.name if statement.company else 'N/A' }}</h6>
+                                                    <small class="text-muted">{{ statement.company.ticker_symbol if statement.company and statement.company.ticker_symbol else 'No ticker' }}</small>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td><span class="badge bg-primary">{{ record.year }}</span></td>
                                         <td>
-                                            {% if record.revenue %}
-                                                <span class="fw-bold text-success">${{ "{:,.0f}".format(record.revenue) }}</span>
+                                            <span class="badge bg-primary">{{ statement.reporting_period }}</span>
+                                            <br><small class="text-muted">FY {{ statement.fiscal_year }}</small>
+                                        </td>
+                                        <td>
+                                            {% if statement.statement_type == 'income_statement' %}
+                                                <span class="badge bg-success">Income Statement</span>
+                                            {% elif statement.statement_type == 'balance_sheet' %}
+                                                <span class="badge bg-info">Balance Sheet</span>
+                                            {% elif statement.statement_type == 'cash_flow' %}
+                                                <span class="badge bg-warning">Cash Flow</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ statement.statement_type|title }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if statement.revenue %}
+                                                <span class="fw-bold text-success">{{ "{:,.0f}".format(statement.revenue|float) }} ETB</span>
                                             {% else %}
                                                 <span class="text-muted">N/A</span>
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if record.net_income %}
-                                                {% if record.net_income >= 0 %}
-                                                    <span class="fw-bold text-success">${{ "{:,.0f}".format(record.net_income) }}</span>
+                                            {% if statement.net_income %}
+                                                {% if statement.net_income|float >= 0 %}
+                                                    <span class="fw-bold text-success">{{ "{:,.0f}".format(statement.net_income|float) }} ETB</span>
                                                 {% else %}
-                                                    <span class="fw-bold text-danger">${{ "{:,.0f}".format(record.net_income) }}</span>
+                                                    <span class="fw-bold text-danger">{{ "{:,.0f}".format(statement.net_income|float) }} ETB</span>
                                                 {% endif %}
                                             {% else %}
                                                 <span class="text-muted">N/A</span>
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if record.total_assets %}
-                                                ${{ "{:,.0f}".format(record.total_assets) }}
+                                            {% if statement.total_assets %}
+                                                {{ "{:,.0f}".format(statement.total_assets|float) }} ETB
                                             {% else %}
                                                 <span class="text-muted">N/A</span>
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if record.roe %}
-                                                {% if record.roe >= 0.15 %}
-                                                    <span class="badge bg-success">{{ "{:.1%}".format(record.roe) }}</span>
-                                                {% elif record.roe >= 0.10 %}
-                                                    <span class="badge bg-warning">{{ "{:.1%}".format(record.roe) }}</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">{{ "{:.1%}".format(record.roe) }}</span>
-                                                {% endif %}
+                                            {% if statement.filing_date %}
+                                                {{ statement.filing_date.strftime('%Y-%m-%d') }}
                                             {% else %}
-                                                <span class="text-muted">N/A</span>
+                                                <span class="text-muted">Not filed</span>
                                             {% endif %}
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <button class="btn btn-outline-primary" onclick="viewFinancialRecord({{ record.id }})">
+                                                <button class="btn btn-outline-primary" onclick="viewFinancialStatement({{ statement.id }})" title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
-                                                <button class="btn btn-outline-secondary" onclick="editFinancialRecord({{ record.id }})">
+                                                <button class="btn btn-outline-secondary" onclick="editFinancialStatement({{ statement.id }})" title="Edit Statement">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                             </div>
@@ -204,13 +213,540 @@
     </div>
 </section>
 
+<!-- View Financial Statement Modal -->
+<div class="modal fade" id="viewStatementModal" tabindex="-1" aria-labelledby="viewStatementModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #075056 0%, #233038 100%); color: white;">
+                <h5 class="modal-title" id="viewStatementModalLabel">
+                    <i class="fas fa-chart-line me-2"></i>Financial Statement Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="viewStatementContent">
+                <!-- Content will be dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Financial Statement Modal -->
+<div class="modal fade" id="editStatementModal" tabindex="-1" aria-labelledby="editStatementModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #FF5B04 0%, #F4D47C 100%); color: white;">
+                <h5 class="modal-title" id="editStatementModalLabel">
+                    <i class="fas fa-edit me-2"></i>Edit Financial Statement
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="editStatementContent">
+                <!-- Content will be dynamically loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveFinancialStatement()">
+                    <i class="fas fa-save me-2"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-function viewFinancialRecord(recordId) {
-    alert('Financial Record Details\n\nViewing detailed financial information for record ID: ' + recordId + '\n\nThis feature will show:\n• Complete financial statements\n• Financial ratios analysis\n• Year-over-year comparisons\n• Performance metrics\n\nFeature coming soon!');
+// View Financial Statement
+function viewFinancialStatement(statementId) {
+    const viewModal = new bootstrap.Modal(document.getElementById('viewStatementModal'));
+    viewModal.show();
+    
+    fetch(`/admin/api/financial-statement/${statementId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const statement = data.statement;
+                const content = `
+                    <div class="container-fluid">
+                        <!-- Company and Period Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="fas fa-building me-2"></i>Company Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>Company:</strong> ${statement.company_name || 'N/A'}</p>
+                                        <p><strong>Ticker:</strong> ${statement.ticker_symbol || 'N/A'}</p>
+                                        <p><strong>Statement Type:</strong> ${statement.statement_type ? statement.statement_type.replace('_', ' ').toUpperCase() : 'N/A'}</p>
+                                        <p><strong>Currency:</strong> ${statement.currency || 'ETB'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0"><i class="fas fa-calendar me-2"></i>Reporting Period</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>Period:</strong> ${statement.reporting_period || 'N/A'}</p>
+                                        <p><strong>Fiscal Year:</strong> ${statement.fiscal_year || 'N/A'}</p>
+                                        <p><strong>Period Start:</strong> ${statement.period_start_date || 'N/A'}</p>
+                                        <p><strong>Period End:</strong> ${statement.period_end_date || 'N/A'}</p>
+                                        <p><strong>Filing Date:</strong> ${statement.filing_date || 'Not filed'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Financial Statement Tabs -->
+                        <ul class="nav nav-tabs mb-3" id="statementTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="income-tab" data-bs-toggle="tab" data-bs-target="#income" type="button" role="tab">
+                                    Income Statement
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="balance-tab" data-bs-toggle="tab" data-bs-target="#balance" type="button" role="tab">
+                                    Balance Sheet
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="cashflow-tab" data-bs-toggle="tab" data-bs-target="#cashflow" type="button" role="tab">
+                                    Cash Flow
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="banking-tab" data-bs-toggle="tab" data-bs-target="#banking" type="button" role="tab">
+                                    Banking Metrics
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content" id="statementTabsContent">
+                            <!-- Income Statement Tab -->
+                            <div class="tab-pane fade show active" id="income" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-success mb-3">Revenue & Income</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Revenue:</strong></td><td class="text-end">${statement.revenue ? parseFloat(statement.revenue).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Cost of Goods Sold:</strong></td><td class="text-end">${statement.cost_of_goods_sold ? parseFloat(statement.cost_of_goods_sold).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Gross Profit:</strong></td><td class="text-end">${statement.gross_profit ? parseFloat(statement.gross_profit).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Operating Income:</strong></td><td class="text-end">${statement.operating_income ? parseFloat(statement.operating_income).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Net Income:</strong></td><td class="text-end fw-bold ${statement.net_income && parseFloat(statement.net_income) >= 0 ? 'text-success' : 'text-danger'}">${statement.net_income ? parseFloat(statement.net_income).toLocaleString() : 'N/A'} ETB</td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-warning mb-3">Expenses & Interest</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Operating Expenses:</strong></td><td class="text-end">${statement.operating_expenses ? parseFloat(statement.operating_expenses).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Interest Income:</strong></td><td class="text-end">${statement.interest_income ? parseFloat(statement.interest_income).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Interest Expense:</strong></td><td class="text-end">${statement.interest_expense ? parseFloat(statement.interest_expense).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>EPS:</strong></td><td class="text-end">${statement.earnings_per_share ? parseFloat(statement.earnings_per_share).toFixed(2) : 'N/A'} ETB</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Balance Sheet Tab -->
+                            <div class="tab-pane fade" id="balance" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary mb-3">Assets</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Total Assets:</strong></td><td class="text-end fw-bold">${statement.total_assets ? parseFloat(statement.total_assets).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Current Assets:</strong></td><td class="text-end">${statement.current_assets ? parseFloat(statement.current_assets).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Cash & Equivalents:</strong></td><td class="text-end">${statement.cash_and_equivalents ? parseFloat(statement.cash_and_equivalents).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Accounts Receivable:</strong></td><td class="text-end">${statement.accounts_receivable ? parseFloat(statement.accounts_receivable).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Inventory:</strong></td><td class="text-end">${statement.inventory ? parseFloat(statement.inventory).toLocaleString() : 'N/A'} ETB</td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-danger mb-3">Liabilities & Equity</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Total Liabilities:</strong></td><td class="text-end">${statement.total_liabilities ? parseFloat(statement.total_liabilities).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Current Liabilities:</strong></td><td class="text-end">${statement.current_liabilities ? parseFloat(statement.current_liabilities).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Long-term Debt:</strong></td><td class="text-end">${statement.long_term_debt ? parseFloat(statement.long_term_debt).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Shareholders' Equity:</strong></td><td class="text-end fw-bold text-success">${statement.shareholders_equity ? parseFloat(statement.shareholders_equity).toLocaleString() : 'N/A'} ETB</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Cash Flow Tab -->
+                            <div class="tab-pane fade" id="cashflow" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <h6 class="text-success mb-3">Operating Cash Flow</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Operating Cash Flow:</strong></td><td class="text-end fw-bold">${statement.operating_cash_flow ? parseFloat(statement.operating_cash_flow).toLocaleString() : 'N/A'} ETB</td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="text-info mb-3">Investment Cash Flow</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Investing Cash Flow:</strong></td><td class="text-end">${statement.investing_cash_flow ? parseFloat(statement.investing_cash_flow).toLocaleString() : 'N/A'} ETB</td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="text-warning mb-3">Financing & Free Cash Flow</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Financing Cash Flow:</strong></td><td class="text-end">${statement.financing_cash_flow ? parseFloat(statement.financing_cash_flow).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Free Cash Flow:</strong></td><td class="text-end fw-bold">${statement.free_cash_flow ? parseFloat(statement.free_cash_flow).toLocaleString() : 'N/A'} ETB</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Banking Metrics Tab -->
+                            <div class="tab-pane fade" id="banking" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary mb-3">Banking Assets & Liabilities</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Deposits:</strong></td><td class="text-end">${statement.deposits ? parseFloat(statement.deposits).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Loans & Advances:</strong></td><td class="text-end">${statement.loans_and_advances ? parseFloat(statement.loans_and_advances).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Loan Loss Provisions:</strong></td><td class="text-end">${statement.loan_loss_provisions ? parseFloat(statement.loan_loss_provisions).toLocaleString() : 'N/A'} ETB</td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-success mb-3">Banking Income</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Net Interest Income:</strong></td><td class="text-end">${statement.net_interest_income ? parseFloat(statement.net_interest_income).toLocaleString() : 'N/A'} ETB</td></tr>
+                                            <tr><td><strong>Non-Interest Income:</strong></td><td class="text-end">${statement.non_interest_income ? parseFloat(statement.non_interest_income).toLocaleString() : 'N/A'} ETB</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('viewStatementContent').innerHTML = content;
+            } else {
+                document.getElementById('viewStatementContent').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading financial statement: ${data.error || 'Unknown error'}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            document.getElementById('viewStatementContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error loading financial statement: ${error.message}
+                </div>
+            `;
+        });
 }
 
-function editFinancialRecord(recordId) {
-    alert('Edit Financial Record\n\nEditing financial record ID: ' + recordId + '\n\nThis feature will allow:\n• Update financial figures\n• Modify calculated ratios\n• Adjust reporting periods\n• Verify data accuracy\n\nFeature coming soon!');
+// Edit Financial Statement
+function editFinancialStatement(statementId) {
+    const editModal = new bootstrap.Modal(document.getElementById('editStatementModal'));
+    editModal.show();
+    
+    fetch(`/admin/api/financial-statement/${statementId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const statement = data.statement;
+                const content = `
+                    <form id="editStatementForm">
+                        <input type="hidden" id="statementId" value="${statement.id}">
+                        
+                        <!-- Basic Information -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Reporting Period</label>
+                                <input type="text" class="form-control" id="reporting_period" value="${statement.reporting_period || ''}" placeholder="e.g., Q1-2024">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Fiscal Year</label>
+                                <input type="number" class="form-control" id="fiscal_year" value="${statement.fiscal_year || ''}" placeholder="e.g., 2024">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Period Start Date</label>
+                                <input type="date" class="form-control" id="period_start_date" value="${statement.period_start_date || ''}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Period End Date</label>
+                                <input type="date" class="form-control" id="period_end_date" value="${statement.period_end_date || ''}">
+                            </div>
+                        </div>
+                        
+                        <!-- Financial Statement Tabs for Editing -->
+                        <ul class="nav nav-tabs mb-3" id="editTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="edit-income-tab" data-bs-toggle="tab" data-bs-target="#edit-income" type="button" role="tab">
+                                    Income Statement
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="edit-balance-tab" data-bs-toggle="tab" data-bs-target="#edit-balance" type="button" role="tab">
+                                    Balance Sheet
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="edit-cashflow-tab" data-bs-toggle="tab" data-bs-target="#edit-cashflow" type="button" role="tab">
+                                    Cash Flow
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="edit-banking-tab" data-bs-toggle="tab" data-bs-target="#edit-banking" type="button" role="tab">
+                                    Banking Metrics
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content" id="editTabsContent">
+                            <!-- Income Statement Edit Tab -->
+                            <div class="tab-pane fade show active" id="edit-income" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Revenue (ETB)</label>
+                                        <input type="number" class="form-control" id="revenue" value="${statement.revenue || ''}" step="0.01" placeholder="e.g., 5000000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Cost of Goods Sold (ETB)</label>
+                                        <input type="number" class="form-control" id="cost_of_goods_sold" value="${statement.cost_of_goods_sold || ''}" step="0.01" placeholder="e.g., 3000000000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Gross Profit (ETB)</label>
+                                        <input type="number" class="form-control" id="gross_profit" value="${statement.gross_profit || ''}" step="0.01" placeholder="e.g., 2000000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Operating Expenses (ETB)</label>
+                                        <input type="number" class="form-control" id="operating_expenses" value="${statement.operating_expenses || ''}" step="0.01" placeholder="e.g., 1500000000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Operating Income (ETB)</label>
+                                        <input type="number" class="form-control" id="operating_income" value="${statement.operating_income || ''}" step="0.01" placeholder="e.g., 500000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Net Income (ETB)</label>
+                                        <input type="number" class="form-control" id="net_income" value="${statement.net_income || ''}" step="0.01" placeholder="e.g., 300000000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Interest Income (ETB)</label>
+                                        <input type="number" class="form-control" id="interest_income" value="${statement.interest_income || ''}" step="0.01" placeholder="e.g., 50000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Interest Expense (ETB)</label>
+                                        <input type="number" class="form-control" id="interest_expense" value="${statement.interest_expense || ''}" step="0.01" placeholder="e.g., 20000000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Earnings Per Share (ETB)</label>
+                                        <input type="number" class="form-control" id="earnings_per_share" value="${statement.earnings_per_share || ''}" step="0.01" placeholder="e.g., 25.50">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Balance Sheet Edit Tab -->
+                            <div class="tab-pane fade" id="edit-balance" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Total Assets (ETB)</label>
+                                        <input type="number" class="form-control" id="total_assets" value="${statement.total_assets || ''}" step="0.01" placeholder="e.g., 25000000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Current Assets (ETB)</label>
+                                        <input type="number" class="form-control" id="current_assets" value="${statement.current_assets || ''}" step="0.01" placeholder="e.g., 10000000000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Cash & Equivalents (ETB)</label>
+                                        <input type="number" class="form-control" id="cash_and_equivalents" value="${statement.cash_and_equivalents || ''}" step="0.01" placeholder="e.g., 5000000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Accounts Receivable (ETB)</label>
+                                        <input type="number" class="form-control" id="accounts_receivable" value="${statement.accounts_receivable || ''}" step="0.01" placeholder="e.g., 2000000000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Inventory (ETB)</label>
+                                        <input type="number" class="form-control" id="inventory" value="${statement.inventory || ''}" step="0.01" placeholder="e.g., 1500000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Total Liabilities (ETB)</label>
+                                        <input type="number" class="form-control" id="total_liabilities" value="${statement.total_liabilities || ''}" step="0.01" placeholder="e.g., 18000000000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Current Liabilities (ETB)</label>
+                                        <input type="number" class="form-control" id="current_liabilities" value="${statement.current_liabilities || ''}" step="0.01" placeholder="e.g., 8000000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Long-term Debt (ETB)</label>
+                                        <input type="number" class="form-control" id="long_term_debt" value="${statement.long_term_debt || ''}" step="0.01" placeholder="e.g., 5000000000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Shareholders' Equity (ETB)</label>
+                                        <input type="number" class="form-control" id="shareholders_equity" value="${statement.shareholders_equity || ''}" step="0.01" placeholder="e.g., 7000000000">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Cash Flow Edit Tab -->
+                            <div class="tab-pane fade" id="edit-cashflow" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Operating Cash Flow (ETB)</label>
+                                        <input type="number" class="form-control" id="operating_cash_flow" value="${statement.operating_cash_flow || ''}" step="0.01" placeholder="e.g., 800000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Investing Cash Flow (ETB)</label>
+                                        <input type="number" class="form-control" id="investing_cash_flow" value="${statement.investing_cash_flow || ''}" step="0.01" placeholder="e.g., -200000000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Financing Cash Flow (ETB)</label>
+                                        <input type="number" class="form-control" id="financing_cash_flow" value="${statement.financing_cash_flow || ''}" step="0.01" placeholder="e.g., -100000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Free Cash Flow (ETB)</label>
+                                        <input type="number" class="form-control" id="free_cash_flow" value="${statement.free_cash_flow || ''}" step="0.01" placeholder="e.g., 600000000">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Banking Metrics Edit Tab -->
+                            <div class="tab-pane fade" id="edit-banking" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Deposits (ETB)</label>
+                                        <input type="number" class="form-control" id="deposits" value="${statement.deposits || ''}" step="0.01" placeholder="e.g., 20000000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Loans & Advances (ETB)</label>
+                                        <input type="number" class="form-control" id="loans_and_advances" value="${statement.loans_and_advances || ''}" step="0.01" placeholder="e.g., 15000000000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Loan Loss Provisions (ETB)</label>
+                                        <input type="number" class="form-control" id="loan_loss_provisions" value="${statement.loan_loss_provisions || ''}" step="0.01" placeholder="e.g., 300000000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Net Interest Income (ETB)</label>
+                                        <input type="number" class="form-control" id="net_interest_income" value="${statement.net_interest_income || ''}" step="0.01" placeholder="e.g., 1200000000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Non-Interest Income (ETB)</label>
+                                        <input type="number" class="form-control" id="non_interest_income" value="${statement.non_interest_income || ''}" step="0.01" placeholder="e.g., 400000000">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                `;
+                document.getElementById('editStatementContent').innerHTML = content;
+            } else {
+                document.getElementById('editStatementContent').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading financial statement: ${data.error || 'Unknown error'}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            document.getElementById('editStatementContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error loading financial statement: ${error.message}
+                </div>
+            `;
+        });
+}
+
+// Save Financial Statement
+function saveFinancialStatement() {
+    const form = document.getElementById('editStatementForm');
+    if (!form) return;
+    
+    const formData = {
+        id: document.getElementById('statementId').value,
+        reporting_period: document.getElementById('reporting_period').value,
+        fiscal_year: document.getElementById('fiscal_year').value ? parseInt(document.getElementById('fiscal_year').value) : null,
+        period_start_date: document.getElementById('period_start_date').value,
+        period_end_date: document.getElementById('period_end_date').value,
+        
+        // Income Statement
+        revenue: document.getElementById('revenue').value ? parseFloat(document.getElementById('revenue').value) : null,
+        cost_of_goods_sold: document.getElementById('cost_of_goods_sold').value ? parseFloat(document.getElementById('cost_of_goods_sold').value) : null,
+        gross_profit: document.getElementById('gross_profit').value ? parseFloat(document.getElementById('gross_profit').value) : null,
+        operating_expenses: document.getElementById('operating_expenses').value ? parseFloat(document.getElementById('operating_expenses').value) : null,
+        operating_income: document.getElementById('operating_income').value ? parseFloat(document.getElementById('operating_income').value) : null,
+        net_income: document.getElementById('net_income').value ? parseFloat(document.getElementById('net_income').value) : null,
+        interest_income: document.getElementById('interest_income').value ? parseFloat(document.getElementById('interest_income').value) : null,
+        interest_expense: document.getElementById('interest_expense').value ? parseFloat(document.getElementById('interest_expense').value) : null,
+        earnings_per_share: document.getElementById('earnings_per_share').value ? parseFloat(document.getElementById('earnings_per_share').value) : null,
+        
+        // Balance Sheet
+        total_assets: document.getElementById('total_assets').value ? parseFloat(document.getElementById('total_assets').value) : null,
+        current_assets: document.getElementById('current_assets').value ? parseFloat(document.getElementById('current_assets').value) : null,
+        cash_and_equivalents: document.getElementById('cash_and_equivalents').value ? parseFloat(document.getElementById('cash_and_equivalents').value) : null,
+        accounts_receivable: document.getElementById('accounts_receivable').value ? parseFloat(document.getElementById('accounts_receivable').value) : null,
+        inventory: document.getElementById('inventory').value ? parseFloat(document.getElementById('inventory').value) : null,
+        total_liabilities: document.getElementById('total_liabilities').value ? parseFloat(document.getElementById('total_liabilities').value) : null,
+        current_liabilities: document.getElementById('current_liabilities').value ? parseFloat(document.getElementById('current_liabilities').value) : null,
+        long_term_debt: document.getElementById('long_term_debt').value ? parseFloat(document.getElementById('long_term_debt').value) : null,
+        shareholders_equity: document.getElementById('shareholders_equity').value ? parseFloat(document.getElementById('shareholders_equity').value) : null,
+        
+        // Cash Flow
+        operating_cash_flow: document.getElementById('operating_cash_flow').value ? parseFloat(document.getElementById('operating_cash_flow').value) : null,
+        investing_cash_flow: document.getElementById('investing_cash_flow').value ? parseFloat(document.getElementById('investing_cash_flow').value) : null,
+        financing_cash_flow: document.getElementById('financing_cash_flow').value ? parseFloat(document.getElementById('financing_cash_flow').value) : null,
+        free_cash_flow: document.getElementById('free_cash_flow').value ? parseFloat(document.getElementById('free_cash_flow').value) : null,
+        
+        // Banking Metrics
+        deposits: document.getElementById('deposits').value ? parseFloat(document.getElementById('deposits').value) : null,
+        loans_and_advances: document.getElementById('loans_and_advances').value ? parseFloat(document.getElementById('loans_and_advances').value) : null,
+        loan_loss_provisions: document.getElementById('loan_loss_provisions').value ? parseFloat(document.getElementById('loan_loss_provisions').value) : null,
+        net_interest_income: document.getElementById('net_interest_income').value ? parseFloat(document.getElementById('net_interest_income').value) : null,
+        non_interest_income: document.getElementById('non_interest_income').value ? parseFloat(document.getElementById('non_interest_income').value) : null
+    };
+    
+    fetch(`/admin/api/financial-statement/${formData.id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Financial statement updated successfully!');
+            const editModal = bootstrap.Modal.getInstance(document.getElementById('editStatementModal'));
+            editModal.hide();
+            location.reload();
+        } else {
+            alert('Error saving financial statement: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error saving financial statement: ' + error.message);
+    });
 }
 </script>
 {% endblock %}
