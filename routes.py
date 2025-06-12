@@ -980,12 +980,13 @@ def add_company_api():
         
         company = Company(
             name=data['name'],
-            ticker_symbol=data.get('ticker_symbol'),
+            ticker=data.get('ticker_symbol'),
             sector=data.get('sector'),
             industry=data.get('industry'),
-            market_cap=data.get('market_cap'),
             shares_outstanding=data.get('shares_outstanding'),
-            description=data.get('description')
+            description=data.get('description'),
+            created_by=current_user.id,
+            updated_by=current_user.id
         )
         
         db.session.add(company)
@@ -1017,7 +1018,7 @@ def get_companies_api():
         companies_data = [{
             'id': company.id,
             'name': company.name,
-            'ticker_symbol': company.ticker_symbol
+            'ticker_symbol': company.ticker
         } for company in companies]
         
         return jsonify({
