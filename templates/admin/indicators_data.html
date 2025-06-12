@@ -663,6 +663,7 @@ function editIndicator(indicatorId) {
                     <form id="editIndicatorForm">
                         <input type="hidden" id="indicatorId" value="${indicator.id}">
                         
+                        <!-- Date Field -->
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <label class="form-label">Date</label>
@@ -670,32 +671,231 @@ function editIndicator(indicatorId) {
                             </div>
                         </div>
                         
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">GDP Growth Rate (%)</label>
-                                <input type="number" class="form-control" id="gdp_growth" value="${indicator.gdp_growth || ''}" step="0.01" placeholder="e.g., 8.5">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Inflation Rate (%)</label>
-                                <input type="number" class="form-control" id="inflation_rate" value="${indicator.inflation_rate || ''}" step="0.01" placeholder="e.g., 15.2">
-                            </div>
-                        </div>
+                        <!-- Edit Form Tabs -->
+                        <ul class="nav nav-tabs mb-3" id="editTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="edit-key-tab" data-bs-toggle="tab" data-bs-target="#edit-key" type="button" role="tab">
+                                    Key Indicators
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="edit-gdp-tab" data-bs-toggle="tab" data-bs-target="#edit-gdp" type="button" role="tab">
+                                    GDP & Growth
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="edit-trade-tab" data-bs-toggle="tab" data-bs-target="#edit-trade" type="button" role="tab">
+                                    Trade & FX
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="edit-banking-tab" data-bs-toggle="tab" data-bs-target="#edit-banking" type="button" role="tab">
+                                    Banking
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="edit-govt-tab" data-bs-toggle="tab" data-bs-target="#edit-govt" type="button" role="tab">
+                                    Government
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="edit-commodities-tab" data-bs-toggle="tab" data-bs-target="#edit-commodities" type="button" role="tab">
+                                    Commodities
+                                </button>
+                            </li>
+                        </ul>
                         
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Exchange Rate (ETB per USD)</label>
-                                <input type="number" class="form-control" id="etb_usd" value="${indicator.etb_usd || ''}" step="0.01" placeholder="e.g., 55.50">
+                        <div class="tab-content" id="editTabsContent">
+                            <!-- Key Indicators Tab -->
+                            <div class="tab-pane fade show active" id="edit-key" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">GDP Growth Rate (%)</label>
+                                        <input type="number" class="form-control" id="gdp_growth" value="${indicator.gdp_growth || ''}" step="0.01" placeholder="e.g., 8.5">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Inflation Rate (%)</label>
+                                        <input type="number" class="form-control" id="inflation_rate" value="${indicator.inflation_rate || ''}" step="0.01" placeholder="e.g., 15.2">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Food Inflation (%)</label>
+                                        <input type="number" class="form-control" id="food_inflation" value="${indicator.food_inflation || ''}" step="0.01" placeholder="e.g., 20.1">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Interest Rate (%)</label>
+                                        <input type="number" class="form-control" id="interest_rate" value="${indicator.interest_rate || ''}" step="0.01" placeholder="e.g., 7.0">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Unemployment Rate (%)</label>
+                                        <input type="number" class="form-control" id="unemployment_rate" value="${indicator.unemployment_rate || ''}" step="0.01" placeholder="e.g., 19.1">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">ETB/USD Exchange Rate</label>
+                                        <input type="number" class="form-control" id="etb_usd" value="${indicator.etb_usd || ''}" step="0.01" placeholder="e.g., 55.50">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Central Bank Rate (%)</label>
-                                <input type="number" class="form-control" id="interest_rate" value="${indicator.interest_rate || ''}" step="0.01" placeholder="e.g., 7.0">
+                            
+                            <!-- GDP & Growth Tab -->
+                            <div class="tab-pane fade" id="edit-gdp" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">GDP per Capita ($)</label>
+                                        <input type="number" class="form-control" id="gdp_per_capita" value="${indicator.gdp_per_capita || ''}" step="0.01" placeholder="e.g., 850">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Industrial Production</label>
+                                        <input type="number" class="form-control" id="industrial_production" value="${indicator.industrial_production || ''}" step="0.01" placeholder="e.g., 8.5">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Agricultural Production</label>
+                                        <input type="number" class="form-control" id="agricultural_production" value="${indicator.agricultural_production || ''}" step="0.01" placeholder="e.g., 45.2">
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Unemployment Rate (%)</label>
-                                <input type="number" class="form-control" id="unemployment_rate" value="${indicator.unemployment_rate || ''}" step="0.01" placeholder="e.g., 19.1">
+                            
+                            <!-- Trade & FX Tab -->
+                            <div class="tab-pane fade" id="edit-trade" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">ETB/EUR</label>
+                                        <input type="number" class="form-control" id="etb_eur" value="${indicator.etb_eur || ''}" step="0.01" placeholder="e.g., 47.20">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">ETB/GBP</label>
+                                        <input type="number" class="form-control" id="etb_gbp" value="${indicator.etb_gbp || ''}" step="0.01" placeholder="e.g., 41.65">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">ETB/JPY</label>
+                                        <input type="number" class="form-control" id="etb_jpy" value="${indicator.etb_jpy || ''}" step="0.01" placeholder="e.g., 6100">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">ETB/CNY</label>
+                                        <input type="number" class="form-control" id="etb_cny" value="${indicator.etb_cny || ''}" step="0.01" placeholder="e.g., 399.60">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Exports (Million $)</label>
+                                        <input type="number" class="form-control" id="exports" value="${indicator.exports ? (indicator.exports/1000000).toFixed(0) : ''}" step="1" placeholder="e.g., 3500">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Imports (Million $)</label>
+                                        <input type="number" class="form-control" id="imports" value="${indicator.imports ? (indicator.imports/1000000).toFixed(0) : ''}" step="1" placeholder="e.g., 15000">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">FDI Inflow (Million $)</label>
+                                        <input type="number" class="form-control" id="fdi_inflow" value="${indicator.fdi_inflow ? (indicator.fdi_inflow/1000000).toFixed(0) : ''}" step="1" placeholder="e.g., 800">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Remittances (Million $)</label>
+                                        <input type="number" class="form-control" id="remittances" value="${indicator.remittances ? (indicator.remittances/1000000).toFixed(0) : ''}" step="1" placeholder="e.g., 4500">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">FX Reserves (Million $)</label>
+                                        <input type="number" class="form-control" id="fx_reserves" value="${indicator.fx_reserves ? (indicator.fx_reserves/1000000).toFixed(0) : ''}" step="1" placeholder="e.g., 3200">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Banking Tab -->
+                            <div class="tab-pane fade" id="edit-banking" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Total Deposits (Billion ETB)</label>
+                                        <input type="number" class="form-control" id="total_deposits" value="${indicator.total_deposits ? (indicator.total_deposits/1000000000).toFixed(1) : ''}" step="0.1" placeholder="e.g., 1800">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Total Loans (Billion ETB)</label>
+                                        <input type="number" class="form-control" id="total_loans" value="${indicator.total_loans ? (indicator.total_loans/1000000000).toFixed(1) : ''}" step="0.1" placeholder="e.g., 1200">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">NPL Ratio (%)</label>
+                                        <input type="number" class="form-control" id="npl_ratio" value="${indicator.npl_ratio || ''}" step="0.01" placeholder="e.g., 8.5">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Loan-to-Deposit Ratio (%)</label>
+                                        <input type="number" class="form-control" id="loan_to_deposit" value="${indicator.loan_to_deposit || ''}" step="0.01" placeholder="e.g., 66.7">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Money Supply M1 (Billion ETB)</label>
+                                        <input type="number" class="form-control" id="money_supply_m1" value="${indicator.money_supply_m1 ? (indicator.money_supply_m1/1000000000).toFixed(1) : ''}" step="0.1" placeholder="e.g., 450">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Money Supply M2 (Billion ETB)</label>
+                                        <input type="number" class="form-control" id="money_supply_m2" value="${indicator.money_supply_m2 ? (indicator.money_supply_m2/1000000000).toFixed(1) : ''}" step="0.1" placeholder="e.g., 1600">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Private Sector Credit (Billion ETB)</label>
+                                        <input type="number" class="form-control" id="private_sector_credit" value="${indicator.private_sector_credit ? (indicator.private_sector_credit/1000000000).toFixed(1) : ''}" step="0.1" placeholder="e.g., 950">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Government Tab -->
+                            <div class="tab-pane fade" id="edit-govt" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Government Revenue (Billion ETB)</label>
+                                        <input type="number" class="form-control" id="govt_revenue" value="${indicator.govt_revenue ? (indicator.govt_revenue/1000000000).toFixed(1) : ''}" step="0.1" placeholder="e.g., 520">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Government Expenditure (Billion ETB)</label>
+                                        <input type="number" class="form-control" id="govt_expenditure" value="${indicator.govt_expenditure ? (indicator.govt_expenditure/1000000000).toFixed(1) : ''}" step="0.1" placeholder="e.g., 580">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Government Debt (Billion ETB)</label>
+                                        <input type="number" class="form-control" id="govt_debt" value="${indicator.govt_debt ? (indicator.govt_debt/1000000000).toFixed(1) : ''}" step="0.1" placeholder="e.g., 2800">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Tax Revenue (Billion ETB)</label>
+                                        <input type="number" class="form-control" id="tax_revenue" value="${indicator.tax_revenue ? (indicator.tax_revenue/1000000000).toFixed(1) : ''}" step="0.1" placeholder="e.g., 390">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Commodities Tab -->
+                            <div class="tab-pane fade" id="edit-commodities" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Coffee Price ($/kg)</label>
+                                        <input type="number" class="form-control" id="coffee_price" value="${indicator.coffee_price || ''}" step="0.01" placeholder="e.g., 4.50">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Gold Price ($/oz)</label>
+                                        <input type="number" class="form-control" id="gold_price" value="${indicator.gold_price || ''}" step="0.01" placeholder="e.g., 1850">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Oil Price ($/barrel)</label>
+                                        <input type="number" class="form-control" id="oil_price" value="${indicator.oil_price || ''}" step="0.01" placeholder="e.g., 75">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Wheat Price ($/ton)</label>
+                                        <input type="number" class="form-control" id="wheat_price" value="${indicator.wheat_price || ''}" step="0.01" placeholder="e.g., 280">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -725,11 +925,45 @@ function saveIndicator() {
     const formData = {
         id: document.getElementById('indicatorId').value,
         date: document.getElementById('date').value,
+        // Key indicators
         gdp_growth: document.getElementById('gdp_growth').value ? parseFloat(document.getElementById('gdp_growth').value) : null,
         inflation_rate: document.getElementById('inflation_rate').value ? parseFloat(document.getElementById('inflation_rate').value) : null,
-        etb_usd: document.getElementById('etb_usd').value ? parseFloat(document.getElementById('etb_usd').value) : null,
+        food_inflation: document.getElementById('food_inflation').value ? parseFloat(document.getElementById('food_inflation').value) : null,
         interest_rate: document.getElementById('interest_rate').value ? parseFloat(document.getElementById('interest_rate').value) : null,
-        unemployment_rate: document.getElementById('unemployment_rate').value ? parseFloat(document.getElementById('unemployment_rate').value) : null
+        unemployment_rate: document.getElementById('unemployment_rate').value ? parseFloat(document.getElementById('unemployment_rate').value) : null,
+        etb_usd: document.getElementById('etb_usd').value ? parseFloat(document.getElementById('etb_usd').value) : null,
+        // GDP & Growth
+        gdp_per_capita: document.getElementById('gdp_per_capita').value ? parseFloat(document.getElementById('gdp_per_capita').value) : null,
+        industrial_production: document.getElementById('industrial_production').value ? parseFloat(document.getElementById('industrial_production').value) : null,
+        agricultural_production: document.getElementById('agricultural_production').value ? parseFloat(document.getElementById('agricultural_production').value) : null,
+        // Trade & FX
+        etb_eur: document.getElementById('etb_eur').value ? parseFloat(document.getElementById('etb_eur').value) : null,
+        etb_gbp: document.getElementById('etb_gbp').value ? parseFloat(document.getElementById('etb_gbp').value) : null,
+        etb_jpy: document.getElementById('etb_jpy').value ? parseFloat(document.getElementById('etb_jpy').value) : null,
+        etb_cny: document.getElementById('etb_cny').value ? parseFloat(document.getElementById('etb_cny').value) : null,
+        exports: document.getElementById('exports').value ? parseFloat(document.getElementById('exports').value) * 1000000 : null,
+        imports: document.getElementById('imports').value ? parseFloat(document.getElementById('imports').value) * 1000000 : null,
+        fdi_inflow: document.getElementById('fdi_inflow').value ? parseFloat(document.getElementById('fdi_inflow').value) * 1000000 : null,
+        remittances: document.getElementById('remittances').value ? parseFloat(document.getElementById('remittances').value) * 1000000 : null,
+        fx_reserves: document.getElementById('fx_reserves').value ? parseFloat(document.getElementById('fx_reserves').value) * 1000000 : null,
+        // Banking
+        total_deposits: document.getElementById('total_deposits').value ? parseFloat(document.getElementById('total_deposits').value) * 1000000000 : null,
+        total_loans: document.getElementById('total_loans').value ? parseFloat(document.getElementById('total_loans').value) * 1000000000 : null,
+        npl_ratio: document.getElementById('npl_ratio').value ? parseFloat(document.getElementById('npl_ratio').value) : null,
+        loan_to_deposit: document.getElementById('loan_to_deposit').value ? parseFloat(document.getElementById('loan_to_deposit').value) : null,
+        money_supply_m1: document.getElementById('money_supply_m1').value ? parseFloat(document.getElementById('money_supply_m1').value) * 1000000000 : null,
+        money_supply_m2: document.getElementById('money_supply_m2').value ? parseFloat(document.getElementById('money_supply_m2').value) * 1000000000 : null,
+        private_sector_credit: document.getElementById('private_sector_credit').value ? parseFloat(document.getElementById('private_sector_credit').value) * 1000000000 : null,
+        // Government
+        govt_revenue: document.getElementById('govt_revenue').value ? parseFloat(document.getElementById('govt_revenue').value) * 1000000000 : null,
+        govt_expenditure: document.getElementById('govt_expenditure').value ? parseFloat(document.getElementById('govt_expenditure').value) * 1000000000 : null,
+        govt_debt: document.getElementById('govt_debt').value ? parseFloat(document.getElementById('govt_debt').value) * 1000000000 : null,
+        tax_revenue: document.getElementById('tax_revenue').value ? parseFloat(document.getElementById('tax_revenue').value) * 1000000000 : null,
+        // Commodities
+        coffee_price: document.getElementById('coffee_price').value ? parseFloat(document.getElementById('coffee_price').value) : null,
+        gold_price: document.getElementById('gold_price').value ? parseFloat(document.getElementById('gold_price').value) : null,
+        oil_price: document.getElementById('oil_price').value ? parseFloat(document.getElementById('oil_price').value) : null,
+        wheat_price: document.getElementById('wheat_price').value ? parseFloat(document.getElementById('wheat_price').value) : null
     };
     
     fetch(`/admin/api/indicator/${formData.id}`, {

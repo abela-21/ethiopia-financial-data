@@ -700,20 +700,95 @@ def update_indicator_api(indicator_id):
             from datetime import datetime
             indicator.date = datetime.strptime(data['date'], '%Y-%m-%d').date()
             
+        # Core economic indicators
         if 'gdp_growth' in data:
             indicator.gdp_growth = data['gdp_growth']
-            
+        if 'gdp_per_capita' in data:
+            indicator.gdp_per_capita = data['gdp_per_capita']
         if 'inflation_rate' in data:
             indicator.inflation_rate = data['inflation_rate']
-            
-        if 'etb_usd' in data:
-            indicator.etb_usd = data['etb_usd']
-            
+        if 'food_inflation' in data:
+            indicator.food_inflation = data['food_inflation']
         if 'interest_rate' in data:
             indicator.interest_rate = data['interest_rate']
-            
         if 'unemployment_rate' in data:
             indicator.unemployment_rate = data['unemployment_rate']
+        if 'industrial_production' in data:
+            indicator.industrial_production = data['industrial_production']
+        if 'agricultural_production' in data:
+            indicator.agricultural_production = data['agricultural_production']
+            
+        # Trade and foreign exchange
+        if 'exports' in data:
+            indicator.exports = data['exports']
+        if 'imports' in data:
+            indicator.imports = data['imports']
+        if 'trade_balance' in data:
+            indicator.trade_balance = data['trade_balance']
+        if 'current_account_balance' in data:
+            indicator.current_account_balance = data['current_account_balance']
+        if 'fdi_inflow' in data:
+            indicator.fdi_inflow = data['fdi_inflow']
+        if 'remittances' in data:
+            indicator.remittances = data['remittances']
+        if 'fx_reserves' in data:
+            indicator.fx_reserves = data['fx_reserves']
+        if 'etb_usd' in data:
+            indicator.etb_usd = data['etb_usd']
+        if 'etb_eur' in data:
+            indicator.etb_eur = data['etb_eur']
+        if 'etb_gbp' in data:
+            indicator.etb_gbp = data['etb_gbp']
+        if 'etb_jpy' in data:
+            indicator.etb_jpy = data['etb_jpy']
+        if 'etb_cny' in data:
+            indicator.etb_cny = data['etb_cny']
+            
+        # Banking and monetary
+        if 'total_deposits' in data:
+            indicator.total_deposits = data['total_deposits']
+        if 'total_loans' in data:
+            indicator.total_loans = data['total_loans']
+        if 'npl_ratio' in data:
+            indicator.npl_ratio = data['npl_ratio']
+        if 'loan_to_deposit' in data:
+            indicator.loan_to_deposit = data['loan_to_deposit']
+        if 'money_supply_m1' in data:
+            indicator.money_supply_m1 = data['money_supply_m1']
+        if 'money_supply_m2' in data:
+            indicator.money_supply_m2 = data['money_supply_m2']
+        if 'private_sector_credit' in data:
+            indicator.private_sector_credit = data['private_sector_credit']
+            
+        # Government finances
+        if 'govt_revenue' in data:
+            indicator.govt_revenue = data['govt_revenue']
+        if 'govt_expenditure' in data:
+            indicator.govt_expenditure = data['govt_expenditure']
+        if 'budget_deficit' in data:
+            indicator.budget_deficit = data['budget_deficit']
+        if 'govt_debt' in data:
+            indicator.govt_debt = data['govt_debt']
+        if 'tax_revenue' in data:
+            indicator.tax_revenue = data['tax_revenue']
+            
+        # Commodities
+        if 'coffee_price' in data:
+            indicator.coffee_price = data['coffee_price']
+        if 'gold_price' in data:
+            indicator.gold_price = data['gold_price']
+        if 'oil_price' in data:
+            indicator.oil_price = data['oil_price']
+        if 'wheat_price' in data:
+            indicator.wheat_price = data['wheat_price']
+            
+        # Auto-calculate derived fields
+        if 'exports' in data and 'imports' in data:
+            indicator.trade_balance = indicator.exports - indicator.imports
+        if 'govt_revenue' in data and 'govt_expenditure' in data:
+            indicator.budget_deficit = indicator.govt_expenditure - indicator.govt_revenue
+        if 'total_loans' in data and 'total_deposits' in data and indicator.total_deposits:
+            indicator.loan_to_deposit = (indicator.total_loans / indicator.total_deposits) * 100
         
         db.session.commit()
         
