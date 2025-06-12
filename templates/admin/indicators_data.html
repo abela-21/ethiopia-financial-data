@@ -24,28 +24,66 @@
             </div>
         </div>
 
-        <!-- Economic Indicators Table -->
+        <!-- Economic Indicators with Tabs -->
         <div class="row">
             <div class="col-12">
                 <div class="card shadow border-0" style="border-radius: 15px;">
                     <div class="card-header bg-transparent border-0">
-                        <h5 class="fw-bold mb-0" style="color: #075056;">Economic Indicators ({{ indicators.total }} total)</h5>
+                        <h5 class="fw-bold mb-3" style="color: #075056;">Economic Indicators ({{ indicators.total }} total)</h5>
+                        
+                        <!-- Navigation Tabs -->
+                        <ul class="nav nav-tabs" id="indicatorTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                                    <i class="fas fa-chart-line me-2"></i>Key Indicators
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="gdp-tab" data-bs-toggle="tab" data-bs-target="#gdp" type="button" role="tab">
+                                    <i class="fas fa-chart-bar me-2"></i>GDP & Growth
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="trade-tab" data-bs-toggle="tab" data-bs-target="#trade" type="button" role="tab">
+                                    <i class="fas fa-globe me-2"></i>Trade & FX
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="banking-tab" data-bs-toggle="tab" data-bs-target="#banking" type="button" role="tab">
+                                    <i class="fas fa-university me-2"></i>Banking
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="govt-tab" data-bs-toggle="tab" data-bs-target="#govt" type="button" role="tab">
+                                    <i class="fas fa-landmark me-2"></i>Government
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="commodities-tab" data-bs-toggle="tab" data-bs-target="#commodities" type="button" role="tab">
+                                    <i class="fas fa-seedling me-2"></i>Commodities
+                                </button>
+                            </li>
+                        </ul>
                     </div>
                     <div class="card-body">
                         {% if indicators.items %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>GDP Growth</th>
-                                        <th>Inflation Rate</th>
-                                        <th>Exchange Rate (USD)</th>
-                                        <th>Interest Rate</th>
-                                        <th>Unemployment</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
+                        <div class="tab-content" id="indicatorTabsContent">
+                            
+                            <!-- Key Indicators Tab -->
+                            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>GDP Growth</th>
+                                                <th>Inflation Rate</th>
+                                                <th>Exchange Rate (USD)</th>
+                                                <th>Interest Rate</th>
+                                                <th>Unemployment</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
                                 <tbody>
                                     {% for indicator in indicators.items %}
                                     <tr>
@@ -120,8 +158,305 @@
                                         </td>
                                     </tr>
                                     {% endfor %}
-                                </tbody>
-                            </table>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- GDP & Growth Tab -->
+                            <div class="tab-pane fade" id="gdp" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>GDP Growth (%)</th>
+                                                <th>GDP per Capita</th>
+                                                <th>Industrial Production</th>
+                                                <th>Agricultural Production</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for indicator in indicators.items %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-circle me-3" style="width: 35px; height: 35px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="fas fa-chart-bar fa-sm text-white"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 fw-bold">{{ indicator.date.strftime('%B %Y') if indicator.date else 'N/A' }}</h6>
+                                                            <small class="text-muted">{{ indicator.date.strftime('%Y-%m-%d') if indicator.date else 'No date' }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {% if indicator.gdp_growth %}
+                                                        <span class="badge bg-success">{{ "{:.1f}%".format(indicator.gdp_growth) }}</span>
+                                                    {% else %}
+                                                        <span class="text-muted">N/A</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ "{:,.0f}".format(indicator.gdp_per_capita) if indicator.gdp_per_capita else 'N/A' }}</td>
+                                                <td>{{ "{:.1f}".format(indicator.industrial_production) if indicator.industrial_production else 'N/A' }}</td>
+                                                <td>{{ "{:.1f}".format(indicator.agricultural_production) if indicator.agricultural_production else 'N/A' }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-primary" onclick="viewIndicator({{ indicator.id }})">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary" onclick="editIndicator({{ indicator.id }})">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Trade & FX Tab -->
+                            <div class="tab-pane fade" id="trade" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>ETB/USD</th>
+                                                <th>ETB/EUR</th>
+                                                <th>ETB/GBP</th>
+                                                <th>Exports</th>
+                                                <th>Imports</th>
+                                                <th>Trade Balance</th>
+                                                <th>FDI Inflow</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for indicator in indicators.items %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-circle me-3" style="width: 35px; height: 35px; background: #007bff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="fas fa-globe fa-sm text-white"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 fw-bold">{{ indicator.date.strftime('%B %Y') if indicator.date else 'N/A' }}</h6>
+                                                            <small class="text-muted">{{ indicator.date.strftime('%Y-%m-%d') if indicator.date else 'No date' }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ "{:.2f}".format(indicator.etb_usd) if indicator.etb_usd else 'N/A' }}</td>
+                                                <td>{{ "{:.2f}".format(indicator.etb_eur) if indicator.etb_eur else 'N/A' }}</td>
+                                                <td>{{ "{:.2f}".format(indicator.etb_gbp) if indicator.etb_gbp else 'N/A' }}</td>
+                                                <td>{{ "{:,.0f}M".format(indicator.exports/1000000) if indicator.exports else 'N/A' }}</td>
+                                                <td>{{ "{:,.0f}M".format(indicator.imports/1000000) if indicator.imports else 'N/A' }}</td>
+                                                <td>
+                                                    {% if indicator.trade_balance %}
+                                                        {% if indicator.trade_balance > 0 %}
+                                                            <span class="badge bg-success">+{{ "{:,.0f}M".format(indicator.trade_balance/1000000) }}</span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger">{{ "{:,.0f}M".format(indicator.trade_balance/1000000) }}</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="text-muted">N/A</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ "{:,.0f}M".format(indicator.fdi_inflow/1000000) if indicator.fdi_inflow else 'N/A' }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-primary" onclick="viewIndicator({{ indicator.id }})">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary" onclick="editIndicator({{ indicator.id }})">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Banking Tab -->
+                            <div class="tab-pane fade" id="banking" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Total Deposits</th>
+                                                <th>Total Loans</th>
+                                                <th>NPL Ratio (%)</th>
+                                                <th>Loan-to-Deposit</th>
+                                                <th>Money Supply M1</th>
+                                                <th>Money Supply M2</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for indicator in indicators.items %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-circle me-3" style="width: 35px; height: 35px; background: #6f42c1; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="fas fa-university fa-sm text-white"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 fw-bold">{{ indicator.date.strftime('%B %Y') if indicator.date else 'N/A' }}</h6>
+                                                            <small class="text-muted">{{ indicator.date.strftime('%Y-%m-%d') if indicator.date else 'No date' }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ "{:,.0f}B".format(indicator.total_deposits/1000000000) if indicator.total_deposits else 'N/A' }}</td>
+                                                <td>{{ "{:,.0f}B".format(indicator.total_loans/1000000000) if indicator.total_loans else 'N/A' }}</td>
+                                                <td>
+                                                    {% if indicator.npl_ratio %}
+                                                        {% if indicator.npl_ratio > 5.0 %}
+                                                            <span class="badge bg-danger">{{ "{:.1f}%".format(indicator.npl_ratio) }}</span>
+                                                        {% elif indicator.npl_ratio > 2.0 %}
+                                                            <span class="badge bg-warning">{{ "{:.1f}%".format(indicator.npl_ratio) }}</span>
+                                                        {% else %}
+                                                            <span class="badge bg-success">{{ "{:.1f}%".format(indicator.npl_ratio) }}</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="text-muted">N/A</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ "{:.1f}%".format(indicator.loan_to_deposit) if indicator.loan_to_deposit else 'N/A' }}</td>
+                                                <td>{{ "{:,.0f}B".format(indicator.money_supply_m1/1000000000) if indicator.money_supply_m1 else 'N/A' }}</td>
+                                                <td>{{ "{:,.0f}B".format(indicator.money_supply_m2/1000000000) if indicator.money_supply_m2 else 'N/A' }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-primary" onclick="viewIndicator({{ indicator.id }})">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary" onclick="editIndicator({{ indicator.id }})">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Government Tab -->
+                            <div class="tab-pane fade" id="govt" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Government Revenue</th>
+                                                <th>Government Expenditure</th>
+                                                <th>Budget Deficit</th>
+                                                <th>Government Debt</th>
+                                                <th>Tax Revenue</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for indicator in indicators.items %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-circle me-3" style="width: 35px; height: 35px; background: #fd7e14; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="fas fa-landmark fa-sm text-white"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 fw-bold">{{ indicator.date.strftime('%B %Y') if indicator.date else 'N/A' }}</h6>
+                                                            <small class="text-muted">{{ indicator.date.strftime('%Y-%m-%d') if indicator.date else 'No date' }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ "{:,.0f}B".format(indicator.govt_revenue/1000000000) if indicator.govt_revenue else 'N/A' }}</td>
+                                                <td>{{ "{:,.0f}B".format(indicator.govt_expenditure/1000000000) if indicator.govt_expenditure else 'N/A' }}</td>
+                                                <td>
+                                                    {% if indicator.budget_deficit %}
+                                                        {% if indicator.budget_deficit > 0 %}
+                                                            <span class="badge bg-success">+{{ "{:,.0f}B".format(indicator.budget_deficit/1000000000) }}</span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger">{{ "{:,.0f}B".format(indicator.budget_deficit/1000000000) }}</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="text-muted">N/A</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ "{:,.0f}B".format(indicator.govt_debt/1000000000) if indicator.govt_debt else 'N/A' }}</td>
+                                                <td>{{ "{:,.0f}B".format(indicator.tax_revenue/1000000000) if indicator.tax_revenue else 'N/A' }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-primary" onclick="viewIndicator({{ indicator.id }})">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary" onclick="editIndicator({{ indicator.id }})">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Commodities Tab -->
+                            <div class="tab-pane fade" id="commodities" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Coffee Price ($/kg)</th>
+                                                <th>Gold Price ($/oz)</th>
+                                                <th>Oil Price ($/barrel)</th>
+                                                <th>Wheat Price ($/ton)</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for indicator in indicators.items %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-circle me-3" style="width: 35px; height: 35px; background: #198754; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="fas fa-seedling fa-sm text-white"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 fw-bold">{{ indicator.date.strftime('%B %Y') if indicator.date else 'N/A' }}</h6>
+                                                            <small class="text-muted">{{ indicator.date.strftime('%Y-%m-%d') if indicator.date else 'No date' }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ "${:.2f}".format(indicator.coffee_price) if indicator.coffee_price else 'N/A' }}</td>
+                                                <td>{{ "${:,.0f}".format(indicator.gold_price) if indicator.gold_price else 'N/A' }}</td>
+                                                <td>{{ "${:.2f}".format(indicator.oil_price) if indicator.oil_price else 'N/A' }}</td>
+                                                <td>{{ "${:,.0f}".format(indicator.wheat_price) if indicator.wheat_price else 'N/A' }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-primary" onclick="viewIndicator({{ indicator.id }})">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-secondary" onclick="editIndicator({{ indicator.id }})">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Pagination -->
@@ -238,13 +573,60 @@ function viewIndicator(indicatorId) {
                             </table>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-muted mb-2">ECONOMIC METRICS</h6>
+                            <h6 class="text-muted mb-2">KEY ECONOMIC METRICS</h6>
                             <table class="table table-sm">
                                 <tr><td><strong>GDP Growth:</strong></td><td>${indicator.gdp_growth ? indicator.gdp_growth.toFixed(1) + '%' : 'N/A'}</td></tr>
+                                <tr><td><strong>GDP per Capita:</strong></td><td>${indicator.gdp_per_capita ? '$' + indicator.gdp_per_capita.toLocaleString() : 'N/A'}</td></tr>
                                 <tr><td><strong>Inflation Rate:</strong></td><td>${indicator.inflation_rate ? indicator.inflation_rate.toFixed(1) + '%' : 'N/A'}</td></tr>
-                                <tr><td><strong>Exchange Rate:</strong></td><td>${indicator.etb_usd ? indicator.etb_usd.toFixed(2) + ' ETB' : 'N/A'}</td></tr>
+                                <tr><td><strong>Food Inflation:</strong></td><td>${indicator.food_inflation ? indicator.food_inflation.toFixed(1) + '%' : 'N/A'}</td></tr>
                                 <tr><td><strong>Interest Rate:</strong></td><td>${indicator.interest_rate ? indicator.interest_rate.toFixed(1) + '%' : 'N/A'}</td></tr>
                                 <tr><td><strong>Unemployment:</strong></td><td>${indicator.unemployment_rate ? indicator.unemployment_rate.toFixed(1) + '%' : 'N/A'}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">TRADE & FOREIGN EXCHANGE</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>ETB/USD:</strong></td><td>${indicator.etb_usd ? indicator.etb_usd.toFixed(2) : 'N/A'}</td></tr>
+                                <tr><td><strong>ETB/EUR:</strong></td><td>${indicator.etb_eur ? indicator.etb_eur.toFixed(2) : 'N/A'}</td></tr>
+                                <tr><td><strong>ETB/GBP:</strong></td><td>${indicator.etb_gbp ? indicator.etb_gbp.toFixed(2) : 'N/A'}</td></tr>
+                                <tr><td><strong>Exports:</strong></td><td>${indicator.exports ? '$' + (indicator.exports/1000000).toFixed(0) + 'M' : 'N/A'}</td></tr>
+                                <tr><td><strong>Imports:</strong></td><td>${indicator.imports ? '$' + (indicator.imports/1000000).toFixed(0) + 'M' : 'N/A'}</td></tr>
+                                <tr><td><strong>Trade Balance:</strong></td><td>${indicator.trade_balance ? '$' + (indicator.trade_balance/1000000).toFixed(0) + 'M' : 'N/A'}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">BANKING & MONETARY</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Total Deposits:</strong></td><td>${indicator.total_deposits ? '$' + (indicator.total_deposits/1000000000).toFixed(1) + 'B' : 'N/A'}</td></tr>
+                                <tr><td><strong>Total Loans:</strong></td><td>${indicator.total_loans ? '$' + (indicator.total_loans/1000000000).toFixed(1) + 'B' : 'N/A'}</td></tr>
+                                <tr><td><strong>NPL Ratio:</strong></td><td>${indicator.npl_ratio ? indicator.npl_ratio.toFixed(1) + '%' : 'N/A'}</td></tr>
+                                <tr><td><strong>Money Supply M1:</strong></td><td>${indicator.money_supply_m1 ? '$' + (indicator.money_supply_m1/1000000000).toFixed(1) + 'B' : 'N/A'}</td></tr>
+                                <tr><td><strong>Money Supply M2:</strong></td><td>${indicator.money_supply_m2 ? '$' + (indicator.money_supply_m2/1000000000).toFixed(1) + 'B' : 'N/A'}</td></tr>
+                                <tr><td><strong>FX Reserves:</strong></td><td>${indicator.fx_reserves ? '$' + (indicator.fx_reserves/1000000000).toFixed(1) + 'B' : 'N/A'}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">GOVERNMENT FINANCES</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Government Revenue:</strong></td><td>${indicator.govt_revenue ? '$' + (indicator.govt_revenue/1000000000).toFixed(1) + 'B' : 'N/A'}</td></tr>
+                                <tr><td><strong>Government Expenditure:</strong></td><td>${indicator.govt_expenditure ? '$' + (indicator.govt_expenditure/1000000000).toFixed(1) + 'B' : 'N/A'}</td></tr>
+                                <tr><td><strong>Budget Deficit:</strong></td><td>${indicator.budget_deficit ? '$' + (indicator.budget_deficit/1000000000).toFixed(1) + 'B' : 'N/A'}</td></tr>
+                                <tr><td><strong>Government Debt:</strong></td><td>${indicator.govt_debt ? '$' + (indicator.govt_debt/1000000000).toFixed(1) + 'B' : 'N/A'}</td></tr>
+                                <tr><td><strong>Tax Revenue:</strong></td><td>${indicator.tax_revenue ? '$' + (indicator.tax_revenue/1000000000).toFixed(1) + 'B' : 'N/A'}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">COMMODITIES & PRODUCTION</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Coffee Price:</strong></td><td>${indicator.coffee_price ? '$' + indicator.coffee_price.toFixed(2) + '/kg' : 'N/A'}</td></tr>
+                                <tr><td><strong>Gold Price:</strong></td><td>${indicator.gold_price ? '$' + indicator.gold_price.toFixed(0) + '/oz' : 'N/A'}</td></tr>
+                                <tr><td><strong>Oil Price:</strong></td><td>${indicator.oil_price ? '$' + indicator.oil_price.toFixed(2) + '/barrel' : 'N/A'}</td></tr>
+                                <tr><td><strong>Agricultural Production:</strong></td><td>${indicator.agricultural_production ? indicator.agricultural_production.toFixed(1) : 'N/A'}</td></tr>
+                                <tr><td><strong>Industrial Production:</strong></td><td>${indicator.industrial_production ? indicator.industrial_production.toFixed(1) : 'N/A'}</td></tr>
                             </table>
                         </div>
                     </div>
