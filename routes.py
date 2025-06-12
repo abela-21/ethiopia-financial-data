@@ -630,12 +630,10 @@ def get_indicator_api(indicator_id):
         indicator_data = {
             'id': indicator.id,
             'date': indicator.date.strftime('%Y-%m-%d') if indicator.date else '',
-            'year': year,
-            'quarter': quarter,
-            'gdp_growth_rate': float(indicator.gdp_growth) if indicator.gdp_growth else None,
+            'gdp_growth': float(indicator.gdp_growth) if indicator.gdp_growth else None,
             'inflation_rate': float(indicator.inflation_rate) if indicator.inflation_rate else None,
-            'exchange_rate_usd': float(indicator.etb_usd) if indicator.etb_usd else None,
-            'central_bank_rate': float(indicator.interest_rate) if indicator.interest_rate else None,
+            'etb_usd': float(indicator.etb_usd) if indicator.etb_usd else None,
+            'interest_rate': float(indicator.interest_rate) if indicator.interest_rate else None,
             'unemployment_rate': float(indicator.unemployment_rate) if indicator.unemployment_rate else None
         }
         
@@ -666,17 +664,17 @@ def update_indicator_api(indicator_id):
             from datetime import datetime
             indicator.date = datetime.strptime(data['date'], '%Y-%m-%d').date()
             
-        if 'gdp_growth_rate' in data:
-            indicator.gdp_growth = data['gdp_growth_rate']
+        if 'gdp_growth' in data:
+            indicator.gdp_growth = data['gdp_growth']
             
         if 'inflation_rate' in data:
             indicator.inflation_rate = data['inflation_rate']
             
-        if 'exchange_rate_usd' in data:
-            indicator.etb_usd = data['exchange_rate_usd']
+        if 'etb_usd' in data:
+            indicator.etb_usd = data['etb_usd']
             
-        if 'central_bank_rate' in data:
-            indicator.interest_rate = data['central_bank_rate']
+        if 'interest_rate' in data:
+            indicator.interest_rate = data['interest_rate']
             
         if 'unemployment_rate' in data:
             indicator.unemployment_rate = data['unemployment_rate']

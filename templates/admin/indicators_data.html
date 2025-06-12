@@ -306,14 +306,14 @@ function editIndicator(indicatorId) {
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Central Bank Rate (%)</label>
-                                <input type="number" class="form-control" id="central_bank_rate" value="${indicator.central_bank_rate ? (indicator.central_bank_rate * 100).toFixed(2) : ''}" step="0.01" placeholder="e.g., 7.0">
+                                <input type="number" class="form-control" id="interest_rate" value="${indicator.interest_rate || ''}" step="0.01" placeholder="e.g., 7.0">
                             </div>
                         </div>
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Unemployment Rate (%)</label>
-                                <input type="number" class="form-control" id="unemployment_rate" value="${indicator.unemployment_rate ? (indicator.unemployment_rate * 100).toFixed(2) : ''}" step="0.01" placeholder="e.g., 19.1">
+                                <input type="number" class="form-control" id="unemployment_rate" value="${indicator.unemployment_rate || ''}" step="0.01" placeholder="e.g., 19.1">
                             </div>
                         </div>
                     </form>
@@ -343,13 +343,11 @@ function saveIndicator() {
     const formData = {
         id: document.getElementById('indicatorId').value,
         date: document.getElementById('date').value,
-        year: parseInt(document.getElementById('year').value),
-        quarter: parseInt(document.getElementById('quarter').value),
-        gdp_growth_rate: document.getElementById('gdp_growth_rate').value ? parseFloat(document.getElementById('gdp_growth_rate').value) / 100 : null,
-        inflation_rate: document.getElementById('inflation_rate').value ? parseFloat(document.getElementById('inflation_rate').value) / 100 : null,
-        exchange_rate_usd: document.getElementById('exchange_rate_usd').value ? parseFloat(document.getElementById('exchange_rate_usd').value) : null,
-        central_bank_rate: document.getElementById('central_bank_rate').value ? parseFloat(document.getElementById('central_bank_rate').value) / 100 : null,
-        unemployment_rate: document.getElementById('unemployment_rate').value ? parseFloat(document.getElementById('unemployment_rate').value) / 100 : null
+        gdp_growth: document.getElementById('gdp_growth').value ? parseFloat(document.getElementById('gdp_growth').value) : null,
+        inflation_rate: document.getElementById('inflation_rate').value ? parseFloat(document.getElementById('inflation_rate').value) : null,
+        etb_usd: document.getElementById('etb_usd').value ? parseFloat(document.getElementById('etb_usd').value) : null,
+        interest_rate: document.getElementById('interest_rate').value ? parseFloat(document.getElementById('interest_rate').value) : null,
+        unemployment_rate: document.getElementById('unemployment_rate').value ? parseFloat(document.getElementById('unemployment_rate').value) : null
     };
     
     fetch(`/admin/api/indicator/${formData.id}`, {
