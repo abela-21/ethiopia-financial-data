@@ -61,13 +61,14 @@
                                             </div>
                                         </td>
                                         <td>
-                                            {% if indicator.gdp_growth_rate %}
-                                                {% if indicator.gdp_growth_rate >= 0.05 %}
-                                                    <span class="badge bg-success">{{ "{:.1%}".format(indicator.gdp_growth_rate) }}</span>
-                                                {% elif indicator.gdp_growth_rate >= 0 %}
-                                                    <span class="badge bg-warning">{{ "{:.1%}".format(indicator.gdp_growth_rate) }}</span>
+                                            {% if indicator.gdp_growth %}
+                                                {% set gdp_decimal = indicator.gdp_growth / 100.0 %}
+                                                {% if gdp_decimal >= 0.05 %}
+                                                    <span class="badge bg-success">{{ "{:.1f}%".format(indicator.gdp_growth) }}</span>
+                                                {% elif gdp_decimal >= 0 %}
+                                                    <span class="badge bg-warning">{{ "{:.1f}%".format(indicator.gdp_growth) }}</span>
                                                 {% else %}
-                                                    <span class="badge bg-danger">{{ "{:.1%}".format(indicator.gdp_growth_rate) }}</span>
+                                                    <span class="badge bg-danger">{{ "{:.1f}%".format(indicator.gdp_growth) }}</span>
                                                 {% endif %}
                                             {% else %}
                                                 <span class="text-muted">N/A</span>
@@ -75,12 +76,12 @@
                                         </td>
                                         <td>
                                             {% if indicator.inflation_rate %}
-                                                {% if indicator.inflation_rate <= 0.05 %}
-                                                    <span class="badge bg-success">{{ "{:.1%}".format(indicator.inflation_rate) }}</span>
-                                                {% elif indicator.inflation_rate <= 0.10 %}
-                                                    <span class="badge bg-warning">{{ "{:.1%}".format(indicator.inflation_rate) }}</span>
+                                                {% if indicator.inflation_rate <= 5.0 %}
+                                                    <span class="badge bg-success">{{ "{:.1f}%".format(indicator.inflation_rate) }}</span>
+                                                {% elif indicator.inflation_rate <= 15.0 %}
+                                                    <span class="badge bg-warning">{{ "{:.1f}%".format(indicator.inflation_rate) }}</span>
                                                 {% else %}
-                                                    <span class="badge bg-danger">{{ "{:.1%}".format(indicator.inflation_rate) }}</span>
+                                                    <span class="badge bg-danger">{{ "{:.1f}%".format(indicator.inflation_rate) }}</span>
                                                 {% endif %}
                                             {% else %}
                                                 <span class="text-muted">N/A</span>

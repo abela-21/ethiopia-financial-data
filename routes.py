@@ -430,7 +430,7 @@ def admin_view_economic_indicators():
         page = request.args.get('page', 1, type=int)
         per_page = 20
         
-        indicators = MacroIndicators.query.paginate(
+        indicators = MacroIndicators.query.order_by(desc(MacroIndicators.date)).paginate(
             page=page, per_page=per_page, error_out=False
         )
         
