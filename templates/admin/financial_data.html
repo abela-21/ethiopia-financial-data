@@ -60,6 +60,38 @@
             </div>
         </div>
 
+        <!-- Statement Type Selection -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow border-0" style="border-radius: 15px;">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3" style="color: #075056;">
+                            <i class="fas fa-filter me-2"></i>Select Statement Type
+                        </h6>
+                        <div class="btn-group" role="group" aria-label="Statement type selection">
+                            <input type="radio" class="btn-check" name="statementType" id="all-statements" value="all" checked>
+                            <label class="btn btn-outline-primary" for="all-statements">All Statements</label>
+                            
+                            <input type="radio" class="btn-check" name="statementType" id="income-statement" value="income_statement">
+                            <label class="btn btn-outline-primary" for="income-statement">Income Statement</label>
+                            
+                            <input type="radio" class="btn-check" name="statementType" id="balance-sheet" value="balance_sheet">
+                            <label class="btn btn-outline-primary" for="balance-sheet">Balance Sheet</label>
+                            
+                            <input type="radio" class="btn-check" name="statementType" id="cash-flow" value="cash_flow">
+                            <label class="btn btn-outline-primary" for="cash-flow">Cash Flow</label>
+                            
+                            <input type="radio" class="btn-check" name="statementType" id="banking-metrics" value="banking_metrics">
+                            <label class="btn btn-outline-primary" for="banking-metrics">Banking Metrics</label>
+                            
+                            <input type="radio" class="btn-check" name="statementType" id="financial-metrics" value="financial_metrics">
+                            <label class="btn btn-outline-primary" for="financial-metrics">Financial Metrics</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Financial Data Table -->
         <div class="row">
             <div class="col-12">
@@ -319,6 +351,11 @@ function viewFinancialStatement(statementId) {
                                     Banking Metrics
                                 </button>
                             </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="financial-metrics-tab" data-bs-toggle="tab" data-bs-target="#financial-metrics" type="button" role="tab">
+                                    Financial Metrics
+                                </button>
+                            </li>
                         </ul>
                         
                         <div class="tab-content" id="statementTabsContent">
@@ -417,6 +454,49 @@ function viewFinancialStatement(statementId) {
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Financial Metrics Tab -->
+                            <div class="tab-pane fade" id="financial-metrics" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-info mb-3">Profitability Ratios</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Gross Profit Margin:</strong></td><td class="text-end">${statement.revenue && statement.gross_profit ? ((parseFloat(statement.gross_profit) / parseFloat(statement.revenue)) * 100).toFixed(2) + '%' : 'N/A'}</td></tr>
+                                            <tr><td><strong>Operating Margin:</strong></td><td class="text-end">${statement.revenue && statement.operating_income ? ((parseFloat(statement.operating_income) / parseFloat(statement.revenue)) * 100).toFixed(2) + '%' : 'N/A'}</td></tr>
+                                            <tr><td><strong>Net Profit Margin:</strong></td><td class="text-end">${statement.revenue && statement.net_income ? ((parseFloat(statement.net_income) / parseFloat(statement.revenue)) * 100).toFixed(2) + '%' : 'N/A'}</td></tr>
+                                            <tr><td><strong>ROA (Return on Assets):</strong></td><td class="text-end">${statement.total_assets && statement.net_income ? ((parseFloat(statement.net_income) / parseFloat(statement.total_assets)) * 100).toFixed(2) + '%' : 'N/A'}</td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-warning mb-3">Liquidity & Leverage</h6>
+                                        <table class="table table-sm">
+                                            <tr><td><strong>Current Ratio:</strong></td><td class="text-end">${statement.current_assets && statement.current_liabilities ? (parseFloat(statement.current_assets) / parseFloat(statement.current_liabilities)).toFixed(2) : 'N/A'}</td></tr>
+                                            <tr><td><strong>Debt-to-Assets:</strong></td><td class="text-end">${statement.total_liabilities && statement.total_assets ? ((parseFloat(statement.total_liabilities) / parseFloat(statement.total_assets)) * 100).toFixed(2) + '%' : 'N/A'}</td></tr>
+                                            <tr><td><strong>Debt-to-Equity:</strong></td><td class="text-end">${statement.total_liabilities && statement.shareholders_equity ? (parseFloat(statement.total_liabilities) / parseFloat(statement.shareholders_equity)).toFixed(2) : 'N/A'}</td></tr>
+                                            <tr><td><strong>Asset Turnover:</strong></td><td class="text-end">${statement.revenue && statement.total_assets ? (parseFloat(statement.revenue) / parseFloat(statement.total_assets)).toFixed(2) : 'N/A'}</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <h6 class="text-success mb-3">Banking-Specific Ratios</h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <table class="table table-sm">
+                                                    <tr><td><strong>Loan-to-Deposit Ratio:</strong></td><td class="text-end">${statement.loans_and_advances && statement.deposits ? ((parseFloat(statement.loans_and_advances) / parseFloat(statement.deposits)) * 100).toFixed(2) + '%' : 'N/A'}</td></tr>
+                                                    <tr><td><strong>Provision Coverage:</strong></td><td class="text-end">${statement.loan_loss_provisions && statement.loans_and_advances ? ((parseFloat(statement.loan_loss_provisions) / parseFloat(statement.loans_and_advances)) * 100).toFixed(2) + '%' : 'N/A'}</td></tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <table class="table table-sm">
+                                                    <tr><td><strong>Cost-to-Income Ratio:</strong></td><td class="text-end">${statement.operating_expenses && statement.revenue ? ((parseFloat(statement.operating_expenses) / parseFloat(statement.revenue)) * 100).toFixed(2) + '%' : 'N/A'}</td></tr>
+                                                    <tr><td><strong>Interest Margin:</strong></td><td class="text-end">${statement.net_interest_income && statement.total_assets ? ((parseFloat(statement.net_interest_income) / parseFloat(statement.total_assets)) * 100).toFixed(2) + '%' : 'N/A'}</td></tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -497,6 +577,11 @@ function editFinancialStatement(statementId) {
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="edit-banking-tab" data-bs-toggle="tab" data-bs-target="#edit-banking" type="button" role="tab">
                                     Banking Metrics
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="edit-financial-metrics-tab" data-bs-toggle="tab" data-bs-target="#edit-financial-metrics" type="button" role="tab">
+                                    Financial Metrics
                                 </button>
                             </li>
                         </ul>
@@ -655,6 +740,60 @@ function editFinancialStatement(statementId) {
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Financial Metrics Edit Tab -->
+                            <div class="tab-pane fade" id="edit-financial-metrics" role="tabpanel">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Financial Metrics are automatically calculated</strong> based on the financial statement data you enter in the other tabs. 
+                                    Update the Income Statement, Balance Sheet, Cash Flow, and Banking Metrics tabs to see the calculated ratios.
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-info mb-3">Profitability Ratios (Auto-calculated)</h6>
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <p class="mb-2"><strong>Gross Profit Margin:</strong> <span class="text-muted">Revenue & Gross Profit required</span></p>
+                                                <p class="mb-2"><strong>Operating Margin:</strong> <span class="text-muted">Revenue & Operating Income required</span></p>
+                                                <p class="mb-2"><strong>Net Profit Margin:</strong> <span class="text-muted">Revenue & Net Income required</span></p>
+                                                <p class="mb-0"><strong>ROA:</strong> <span class="text-muted">Total Assets & Net Income required</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-warning mb-3">Liquidity & Leverage (Auto-calculated)</h6>
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <p class="mb-2"><strong>Current Ratio:</strong> <span class="text-muted">Current Assets & Current Liabilities required</span></p>
+                                                <p class="mb-2"><strong>Debt-to-Assets:</strong> <span class="text-muted">Total Liabilities & Total Assets required</span></p>
+                                                <p class="mb-2"><strong>Debt-to-Equity:</strong> <span class="text-muted">Total Liabilities & Shareholders Equity required</span></p>
+                                                <p class="mb-0"><strong>Asset Turnover:</strong> <span class="text-muted">Revenue & Total Assets required</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <h6 class="text-success mb-3">Banking-Specific Ratios (Auto-calculated)</h6>
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <p class="mb-2"><strong>Loan-to-Deposit Ratio:</strong> <span class="text-muted">Loans & Deposits required</span></p>
+                                                        <p class="mb-2"><strong>Provision Coverage:</strong> <span class="text-muted">Loan Provisions & Loans required</span></p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p class="mb-2"><strong>Cost-to-Income Ratio:</strong> <span class="text-muted">Operating Expenses & Revenue required</span></p>
+                                                        <p class="mb-0"><strong>Interest Margin:</strong> <span class="text-muted">Net Interest Income & Total Assets required</span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 `;
@@ -748,5 +887,50 @@ function saveFinancialStatement() {
         alert('Error saving financial statement: ' + error.message);
     });
 }
+
+// Statement Type Filtering
+document.addEventListener('DOMContentLoaded', function() {
+    const statementTypeInputs = document.querySelectorAll('input[name="statementType"]');
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    statementTypeInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            filterStatements(this.value);
+        });
+    });
+    
+    function filterStatements(statementType) {
+        tableRows.forEach(row => {
+            if (statementType === 'all') {
+                row.style.display = 'table-row';
+            } else {
+                // Get statement type from the row (assuming it's in the 4th column)
+                const statementTypeCell = row.cells[3];
+                if (statementTypeCell) {
+                    const rowStatementType = statementTypeCell.textContent.trim().toLowerCase().replace(/\s+/g, '_');
+                    if (rowStatementType.includes(statementType)) {
+                        row.style.display = 'table-row';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            }
+        });
+        
+        // Update visible count
+        updateVisibleCount();
+    }
+    
+    function updateVisibleCount() {
+        const visibleRows = document.querySelectorAll('tbody tr[style="table-row"], tbody tr:not([style])');
+        const totalRows = tableRows.length;
+        
+        // Update statistics if they exist
+        const totalRecordsElement = document.querySelector('.card-body h3');
+        if (totalRecordsElement) {
+            totalRecordsElement.textContent = visibleRows.length;
+        }
+    }
+});
 </script>
 {% endblock %}
