@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, send_file
 from flask_login import login_required, current_user
 from models import Company, Stock, Financial, MacroIndicators, Bank, ResearchDocument, EconomicSector, db
 from functools import wraps
 from sqlalchemy import func, desc
 from datetime import datetime, timedelta
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -1180,3 +1181,94 @@ def refresh_data_api():
             'success': False,
             'error': str(e)
         }), 500
+
+@main_bp.route('/admin/bulk-import')
+@login_required
+@admin_required
+def admin_bulk_import():
+    """Bulk import interface for CSV/Excel data uploads"""
+    return render_template('admin/bulk_import.html')
+
+@main_bp.route('/admin/bulk-import/upload', methods=['POST'])
+@login_required
+@admin_required
+def admin_bulk_import_upload():
+    """Handle bulk data import file uploads"""
+    try:
+        from werkzeug.utils import secure_filename
+        import tempfile
+        import os
+        
+        # Get uploaded file and data type
+        file = request.files.get('file')
+        data_type = request.form.get('data_type')
+        
+        if not file or not data_type:
+            return jsonify({'success': False, 'errors': ['Missing file or data type']})
+        
+        # Validate file extension
+        if not file.filename or not file.filename.endswith(('.csv', '.xlsx')):
+            return jsonify({'success': False, 'errors': ['Invalid file format. Use CSV or Excel (.xlsx)']})
+        
+        # Save file temporarily
+        filename = secure_filename(file.filename or 'upload.csv')
+        temp_dir = tempfile.mkdtemp()
+        file_path = os.path.join(temp_dir, filename)
+        file.save(file_path)
+        
+        # Import processor
+        from Data.bulk_import_processor import BulkImportProcessor
+        processor = BulkImportProcessor()
+        
+        # Process based on data type
+        if data_type == 'companies':
+            result = processor.import_companies_data(file_path)
+        elif data_type == 'financial':
+            result = processor.import_financial_statements_data(file_path)
+        elif data_type == 'macro':
+            result = processor.import_macro_indicators_data(file_path)
+        else:
+            return jsonify({'success': False, 'errors': ['Invalid data type']})
+        
+        # Calculate success rate
+        if result.get('success') and 'imported' in result:
+            total = result.get('imported', 0) + result.get('errors', 0)
+            if total > 0:
+                result['success_rate'] = round((result.get('imported', 0) / total) * 100, 2)
+        
+        # Clean up temp file
+        os.remove(file_path)
+        os.rmdir(temp_dir)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"Error in bulk import upload: {str(e)}")
+        return jsonify({'success': False, 'errors': [str(e)]})
+
+@main_bp.route('/admin/bulk-import/templates/<template_type>')
+@login_required
+@admin_required
+def download_import_template(template_type):
+    """Download import templates"""
+    try:
+        # send_file already imported at top
+        
+        template_files = {
+            'companies': 'Data/companies_import_template.xlsx',
+            'financial': 'Data/financial_statements_import_template.xlsx',
+            'macro': 'Data/macro_indicators_import_template.xlsx'
+        }
+        
+        if template_type not in template_files:
+            return jsonify({'error': 'Invalid template type'}), 404
+        
+        file_path = template_files[template_type]
+        if not os.path.exists(file_path):
+            return jsonify({'error': 'Template file not found'}), 404
+            
+        return send_file(file_path, as_attachment=True)
+        
+    except Exception as e:
+        logger.error(f"Error downloading template: {str(e)}")
+        return jsonify({'error': str(e)}), 500
