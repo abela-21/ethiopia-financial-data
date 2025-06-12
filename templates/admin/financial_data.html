@@ -103,22 +103,36 @@
                         {% if financial_data.items %}
                         <div class="table-responsive">
                             <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
+                                <thead class="table-light" id="tableHeader">
+                                    <tr id="headerRow">
                                         <th>ID</th>
                                         <th>Company</th>
                                         <th>Period</th>
                                         <th>Statement Type</th>
-                                        <th>Revenue</th>
-                                        <th>Net Income</th>
-                                        <th>Total Assets</th>
+                                        <th class="data-column">Revenue</th>
+                                        <th class="data-column">Net Income</th>
+                                        <th class="data-column">Total Assets</th>
                                         <th>Filing Date</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for statement in financial_data.items %}
-                                    <tr>
+                                    <tr data-statement-id="{{ statement.id }}"
+                                        data-revenue="{{ statement.revenue or 0 }}"
+                                        data-net-income="{{ statement.net_income or 0 }}"
+                                        data-operating-income="{{ statement.operating_income or 0 }}"
+                                        data-total-assets="{{ statement.total_assets or 0 }}"
+                                        data-total-liabilities="{{ statement.total_liabilities or 0 }}"
+                                        data-shareholders-equity="{{ statement.shareholders_equity or 0 }}"
+                                        data-operating-cash-flow="{{ statement.operating_cash_flow or 0 }}"
+                                        data-investing-cash-flow="{{ statement.investing_cash_flow or 0 }}"
+                                        data-free-cash-flow="{{ statement.free_cash_flow or 0 }}"
+                                        data-deposits="{{ statement.deposits or 0 }}"
+                                        data-loans-advances="{{ statement.loans_and_advances or 0 }}"
+                                        data-net-interest-income="{{ statement.net_interest_income or 0 }}"
+                                        data-current-assets="{{ statement.current_assets or 0 }}"
+                                        data-current-liabilities="{{ statement.current_liabilities or 0 }}">
                                         <td><span class="badge bg-secondary">{{ statement.id }}</span></td>
                                         <td>
                                             <div class="d-flex align-items-center">
@@ -888,51 +902,212 @@ function saveFinancialStatement() {
     });
 }
 
-// Statement Type Filtering
+// Statement Type Filtering with Dynamic Columns
 document.addEventListener('DOMContentLoaded', function() {
     const statementTypeInputs = document.querySelectorAll('input[name="statementType"]');
     const tableRows = document.querySelectorAll('tbody tr');
     
+    // Column definitions for each statement type
+    const columnConfigs = {
+        'all': ['Revenue', 'Net Income', 'Total Assets'],
+        'income_statement': ['Revenue', 'Net Income', 'Operating Income'],
+        'balance_sheet': ['Total Assets', 'Total Liabilities', 'Shareholders Equity'],
+        'cash_flow': ['Operating Cash Flow', 'Investing Cash Flow', 'Free Cash Flow'],
+        'banking_metrics': ['Deposits', 'Loans & Advances', 'Net Interest Income'],
+        'financial_metrics': ['Net Profit Margin', 'ROA', 'Current Ratio']
+    };
+    
     statementTypeInputs.forEach(input => {
         input.addEventListener('change', function() {
             filterStatements(this.value);
+            updateTableHeaders(this.value);
         });
     });
     
+    function updateTableHeaders(statementType) {
+        const headerRow = document.getElementById('headerRow');
+        const dataColumns = headerRow.querySelectorAll('.data-column');
+        const config = columnConfigs[statementType] || columnConfigs['all'];
+        
+        // Update header columns
+        dataColumns.forEach((col, index) => {
+            if (config[index]) {
+                col.textContent = config[index];
+                col.style.display = 'table-cell';
+            } else {
+                col.style.display = 'none';
+            }
+        });
+    }
+    
     function filterStatements(statementType) {
         tableRows.forEach(row => {
+            const statementTypeCell = row.cells[3];
+            if (!statementTypeCell) return;
+            
+            const rowStatementType = statementTypeCell.textContent.trim().toLowerCase().replace(/\s+/g, '_');
+            
             if (statementType === 'all') {
                 row.style.display = 'table-row';
+                updateRowData(row, 'all');
+            } else if (rowStatementType.includes(statementType.replace('_', ' ').toLowerCase()) || 
+                       rowStatementType === statementType) {
+                row.style.display = 'table-row';
+                updateRowData(row, statementType);
             } else {
-                // Get statement type from the row (4th column - Statement Type)
-                const statementTypeCell = row.cells[3];
-                if (statementTypeCell) {
-                    const rowStatementType = statementTypeCell.textContent.trim().toLowerCase().replace(/\s+/g, '_');
-                    
-                    // Match the exact statement type
-                    if (rowStatementType === statementType || 
-                        (statementType === 'income_statement' && rowStatementType === 'income_statement') ||
-                        (statementType === 'balance_sheet' && rowStatementType === 'balance_sheet') ||
-                        (statementType === 'cash_flow' && rowStatementType === 'cash_flow') ||
-                        (statementType === 'banking_metrics' && rowStatementType === 'banking_metrics') ||
-                        (statementType === 'financial_metrics' && rowStatementType === 'financial_metrics')) {
-                        row.style.display = 'table-row';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                }
+                row.style.display = 'none';
             }
         });
         
-        // Update visible count
         updateVisibleCount();
     }
     
-    function updateVisibleCount() {
-        const visibleRows = document.querySelectorAll('tbody tr[style="table-row"], tbody tr:not([style])');
-        const totalRows = tableRows.length;
+    function updateRowData(row, statementType) {
+        const dataCells = row.querySelectorAll('.data-column');
+        const config = columnConfigs[statementType] || columnConfigs['all'];
         
-        // Update statistics if they exist
+        // Get data from row attributes
+        const data = {
+            revenue: parseFloat(row.dataset.revenue || 0),
+            netIncome: parseFloat(row.dataset.netIncome || 0),
+            operatingIncome: parseFloat(row.dataset.operatingIncome || 0),
+            totalAssets: parseFloat(row.dataset.totalAssets || 0),
+            totalLiabilities: parseFloat(row.dataset.totalLiabilities || 0),
+            shareholdersEquity: parseFloat(row.dataset.shareholdersEquity || 0),
+            operatingCashFlow: parseFloat(row.dataset.operatingCashFlow || 0),
+            investingCashFlow: parseFloat(row.dataset.investingCashFlow || 0),
+            freeCashFlow: parseFloat(row.dataset.freeCashFlow || 0),
+            deposits: parseFloat(row.dataset.deposits || 0),
+            loansAdvances: parseFloat(row.dataset.loansAdvances || 0),
+            netInterestIncome: parseFloat(row.dataset.netInterestIncome || 0),
+            currentAssets: parseFloat(row.dataset.currentAssets || 0),
+            currentLiabilities: parseFloat(row.dataset.currentLiabilities || 0)
+        };
+        
+        // Update each data cell based on statement type
+        dataCells.forEach((cell, index) => {
+            if (config[index]) {
+                let value = '';
+                let className = '';
+                
+                switch (statementType) {
+                    case 'income_statement':
+                        switch (index) {
+                            case 0: 
+                                value = data.revenue > 0 ? `${data.revenue.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-success fw-bold';
+                                break;
+                            case 1: 
+                                value = data.netIncome > 0 ? `${data.netIncome.toLocaleString()} ETB` : 'N/A';
+                                className = data.netIncome >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
+                                break;
+                            case 2: 
+                                value = data.operatingIncome > 0 ? `${data.operatingIncome.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-info fw-bold';
+                                break;
+                        }
+                        break;
+                        
+                    case 'balance_sheet':
+                        switch (index) {
+                            case 0: 
+                                value = data.totalAssets > 0 ? `${data.totalAssets.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-primary fw-bold';
+                                break;
+                            case 1: 
+                                value = data.totalLiabilities > 0 ? `${data.totalLiabilities.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-warning fw-bold';
+                                break;
+                            case 2: 
+                                value = data.shareholdersEquity > 0 ? `${data.shareholdersEquity.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-success fw-bold';
+                                break;
+                        }
+                        break;
+                        
+                    case 'cash_flow':
+                        switch (index) {
+                            case 0: 
+                                value = data.operatingCashFlow > 0 ? `${data.operatingCashFlow.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-success fw-bold';
+                                break;
+                            case 1: 
+                                value = data.investingCashFlow !== 0 ? `${data.investingCashFlow.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-info fw-bold';
+                                break;
+                            case 2: 
+                                value = data.freeCashFlow > 0 ? `${data.freeCashFlow.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-primary fw-bold';
+                                break;
+                        }
+                        break;
+                        
+                    case 'banking_metrics':
+                        switch (index) {
+                            case 0: 
+                                value = data.deposits > 0 ? `${data.deposits.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-info fw-bold';
+                                break;
+                            case 1: 
+                                value = data.loansAdvances > 0 ? `${data.loansAdvances.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-success fw-bold';
+                                break;
+                            case 2: 
+                                value = data.netInterestIncome > 0 ? `${data.netInterestIncome.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-primary fw-bold';
+                                break;
+                        }
+                        break;
+                        
+                    case 'financial_metrics':
+                        switch (index) {
+                            case 0: // Net Profit Margin
+                                value = (data.revenue > 0 && data.netIncome > 0) ? 
+                                    `${((data.netIncome / data.revenue) * 100).toFixed(2)}%` : 'N/A';
+                                className = 'text-success fw-bold';
+                                break;
+                            case 1: // ROA
+                                value = (data.totalAssets > 0 && data.netIncome > 0) ? 
+                                    `${((data.netIncome / data.totalAssets) * 100).toFixed(2)}%` : 'N/A';
+                                className = 'text-info fw-bold';
+                                break;
+                            case 2: // Current Ratio
+                                value = (data.currentAssets > 0 && data.currentLiabilities > 0) ? 
+                                    `${(data.currentAssets / data.currentLiabilities).toFixed(2)}` : 'N/A';
+                                className = 'text-primary fw-bold';
+                                break;
+                        }
+                        break;
+                        
+                    default: // 'all' case
+                        switch (index) {
+                            case 0: 
+                                value = data.revenue > 0 ? `${data.revenue.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-success fw-bold';
+                                break;
+                            case 1: 
+                                value = data.netIncome > 0 ? `${data.netIncome.toLocaleString()} ETB` : 'N/A';
+                                className = data.netIncome >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
+                                break;
+                            case 2: 
+                                value = data.totalAssets > 0 ? `${data.totalAssets.toLocaleString()} ETB` : 'N/A';
+                                className = 'text-primary fw-bold';
+                                break;
+                        }
+                }
+                
+                cell.innerHTML = `<span class="${className}">${value}</span>`;
+                cell.style.display = 'table-cell';
+            } else {
+                cell.style.display = 'none';
+            }
+        });
+    }
+    
+    function updateVisibleCount() {
+        const visibleRows = document.querySelectorAll('tbody tr[style*="table-row"], tbody tr:not([style*="none"])');
+        
+        // Update statistics
         const totalRecordsElement = document.querySelector('.card-body h3');
         if (totalRecordsElement) {
             totalRecordsElement.textContent = visibleRows.length;
