@@ -904,11 +904,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (statementType === 'all') {
                 row.style.display = 'table-row';
             } else {
-                // Get statement type from the row (assuming it's in the 4th column)
+                // Get statement type from the row (4th column - Statement Type)
                 const statementTypeCell = row.cells[3];
                 if (statementTypeCell) {
                     const rowStatementType = statementTypeCell.textContent.trim().toLowerCase().replace(/\s+/g, '_');
-                    if (rowStatementType.includes(statementType)) {
+                    
+                    // Match the exact statement type
+                    if (rowStatementType === statementType || 
+                        (statementType === 'income_statement' && rowStatementType === 'income_statement') ||
+                        (statementType === 'balance_sheet' && rowStatementType === 'balance_sheet') ||
+                        (statementType === 'cash_flow' && rowStatementType === 'cash_flow') ||
+                        (statementType === 'banking_metrics' && rowStatementType === 'banking_metrics') ||
+                        (statementType === 'financial_metrics' && rowStatementType === 'financial_metrics')) {
                         row.style.display = 'table-row';
                     } else {
                         row.style.display = 'none';
