@@ -630,11 +630,47 @@ def get_indicator_api(indicator_id):
         indicator_data = {
             'id': indicator.id,
             'date': indicator.date.strftime('%Y-%m-%d') if indicator.date else '',
+            # Core economic indicators
             'gdp_growth': float(indicator.gdp_growth) if indicator.gdp_growth else None,
+            'gdp_per_capita': float(indicator.gdp_per_capita) if indicator.gdp_per_capita else None,
             'inflation_rate': float(indicator.inflation_rate) if indicator.inflation_rate else None,
-            'etb_usd': float(indicator.etb_usd) if indicator.etb_usd else None,
+            'food_inflation': float(indicator.food_inflation) if indicator.food_inflation else None,
             'interest_rate': float(indicator.interest_rate) if indicator.interest_rate else None,
-            'unemployment_rate': float(indicator.unemployment_rate) if indicator.unemployment_rate else None
+            'unemployment_rate': float(indicator.unemployment_rate) if indicator.unemployment_rate else None,
+            'industrial_production': float(indicator.industrial_production) if indicator.industrial_production else None,
+            'agricultural_production': float(indicator.agricultural_production) if indicator.agricultural_production else None,
+            # Trade and foreign exchange
+            'exports': float(indicator.exports) if indicator.exports else None,
+            'imports': float(indicator.imports) if indicator.imports else None,
+            'trade_balance': float(indicator.trade_balance) if indicator.trade_balance else None,
+            'current_account_balance': float(indicator.current_account_balance) if indicator.current_account_balance else None,
+            'fdi_inflow': float(indicator.fdi_inflow) if indicator.fdi_inflow else None,
+            'remittances': float(indicator.remittances) if indicator.remittances else None,
+            'fx_reserves': float(indicator.fx_reserves) if indicator.fx_reserves else None,
+            'etb_usd': float(indicator.etb_usd) if indicator.etb_usd else None,
+            'etb_eur': float(indicator.etb_eur) if indicator.etb_eur else None,
+            'etb_gbp': float(indicator.etb_gbp) if indicator.etb_gbp else None,
+            'etb_jpy': float(indicator.etb_jpy) if indicator.etb_jpy else None,
+            'etb_cny': float(indicator.etb_cny) if indicator.etb_cny else None,
+            # Banking and monetary
+            'total_deposits': float(indicator.total_deposits) if indicator.total_deposits else None,
+            'total_loans': float(indicator.total_loans) if indicator.total_loans else None,
+            'npl_ratio': float(indicator.npl_ratio) if indicator.npl_ratio else None,
+            'loan_to_deposit': float(indicator.loan_to_deposit) if indicator.loan_to_deposit else None,
+            'money_supply_m1': float(indicator.money_supply_m1) if indicator.money_supply_m1 else None,
+            'money_supply_m2': float(indicator.money_supply_m2) if indicator.money_supply_m2 else None,
+            'private_sector_credit': float(indicator.private_sector_credit) if indicator.private_sector_credit else None,
+            # Government finances
+            'govt_revenue': float(indicator.govt_revenue) if indicator.govt_revenue else None,
+            'govt_expenditure': float(indicator.govt_expenditure) if indicator.govt_expenditure else None,
+            'budget_deficit': float(indicator.budget_deficit) if indicator.budget_deficit else None,
+            'govt_debt': float(indicator.govt_debt) if indicator.govt_debt else None,
+            'tax_revenue': float(indicator.tax_revenue) if indicator.tax_revenue else None,
+            # Commodities
+            'coffee_price': float(indicator.coffee_price) if indicator.coffee_price else None,
+            'gold_price': float(indicator.gold_price) if indicator.gold_price else None,
+            'oil_price': float(indicator.oil_price) if indicator.oil_price else None,
+            'wheat_price': float(indicator.wheat_price) if indicator.wheat_price else None
         }
         
         return jsonify({
