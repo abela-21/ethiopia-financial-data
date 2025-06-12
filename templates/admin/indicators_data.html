@@ -218,7 +218,9 @@
 
 <script>
 function viewIndicator(indicatorId) {
-    $('#viewIndicatorModal').modal('show');
+    // Bootstrap 5 native modal initialization
+    const viewModal = new bootstrap.Modal(document.getElementById('viewIndicatorModal'));
+    viewModal.show();
     
     fetch(`/admin/api/indicator/${indicatorId}`)
         .then(response => response.json())
@@ -267,7 +269,9 @@ function viewIndicator(indicatorId) {
 }
 
 function editIndicator(indicatorId) {
-    $('#editIndicatorModal').modal('show');
+    // Bootstrap 5 native modal initialization
+    const editModal = new bootstrap.Modal(document.getElementById('editIndicatorModal'));
+    editModal.show();
     
     fetch(`/admin/api/indicator/${indicatorId}`)
         .then(response => response.json())
@@ -372,7 +376,9 @@ function saveIndicator() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            $('#editIndicatorModal').modal('hide');
+            // Bootstrap 5 native modal hide
+            const editModal = bootstrap.Modal.getInstance(document.getElementById('editIndicatorModal'));
+            editModal.hide();
             location.reload(); // Refresh the page to show updated data
         } else {
             alert('Error saving indicator: ' + data.error);
