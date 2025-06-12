@@ -683,6 +683,113 @@ class EthiopianDataMigration:
                 self.logger.error(f"Error loading research documents: {e}")
                 raise
 
+    def load_economic_indicators(self):
+        """Load economic indicators from external data and populate macro_indicators table"""
+        print("📊 Loading economic indicators...")
+        
+        with self.app.app_context():
+            try:
+                # First, fetch external data
+                from Data.enhanced_external_apis import EnhancedExternalDataIntegrator
+                integrator = EnhancedExternalDataIntegrator()
+                
+                # Fetch all external data
+                all_data = integrator.fetch_all_external_data()
+                
+                if all_data:
+                    # Store in external_economic_data table
+                    integrator.store_in_database(all_data)
+                    
+                    # Now populate macro_indicators table with latest data
+                    from models import MacroIndicators
+                    
+                    # Get the most recent data for key indicators
+                    with db.engine.connect() as conn:
+                        # Get latest GDP data
+                        gdp_data = conn.execute(text("""
+                            SELECT value FROM external_economic_data 
+                            WHERE indicator_code = 'NY.GDP.MKTP.CD' 
+                            ORDER BY date DESC LIMIT 1
+                        """)).scalar()
+                        
+                        # Get latest GDP growth
+                        gdp_growth = conn.execute(text("""
+                            SELECT value FROM external_economic_data 
+                            WHERE indicator_code = 'NY.GDP.MKTP.KD.ZG' 
+                            ORDER BY date DESC LIMIT 1
+                        """)).scalar()
+                        
+                        # Get latest inflation
+                        inflation = conn.execute(text("""
+                            SELECT value FROM external_economic_data 
+                            WHERE indicator_code = 'FP.CPI.TOTL.ZG' 
+                            ORDER BY date DESC LIMIT 1
+                        """)).scalar()
+                        
+                        # Get latest unemployment
+                        unemployment = conn.execute(text("""
+                            SELECT value FROM external_economic_data 
+                            WHERE indicator_code = 'SL.UEM.TOTL.ZS' 
+                            ORDER BY date DESC LIMIT 1
+                        """)).scalar()
+                        
+                        # Get latest exchange rate
+                        exchange_rate = conn.execute(text("""
+                            SELECT value FROM external_economic_data 
+                            WHERE indicator_code = 'PA.NUS.FCRF' 
+                            ORDER BY date DESC LIMIT 1
+                        """)).scalar()
+                        
+                        # Get latest exports
+                        exports = conn.execute(text("""
+                            SELECT value FROM external_economic_data 
+                            WHERE indicator_code = 'NE.EXP.GNFS.CD' 
+                            ORDER BY date DESC LIMIT 1
+                        """)).scalar()
+                        
+                        # Get latest imports
+                        imports = conn.execute(text("""
+                            SELECT value FROM external_economic_data 
+                            WHERE indicator_code = 'NE.IMP.GNFS.CD' 
+                            ORDER BY date DESC LIMIT 1
+                        """)).scalar()
+                        
+                        # Get latest FDI
+                        fdi = conn.execute(text("""
+                            SELECT value FROM external_economic_data 
+                            WHERE indicator_code = 'BX.KLT.DINV.CD.WD' 
+                            ORDER BY date DESC LIMIT 1
+                        """)).scalar()
+                    
+                    # Create macro indicator record
+                    macro_indicator = MacroIndicators(
+                        date=datetime.now().date(),
+                        gdp_growth=float(gdp_growth) if gdp_growth else None,
+                        inflation_rate=float(inflation) if inflation else None,
+                        unemployment_rate=float(unemployment) if unemployment else None,
+                        exports=float(exports) if exports else None,
+                        imports=float(imports) if imports else None,
+                        trade_balance=float(exports - imports) if exports and imports else None,
+                        fdi_inflow=float(fdi) if fdi else None,
+                        etb_usd=float(exchange_rate) if exchange_rate else None,
+                        created_at=datetime.now(),
+                        updated_at=datetime.now()
+                    )
+                    
+                    db.session.add(macro_indicator)
+                    db.session.commit()
+                    
+                    print(f"✅ Successfully loaded economic indicators from {len(all_data)} external data points")
+                    self.logger.info(f"Successfully loaded economic indicators from external data")
+                else:
+                    print("⚠️ No external data available for economic indicators")
+                    
+            except Exception as e:
+                db.session.rollback()
+                print(f"❌ Error loading economic indicators: {e}")
+                self.logger.error(f"Error loading economic indicators: {e}")
+                # Don't raise - this is optional functionality
+
     def run_full_migration(self):
         """Execute complete data migration process"""
         print("🚀 Starting Ethiopian Banking & Economic Data Migration")
@@ -701,12 +808,16 @@ class EthiopianDataMigration:
             # Step 4: Load research documents
             self.load_research_documents()
             
+            # Step 5: Load economic indicators from external data
+            self.load_economic_indicators()
+            
             print("=" * 60)
             print("🎉 Ethiopian Banking & Economic Data Migration Completed Successfully!")
             print(f"📊 Total loaded:")
             print(f"   • 18 Ethiopian Banks")
             print(f"   • 10 Economic Sectors") 
             print(f"   • 8 Research Documents")
+            print(f"   • Economic Indicators from World Bank API")
             
             self.logger.info("Full migration completed successfully")
             
