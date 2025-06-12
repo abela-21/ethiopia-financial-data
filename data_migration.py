@@ -50,7 +50,7 @@ class EthiopianDataMigration:
                 db.session.execute(text("DELETE FROM bank_financial_metric"))
                 db.session.execute(text("DELETE FROM research_document"))
                 db.session.execute(text("DELETE FROM bank"))
-                db.session.execute(text("DELETE FROM macro_indicators WHERE source = 'ethiopian_data'"))
+                db.session.execute(text("DELETE FROM macro_indicators"))
                 
                 db.session.commit()
                 print("✅ Existing data cleared successfully")
