@@ -1152,30 +1152,113 @@ def add_economic_indicator_api():
 def refresh_data_api():
     """API endpoint to refresh platform data"""
     try:
-        # Run data migration scripts
-        import subprocess
-        import os
+        from datetime import datetime
+        from models import MacroIndicators
+        from sqlalchemy import text
         
-        # Execute data migration
-        result = subprocess.run(
-            ['python', 'data_migration.py'],
-            cwd=os.getcwd(),
-            capture_output=True,
-            text=True
-        )
+        # Check if external data exists
+        external_count = db.session.execute(text("SELECT COUNT(*) FROM external_economic_data")).scalar()
         
-        if result.returncode == 0:
+        if external_count > 0:
+            # Use existing external data to populate macro indicators
+            with db.engine.connect() as conn:
+                gdp_growth = conn.execute(text("""
+                    SELECT value FROM external_economic_data 
+                    WHERE indicator_code = 'NY.GDP.MKTP.KD.ZG' 
+                    ORDER BY date DESC LIMIT 1
+                """)).scalar()
+                
+                inflation = conn.execute(text("""
+                    SELECT value FROM external_economic_data 
+                    WHERE indicator_code = 'FP.CPI.TOTL.ZG' 
+                    ORDER BY date DESC LIMIT 1
+                """)).scalar()
+                
+                unemployment = conn.execute(text("""
+                    SELECT value FROM external_economic_data 
+                    WHERE indicator_code = 'SL.UEM.TOTL.ZS' 
+                    ORDER BY date DESC LIMIT 1
+                """)).scalar()
+                
+                exchange_rate = conn.execute(text("""
+                    SELECT value FROM external_economic_data 
+                    WHERE indicator_code = 'PA.NUS.FCRF' 
+                    ORDER BY date DESC LIMIT 1
+                """)).scalar()
+                
+                exports = conn.execute(text("""
+                    SELECT value FROM external_economic_data 
+                    WHERE indicator_code = 'NE.EXP.GNFS.CD' 
+                    ORDER BY date DESC LIMIT 1
+                """)).scalar()
+                
+                imports = conn.execute(text("""
+                    SELECT value FROM external_economic_data 
+                    WHERE indicator_code = 'NE.IMP.GNFS.CD' 
+                    ORDER BY date DESC LIMIT 1
+                """)).scalar()
+                
+                fdi = conn.execute(text("""
+                    SELECT value FROM external_economic_data 
+                    WHERE indicator_code = 'BX.KLT.DINV.CD.WD' 
+                    ORDER BY date DESC LIMIT 1
+                """)).scalar()
+            
+            # Clear existing indicators for today
+            today = datetime.now().date()
+            db.session.execute(text("DELETE FROM macro_indicators WHERE date = :date"), {"date": today})
+            db.session.commit()
+            
+            # Create new indicator record
+            indicator = MacroIndicators()
+            indicator.date = today
+            indicator.gdp_growth = float(gdp_growth) if gdp_growth else None
+            indicator.inflation_rate = float(inflation) if inflation else None
+            indicator.unemployment_rate = float(unemployment) if unemployment else None
+            indicator.exports = float(exports) if exports else None
+            indicator.imports = float(imports) if imports else None
+            indicator.trade_balance = float(exports - imports) if exports and imports else None
+            indicator.fdi_inflow = float(fdi) if fdi else None
+            indicator.etb_usd = float(exchange_rate) if exchange_rate else None
+            
+            db.session.add(indicator)
+            db.session.commit()
+            
             return jsonify({
                 'success': True,
-                'message': 'Platform data refreshed successfully'
+                'message': f'Economic indicators refreshed successfully from {external_count} external data records'
             })
         else:
-            return jsonify({
-                'success': False,
-                'error': f'Data refresh failed: {result.stderr}'
-            }), 500
+            # Fetch fresh data if none exists
+            from Data.enhanced_external_apis import EnhancedExternalDataIntegrator
+            integrator = EnhancedExternalDataIntegrator()
+            
+            # Fetch essential indicators only
+            essential_data = []
+            indicators = ['NY.GDP.MKTP.KD.ZG', 'FP.CPI.TOTL.ZG', 'PA.NUS.FCRF']
+            
+            for indicator_code in indicators:
+                try:
+                    data = integrator.fetch_world_bank_indicator(indicator_code)
+                    if data:
+                        essential_data.extend(data)
+                except Exception as e:
+                    logger.warning(f"Could not fetch {indicator_code}: {e}")
+            
+            if essential_data:
+                integrator.store_in_database(essential_data)
+                return jsonify({
+                    'success': True,
+                    'message': f'Fetched and stored {len(essential_data)} new external data records'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'No external data available and could not fetch new data'
+                }), 500
         
     except Exception as e:
+        db.session.rollback()
         logger.error(f"Error refreshing data: {str(e)}")
         return jsonify({
             'success': False,
