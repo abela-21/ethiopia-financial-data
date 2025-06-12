@@ -1,0 +1,11 @@
+name,license_number,establishment_date,headquarters_location,branch_count,atm_count,digital_banking_users,nbe_rating,website_url,swift_code,bank_type,ownership_type
+"Commercial Bank of Ethiopia","L-001","1963-01-01","Addis Ababa",1850,2200,5500000,"A+","https://www.combanketh.et","CBETETAA","Commercial","State-owned"
+"Awash International Bank","L-002","1994-10-10","Addis Ababa",520,680,1200000,"A","https://www.awashbank.com","AWINETAA","Commercial","Private"
+"Dashen Bank","L-003","1995-09-20","Addis Ababa","495",645,980000,"A","https://www.dashenbanksc.com","DASHETAA","Commercial","Private"
+"Bank of Abyssinia","L-004","1996-02-15","Addis Ababa",425,580,850000,"A-","https://www.bankofabyssinia.com","ABYSETAA","Commercial","Private"
+"Wegagen Bank","L-005","1997-06-11","Addis Ababa",385,520,720000,"B+","https://www.wegagenbanksc.com","WEGAETAA","Commercial","Private"
+"United Bank","L-006","1998-09-10","Addis Ababa",365,490,680000,"B+","https://www.unitedbank.com.et","UNTDETAA","Commercial","Private"
+"Nib International Bank","L-007","1999-05-26","Addis Ababa,340,465,625000,"B+","https://www.nibbank-et.com","NIIBETAA","Commercial","Private"
+"Cooperative Bank of Oromia","L-008","2004-10-26","Addis Ababa",485,620,890000,"B","https://www.coopbankoromia.com.et","CBOOETAA","Commercial","Cooperative"
+"Lion International Bank","L-009","2006-10-27","Addis Ababa",285,385,485000,"B","https://www.lionbank.com.et","LIBEETAA","Commercial","Private"
+"Oromia International Bank","L-010","2008-10-25","Addis Ababa",425,560,750000,"B+","https://www.oromiabanksc.com","OIBSETAA","Commercial","Private"
