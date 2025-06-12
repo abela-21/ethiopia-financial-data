@@ -978,24 +978,34 @@ def add_company_api():
         from models import Company
         data = request.get_json()
         
-        company = Company(
-            name=data['name'],
-            ticker=data.get('ticker_symbol'),
-            sector=data.get('sector'),
-            industry=data.get('industry'),
-            shares_outstanding=data.get('shares_outstanding'),
-            description=data.get('description'),
-            created_by=current_user.id,
-            updated_by=current_user.id
+        # Use direct SQL to avoid constructor issues
+        from sqlalchemy import text
+        result = db.session.execute(
+            text("""
+                INSERT INTO company (name, ticker, sector, industry, shares_outstanding, description, created_at, updated_at)
+                VALUES (:name, :ticker, :sector, :industry, :shares_outstanding, :description, NOW(), NOW())
+                RETURNING id, name, ticker
+            """),
+            {
+                'name': data['name'],
+                'ticker': data.get('ticker_symbol'),
+                'sector': data.get('sector'),
+                'industry': data.get('industry'),
+                'shares_outstanding': data.get('shares_outstanding'),
+                'description': data.get('description')
+            }
         )
-        
-        db.session.add(company)
+        company_data = result.fetchone()
         db.session.commit()
         
         return jsonify({
             'success': True,
             'message': 'Company added successfully',
-            'company_id': company.id
+            'company': {
+                'id': company_data.id,
+                'name': company_data.name,
+                'ticker_symbol': company_data.ticker
+            }
         })
         
     except Exception as e:
@@ -1080,7 +1090,7 @@ def add_financial_statement_api():
 def add_economic_indicator_api():
     """API endpoint to add new economic indicator"""
     try:
-        from models import EconomicIndicator
+        # Use macro_indicators table directly with SQL
         from datetime import datetime
         data = request.get_json()
         
