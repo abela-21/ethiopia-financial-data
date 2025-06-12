@@ -967,3 +967,180 @@ def update_financial_statement_api(statement_id):
             'success': False,
             'error': f'Error updating financial statement: {str(e)}'
         }), 500
+
+# Add New Record API endpoints
+@main_bp.route('/admin/api/companies', methods=['POST'])
+@login_required
+@admin_required
+def add_company_api():
+    """API endpoint to add new company"""
+    try:
+        from models import Company
+        data = request.get_json()
+        
+        company = Company(
+            name=data['name'],
+            ticker_symbol=data.get('ticker_symbol'),
+            sector=data.get('sector'),
+            industry=data.get('industry'),
+            market_cap=data.get('market_cap'),
+            shares_outstanding=data.get('shares_outstanding'),
+            description=data.get('description')
+        )
+        
+        db.session.add(company)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Company added successfully',
+            'company_id': company.id
+        })
+        
+    except Exception as e:
+        logger.error(f"Error adding company: {str(e)}")
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@main_bp.route('/admin/api/companies', methods=['GET'])
+@login_required
+@admin_required
+def get_companies_api():
+    """API endpoint to get companies for dropdown"""
+    try:
+        from models import Company
+        companies = Company.query.all()
+        
+        companies_data = [{
+            'id': company.id,
+            'name': company.name,
+            'ticker_symbol': company.ticker_symbol
+        } for company in companies]
+        
+        return jsonify({
+            'success': True,
+            'companies': companies_data
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting companies: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@main_bp.route('/admin/api/financial-statements', methods=['POST'])
+@login_required
+@admin_required
+def add_financial_statement_api():
+    """API endpoint to add new financial statement"""
+    try:
+        from models import FinancialStatement
+        from datetime import datetime
+        data = request.get_json()
+        
+        statement = FinancialStatement(
+            company_id=data['company_id'],
+            statement_type=data['statement_type'],
+            reporting_period=data['reporting_period'],
+            fiscal_year=data['fiscal_year'],
+            period_start_date=datetime.strptime(data['period_start_date'], '%Y-%m-%d').date(),
+            period_end_date=datetime.strptime(data['period_end_date'], '%Y-%m-%d').date(),
+            revenue=data.get('revenue'),
+            net_income=data.get('net_income'),
+            total_assets=data.get('total_assets'),
+            total_liabilities=data.get('total_liabilities'),
+            currency='ETB'
+        )
+        
+        db.session.add(statement)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Financial statement added successfully',
+            'statement_id': statement.id
+        })
+        
+    except Exception as e:
+        logger.error(f"Error adding financial statement: {str(e)}")
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@main_bp.route('/admin/api/economic-indicators', methods=['POST'])
+@login_required
+@admin_required
+def add_economic_indicator_api():
+    """API endpoint to add new economic indicator"""
+    try:
+        from models import EconomicIndicator
+        from datetime import datetime
+        data = request.get_json()
+        
+        indicator = EconomicIndicator(
+            date=datetime.strptime(data['date'], '%Y-%m-%d').date(),
+            category=data['category'],
+            gdp=data.get('gdp'),
+            inflation_rate=data.get('inflation_rate'),
+            exchange_rate=data.get('exchange_rate'),
+            population=data.get('population')
+        )
+        
+        db.session.add(indicator)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Economic indicator added successfully',
+            'indicator_id': indicator.id
+        })
+        
+    except Exception as e:
+        logger.error(f"Error adding economic indicator: {str(e)}")
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@main_bp.route('/admin/api/refresh-data', methods=['POST'])
+@login_required
+@admin_required
+def refresh_data_api():
+    """API endpoint to refresh platform data"""
+    try:
+        # Run data migration scripts
+        import subprocess
+        import os
+        
+        # Execute data migration
+        result = subprocess.run(
+            ['python', 'data_migration.py'],
+            cwd=os.getcwd(),
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode == 0:
+            return jsonify({
+                'success': True,
+                'message': 'Platform data refreshed successfully'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Data refresh failed: {result.stderr}'
+            }), 500
+        
+    except Exception as e:
+        logger.error(f"Error refreshing data: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

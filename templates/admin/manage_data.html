@@ -895,36 +895,332 @@
 </div>
 
 <script>
+// Show modal functions
+function showAddCompanyModal() {
+    const modal = new bootstrap.Modal(document.getElementById('addCompanyModal'));
+    modal.show();
+}
+
+function showAddFinancialModal() {
+    loadCompaniesForDropdown();
+    const modal = new bootstrap.Modal(document.getElementById('addFinancialModal'));
+    modal.show();
+}
+
+function showAddEconomicIndicatorModal() {
+    const modal = new bootstrap.Modal(document.getElementById('addEconomicIndicatorModal'));
+    modal.show();
+}
+
+function showAddBankModal() {
+    const modal = new bootstrap.Modal(document.getElementById('addBankModal'));
+    modal.show();
+}
+
+function showAddResearchModal() {
+    const modal = new bootstrap.Modal(document.getElementById('addResearchModal'));
+    modal.show();
+}
+
+function showAddListedCompanyModal() {
+    const modal = new bootstrap.Modal(document.getElementById('addListedCompanyModal'));
+    modal.show();
+}
+
+function showAddUserModal() {
+    const modal = new bootstrap.Modal(document.getElementById('addUserModal'));
+    modal.show();
+}
+
+// Load companies for financial statement dropdown
+function loadCompaniesForDropdown() {
+    fetch('/admin/api/companies')
+        .then(response => response.json())
+        .then(data => {
+            const dropdown = document.getElementById('financialCompanyId');
+            dropdown.innerHTML = '<option value="">Select Company</option>';
+            
+            if (data.success && data.companies) {
+                data.companies.forEach(company => {
+                    const option = document.createElement('option');
+                    option.value = company.id;
+                    option.textContent = `${company.name} (${company.ticker_symbol || 'No ticker'})`;
+                    dropdown.appendChild(option);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading companies:', error);
+        });
+}
+
+// Save functions
+function saveNewCompany() {
+    const formData = {
+        name: document.getElementById('companyName').value,
+        ticker_symbol: document.getElementById('tickerSymbol').value,
+        sector: document.getElementById('sector').value,
+        industry: document.getElementById('industry').value,
+        market_cap: document.getElementById('marketCap').value || null,
+        shares_outstanding: document.getElementById('sharesOutstanding').value || null,
+        description: document.getElementById('companyDescription').value
+    };
+    
+    fetch('/admin/api/companies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Company added successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('addCompanyModal')).hide();
+            location.reload();
+        } else {
+            alert('Error adding company: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error adding company: ' + error.message);
+    });
+}
+
+function saveNewFinancialStatement() {
+    const formData = {
+        company_id: document.getElementById('financialCompanyId').value,
+        statement_type: document.getElementById('statementType').value,
+        reporting_period: document.getElementById('reportingPeriod').value,
+        fiscal_year: document.getElementById('fiscalYear').value,
+        period_start_date: document.getElementById('periodStartDate').value,
+        period_end_date: document.getElementById('periodEndDate').value,
+        revenue: document.getElementById('revenue').value || null,
+        net_income: document.getElementById('netIncome').value || null,
+        total_assets: document.getElementById('totalAssets').value || null,
+        total_liabilities: document.getElementById('totalLiabilities').value || null
+    };
+    
+    fetch('/admin/api/financial-statements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Financial statement added successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('addFinancialModal')).hide();
+            location.reload();
+        } else {
+            alert('Error adding financial statement: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error adding financial statement: ' + error.message);
+    });
+}
+
+function saveNewEconomicIndicator() {
+    const formData = {
+        date: document.getElementById('indicatorDate').value,
+        category: document.getElementById('indicatorCategory').value,
+        gdp: document.getElementById('gdp').value || null,
+        inflation_rate: document.getElementById('inflationRate').value || null,
+        exchange_rate: document.getElementById('exchangeRate').value || null,
+        population: document.getElementById('population').value || null
+    };
+    
+    fetch('/admin/api/economic-indicators', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Economic indicator added successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('addEconomicIndicatorModal')).hide();
+            location.reload();
+        } else {
+            alert('Error adding economic indicator: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error adding economic indicator: ' + error.message);
+    });
+}
+
+function saveNewBank() {
+    const formData = {
+        name: document.getElementById('bankName').value,
+        bank_type: document.getElementById('bankType').value,
+        headquarters: document.getElementById('headquarters').value,
+        established_year: document.getElementById('establishedYear').value || null,
+        description: document.getElementById('bankDescription').value
+    };
+    
+    fetch('/admin/api/banks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Bank added successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('addBankModal')).hide();
+            location.reload();
+        } else {
+            alert('Error adding bank: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error adding bank: ' + error.message);
+    });
+}
+
+function saveNewResearch() {
+    const formData = {
+        title: document.getElementById('researchTitle').value,
+        author: document.getElementById('researchAuthor').value,
+        publication_date: document.getElementById('publicationDate').value,
+        category: document.getElementById('researchCategory').value,
+        document_type: document.getElementById('documentType').value,
+        summary: document.getElementById('researchSummary').value,
+        document_url: document.getElementById('documentUrl').value
+    };
+    
+    fetch('/admin/api/research-documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Research document added successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('addResearchModal')).hide();
+            location.reload();
+        } else {
+            alert('Error adding research document: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error adding research document: ' + error.message);
+    });
+}
+
+function saveNewListedCompany() {
+    const formData = {
+        name: document.getElementById('listedCompanyName').value,
+        ticker_symbol: document.getElementById('listedTickerSymbol').value,
+        sector: document.getElementById('listedSector').value,
+        industry: document.getElementById('listedIndustry').value,
+        listing_date: document.getElementById('listingDate').value,
+        market_cap: document.getElementById('listedMarketCap').value || null,
+        description: document.getElementById('listedDescription').value
+    };
+    
+    fetch('/admin/api/listed-companies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Listed company added successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('addListedCompanyModal')).hide();
+            location.reload();
+        } else {
+            alert('Error adding listed company: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error adding listed company: ' + error.message);
+    });
+}
+
+function saveNewUser() {
+    const formData = {
+        first_name: document.getElementById('firstName').value,
+        last_name: document.getElementById('lastName').value,
+        email: document.getElementById('userEmail').value,
+        username: document.getElementById('username').value,
+        password: document.getElementById('userPassword').value,
+        role: document.getElementById('userRole').value,
+        organization: document.getElementById('userOrganization').value
+    };
+    
+    fetch('/admin/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('User added successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+            location.reload();
+        } else {
+            alert('Error adding user: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error adding user: ' + error.message);
+    });
+}
+
 function refreshPlatformData() {
     // Show loading modal
     const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
     document.getElementById('loadingText').textContent = 'Refreshing Platform Data...';
     loadingModal.show();
     
-    fetch('{{ url_for("main.admin_refresh_data") }}', {
+    fetch('/admin/api/refresh-data', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
+        headers: { 'Content-Type': 'application/json' }
     })
     .then(response => response.json())
     .then(data => {
         loadingModal.hide();
         if (data.success) {
-            alert('✅ Data refresh completed successfully!\n\nPlatform data has been updated with the latest information.');
+            alert('Platform data refreshed successfully!');
             location.reload();
         } else {
-            alert('❌ Data refresh failed: ' + data.error);
+            alert('Error refreshing data: ' + data.error);
         }
     })
     .catch(error => {
         loadingModal.hide();
-        alert('❌ Error refreshing data: ' + error.message);
+        alert('Error refreshing data: ' + error.message);
     });
 }
 
-function exportPlatformData() {
-    alert('📊 Data Export Feature\n\nThis will export platform data in multiple formats:\n\n• Company listings (CSV/Excel)\n• Financial data (CSV/Excel)\n• Research documents metadata\n• User statistics\n\nFeature coming soon!');
+// Dynamic form fields for financial statements
+document.addEventListener('DOMContentLoaded', function() {
+    const statementTypeSelect = document.getElementById('statementType');
+    if (statementTypeSelect) {
+        statementTypeSelect.addEventListener('change', function() {
+            toggleFinancialFields(this.value);
+        });
+    }
+});
+
+function toggleFinancialFields(statementType) {
+    const allFields = document.querySelectorAll('.financial-fields');
+    allFields.forEach(field => field.style.display = 'none');
+    
+    switch(statementType) {
+        case 'income_statement':
+            document.getElementById('incomeStatementFields').style.display = 'block';
+            break;
+        case 'balance_sheet':
+            document.getElementById('balanceSheetFields').style.display = 'block';
+            break;
+        // Add other cases as needed
+    }
 }
 </script>
 {% endblock %}
