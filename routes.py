@@ -1053,27 +1053,43 @@ def add_financial_statement_api():
         from datetime import datetime
         data = request.get_json()
         
-        statement = FinancialStatement(
-            company_id=data['company_id'],
-            statement_type=data['statement_type'],
-            reporting_period=data['reporting_period'],
-            fiscal_year=data['fiscal_year'],
-            period_start_date=datetime.strptime(data['period_start_date'], '%Y-%m-%d').date(),
-            period_end_date=datetime.strptime(data['period_end_date'], '%Y-%m-%d').date(),
-            revenue=data.get('revenue'),
-            net_income=data.get('net_income'),
-            total_assets=data.get('total_assets'),
-            total_liabilities=data.get('total_liabilities'),
-            currency='ETB'
+        # Use direct SQL for financial_statement table
+        from sqlalchemy import text
+        result = db.session.execute(
+            text("""
+                INSERT INTO financial_statement (company_id, statement_type, reporting_period, fiscal_year, 
+                                               period_start_date, period_end_date, revenue, net_income, 
+                                               total_assets, total_liabilities, currency, created_at)
+                VALUES (:company_id, :statement_type, :reporting_period, :fiscal_year, 
+                       :period_start_date, :period_end_date, :revenue, :net_income, 
+                       :total_assets, :total_liabilities, :currency, NOW())
+                RETURNING id, company_id, statement_type
+            """),
+            {
+                'company_id': data['company_id'],
+                'statement_type': data['statement_type'],
+                'reporting_period': data['reporting_period'],
+                'fiscal_year': data['fiscal_year'],
+                'period_start_date': data['period_start_date'],
+                'period_end_date': data['period_end_date'],
+                'revenue': data.get('revenue'),
+                'net_income': data.get('net_income'),
+                'total_assets': data.get('total_assets'),
+                'total_liabilities': data.get('total_liabilities'),
+                'currency': 'ETB'
+            }
         )
-        
-        db.session.add(statement)
+        statement_data = result.fetchone()
         db.session.commit()
         
         return jsonify({
             'success': True,
             'message': 'Financial statement added successfully',
-            'statement_id': statement.id
+            'statement': {
+                'id': statement_data.id,
+                'company_id': statement_data.company_id,
+                'statement_type': statement_data.statement_type
+            }
         })
         
     except Exception as e:
@@ -1094,22 +1110,31 @@ def add_economic_indicator_api():
         from datetime import datetime
         data = request.get_json()
         
-        indicator = EconomicIndicator(
-            date=datetime.strptime(data['date'], '%Y-%m-%d').date(),
-            category=data['category'],
-            gdp=data.get('gdp'),
-            inflation_rate=data.get('inflation_rate'),
-            exchange_rate=data.get('exchange_rate'),
-            population=data.get('population')
+        # Use direct SQL for macro_indicators table
+        from sqlalchemy import text
+        result = db.session.execute(
+            text("""
+                INSERT INTO macro_indicators (date, gdp_growth, inflation_rate, unemployment_rate, created_at, updated_at)
+                VALUES (:date, :gdp_growth, :inflation_rate, :unemployment_rate, NOW(), NOW())
+                RETURNING id, date
+            """),
+            {
+                'date': data['date'],
+                'gdp_growth': data.get('gdp_growth'),
+                'inflation_rate': data.get('inflation_rate'),
+                'unemployment_rate': data.get('unemployment_rate')
+            }
         )
-        
-        db.session.add(indicator)
+        indicator_data = result.fetchone()
         db.session.commit()
         
         return jsonify({
             'success': True,
             'message': 'Economic indicator added successfully',
-            'indicator_id': indicator.id
+            'indicator': {
+                'id': indicator_data.id,
+                'date': str(indicator_data.date)
+            }
         })
         
     except Exception as e:
