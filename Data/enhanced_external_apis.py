@@ -308,7 +308,7 @@ class EnhancedExternalDataIntegrator:
                     # Check if record exists
                     existing = conn.execute(
                         text("""
-                            SELECT id FROM external_data_sources 
+                            SELECT id FROM external_economic_data 
                             WHERE indicator_code = :code AND date = :date AND source = :source
                         """),
                         {
@@ -322,7 +322,7 @@ class EnhancedExternalDataIntegrator:
                         # Update existing record
                         conn.execute(
                             text("""
-                                UPDATE external_data_sources SET
+                                UPDATE external_economic_data SET
                                     indicator_name = :name,
                                     value = :value,
                                     unit = :unit,
@@ -341,7 +341,7 @@ class EnhancedExternalDataIntegrator:
                         # Insert new record
                         conn.execute(
                             text("""
-                                INSERT INTO external_data_sources (
+                                INSERT INTO external_economic_data (
                                     indicator_code, indicator_name, date, value, 
                                     country, source, unit, created_at, last_updated
                                 )

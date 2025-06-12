@@ -1336,29 +1336,29 @@ def admin_external_data_overview():
         with db.engine.connect() as conn:
             # Total records
             total_records = conn.execute(
-                text("SELECT COUNT(*) FROM external_data_sources")
+                text("SELECT COUNT(*) FROM external_economic_data")
             ).scalar() or 0
             
             # Total indicators
             total_indicators = conn.execute(
-                text("SELECT COUNT(DISTINCT indicator_code) FROM external_data_sources")
+                text("SELECT COUNT(DISTINCT indicator_code) FROM external_economic_data")
             ).scalar() or 0
             
             # Sources count
             sources_count = conn.execute(
-                text("SELECT COUNT(DISTINCT source) FROM external_data_sources")
+                text("SELECT COUNT(DISTINCT source) FROM external_economic_data")
             ).scalar() or 0
             
             # Last update
             last_update = conn.execute(
-                text("SELECT MAX(last_updated) FROM external_data_sources")
+                text("SELECT MAX(last_updated) FROM external_economic_data")
             ).scalar()
             
             # Recent data (last 10 records)
             recent_data = conn.execute(
                 text("""
                     SELECT indicator_name, source, date, value, unit
-                    FROM external_data_sources 
+                    FROM external_economic_data 
                     ORDER BY last_updated DESC 
                     LIMIT 10
                 """)
@@ -1405,7 +1405,7 @@ def admin_external_data_export(format_type):
         with db.engine.connect() as conn:
             records = conn.execute(
                 text("""
-                    SELECT * FROM external_data_sources 
+                    SELECT * FROM external_economic_data 
                     ORDER BY date DESC, source, indicator_code
                 """)
             ).fetchall()

@@ -1,0 +1,31 @@
+Error refreshing data: Data refresh failed: /home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_limiter/extension.py:324: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+  warnings.warn(
+INFO:app:Database tables created successfully
+ERROR:__main__:Error clearing data: (psycopg2.errors.UndefinedColumn) column "source" does not exist
+LINE 1: DELETE FROM macro_indicators WHERE source = 'ethiopian_data'
+                                           ^
+
+[SQL: DELETE FROM macro_indicators WHERE source = 'ethiopian_data']
+(Background on this error at: https://sqlalche.me/e/20/f405)
+ERROR:__main__:Migration failed: (psycopg2.errors.UndefinedColumn) column "source" does not exist
+LINE 1: DELETE FROM macro_indicators WHERE source = 'ethiopian_data'
+                                           ^
+
+[SQL: DELETE FROM macro_indicators WHERE source = 'ethiopian_data']
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Traceback (most recent call last):
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column "source" does not exist
+LINE 1: DELETE FROM macro_indicators WHERE source = 'ethiopian_data'
+                                           ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/workspace/data_migration.py", line 703, in <module>
+    migration.run_full_migration()
+  File "/home/runner/workspace/data_migration.py", line 676, in run_fu

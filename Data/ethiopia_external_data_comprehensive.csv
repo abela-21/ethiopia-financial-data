@@ -1,0 +1,196 @@
+date,indicator_code,indicator_name,value,country,source,unit,category
+2023-12-31,NY.GDP.MKTP.CD,GDP (current US$),163697927593.982,Ethiopia,World Bank,Current US$,Economic Growth
+2022-12-31,NY.GDP.MKTP.CD,GDP (current US$),126772703047.701,Ethiopia,World Bank,Current US$,Economic Growth
+2021-12-31,NY.GDP.MKTP.CD,GDP (current US$),111261882958.426,Ethiopia,World Bank,Current US$,Economic Growth
+2020-12-31,NY.GDP.MKTP.CD,GDP (current US$),107657734392.446,Ethiopia,World Bank,Current US$,Economic Growth
+2019-12-31,NY.GDP.MKTP.CD,GDP (current US$),95912607722.3032,Ethiopia,World Bank,Current US$,Economic Growth
+2018-12-31,NY.GDP.MKTP.CD,GDP (current US$),84269196625.8784,Ethiopia,World Bank,Current US$,Economic Growth
+2017-12-31,NY.GDP.MKTP.CD,GDP (current US$),81770886825.6048,Ethiopia,World Bank,Current US$,Economic Growth
+2016-12-31,NY.GDP.MKTP.CD,GDP (current US$),74296745207.8721,Ethiopia,World Bank,Current US$,Economic Growth
+2015-12-31,NY.GDP.MKTP.CD,GDP (current US$),64589328550.5953,Ethiopia,World Bank,Current US$,Economic Growth
+2023-12-31,NY.GDP.PCAP.CD,GDP per capita (current US$),1272.01628209211,Ethiopia,World Bank,Current US$ per capita,Economic Growth
+2022-12-31,NY.GDP.PCAP.CD,GDP per capita (current US$),1011.0732858233,Ethiopia,World Bank,Current US$ per capita,Economic Growth
+2021-12-31,NY.GDP.PCAP.CD,GDP per capita (current US$),910.947840320752,Ethiopia,World Bank,Current US$ per capita,Economic Growth
+2020-12-31,NY.GDP.PCAP.CD,GDP per capita (current US$),905.313175805855,Ethiopia,World Bank,Current US$ per capita,Economic Growth
+2019-12-31,NY.GDP.PCAP.CD,GDP per capita (current US$),828.70897229725,Ethiopia,World Bank,Current US$ per capita,Economic Growth
+2018-12-31,NY.GDP.PCAP.CD,GDP per capita (current US$),747.968143637014,Ethiopia,World Bank,Current US$ per capita,Economic Growth
+2017-12-31,NY.GDP.PCAP.CD,GDP per capita (current US$),745.632449222154,Ethiopia,World Bank,Current US$ per capita,Economic Growth
+2016-12-31,NY.GDP.PCAP.CD,GDP per capita (current US$),696.195884706786,Ethiopia,World Bank,Current US$ per capita,Economic Growth
+2015-12-31,NY.GDP.PCAP.CD,GDP per capita (current US$),621.845673808133,Ethiopia,World Bank,Current US$ per capita,Economic Growth
+2023-12-31,NY.GDP.MKTP.KD.ZG,GDP growth (annual %),6.49813464238613,Ethiopia,World Bank,Annual %,Economic Growth
+2022-12-31,NY.GDP.MKTP.KD.ZG,GDP growth (annual %),5.32117628383672,Ethiopia,World Bank,Annual %,Economic Growth
+2021-12-31,NY.GDP.MKTP.KD.ZG,GDP growth (annual %),5.64153071734657,Ethiopia,World Bank,Annual %,Economic Growth
+2020-12-31,NY.GDP.MKTP.KD.ZG,GDP growth (annual %),6.05953088643369,Ethiopia,World Bank,Annual %,Economic Growth
+2019-12-31,NY.GDP.MKTP.KD.ZG,GDP growth (annual %),8.3640856990789,Ethiopia,World Bank,Annual %,Economic Growth
+2018-12-31,NY.GDP.MKTP.KD.ZG,GDP growth (annual %),6.81614779681703,Ethiopia,World Bank,Annual %,Economic Growth
+2017-12-31,NY.GDP.MKTP.KD.ZG,GDP growth (annual %),9.56418964295607,Ethiopia,World Bank,Annual %,Economic Growth
+2016-12-31,NY.GDP.MKTP.KD.ZG,GDP growth (annual %),9.43348265784402,Ethiopia,World Bank,Annual %,Economic Growth
+2015-12-31,NY.GDP.MKTP.KD.ZG,GDP growth (annual %),10.3924630202334,Ethiopia,World Bank,Annual %,Economic Growth
+2023-12-31,FP.CPI.TOTL.ZG,"Inflation, consumer prices (annual %)",30.2188278135278,Ethiopia,World Bank,Annual %,Monetary Policy
+2022-12-31,FP.CPI.TOTL.ZG,"Inflation, consumer prices (annual %)",33.8898797100898,Ethiopia,World Bank,Annual %,Monetary Policy
+2021-12-31,FP.CPI.TOTL.ZG,"Inflation, consumer prices (annual %)",26.8395221557722,Ethiopia,World Bank,Annual %,Monetary Policy
+2020-12-31,FP.CPI.TOTL.ZG,"Inflation, consumer prices (annual %)",20.3563468559061,Ethiopia,World Bank,Annual %,Monetary Policy
+2019-12-31,FP.CPI.TOTL.ZG,"Inflation, consumer prices (annual %)",15.8096321719344,Ethiopia,World Bank,Annual %,Monetary Policy
+2018-12-31,FP.CPI.TOTL.ZG,"Inflation, consumer prices (annual %)",13.8330356586661,Ethiopia,World Bank,Annual %,Monetary Policy
+2017-12-31,FP.CPI.TOTL.ZG,"Inflation, consumer prices (annual %)",10.6871150284238,Ethiopia,World Bank,Annual %,Monetary Policy
+2016-12-31,FP.CPI.TOTL.ZG,"Inflation, consumer prices (annual %)",6.62813337230924,Ethiopia,World Bank,Annual %,Monetary Policy
+2015-12-31,FP.CPI.TOTL.ZG,"Inflation, consumer prices (annual %)",9.56889955968623,Ethiopia,World Bank,Annual %,Monetary Policy
+2024-12-31,SL.UEM.TOTL.ZS,"Unemployment, total (% of total labor force)",3.398,Ethiopia,World Bank,% of labor force,Labor Market
+2023-12-31,SL.UEM.TOTL.ZS,"Unemployment, total (% of total labor force)",3.402,Ethiopia,World Bank,% of labor force,Labor Market
+2022-12-31,SL.UEM.TOTL.ZS,"Unemployment, total (% of total labor force)",3.409,Ethiopia,World Bank,% of labor force,Labor Market
+2021-12-31,SL.UEM.TOTL.ZS,"Unemployment, total (% of total labor force)",3.935,Ethiopia,World Bank,% of labor force,Labor Market
+2020-12-31,SL.UEM.TOTL.ZS,"Unemployment, total (% of total labor force)",3.994,Ethiopia,World Bank,% of labor force,Labor Market
+2019-12-31,SL.UEM.TOTL.ZS,"Unemployment, total (% of total labor force)",2.917,Ethiopia,World Bank,% of labor force,Labor Market
+2018-12-31,SL.UEM.TOTL.ZS,"Unemployment, total (% of total labor force)",2.802,Ethiopia,World Bank,% of labor force,Labor Market
+2017-12-31,SL.UEM.TOTL.ZS,"Unemployment, total (% of total labor force)",2.662,Ethiopia,World Bank,% of labor force,Labor Market
+2016-12-31,SL.UEM.TOTL.ZS,"Unemployment, total (% of total labor force)",2.554,Ethiopia,World Bank,% of labor force,Labor Market
+2015-12-31,SL.UEM.TOTL.ZS,"Unemployment, total (% of total labor force)",2.443,Ethiopia,World Bank,% of labor force,Labor Market
+2023-12-31,NE.EXP.GNFS.CD,Exports of goods and services (current US$),10792608749.6624,Ethiopia,World Bank,Current US$,International Trade
+2022-12-31,NE.EXP.GNFS.CD,Exports of goods and services (current US$),10451093940.5472,Ethiopia,World Bank,Current US$,International Trade
+2021-12-31,NE.EXP.GNFS.CD,Exports of goods and services (current US$),8491174951.53881,Ethiopia,World Bank,Current US$,International Trade
+2020-12-31,NE.EXP.GNFS.CD,Exports of goods and services (current US$),7672983060.57996,Ethiopia,World Bank,Current US$,International Trade
+2019-12-31,NE.EXP.GNFS.CD,Exports of goods and services (current US$),7615438618.00348,Ethiopia,World Bank,Current US$,International Trade
+2018-12-31,NE.EXP.GNFS.CD,Exports of goods and services (current US$),7055586688.75777,Ethiopia,World Bank,Current US$,International Trade
+2017-12-31,NE.EXP.GNFS.CD,Exports of goods and services (current US$),6238602381.7425,Ethiopia,World Bank,Current US$,International Trade
+2016-12-31,NE.EXP.GNFS.CD,Exports of goods and services (current US$),5804121546.5048,Ethiopia,World Bank,Current US$,International Trade
+2015-12-31,NE.EXP.GNFS.CD,Exports of goods and services (current US$),6047701382.62093,Ethiopia,World Bank,Current US$,International Trade
+2023-12-31,NE.IMP.GNFS.CD,Imports of goods and services (current US$),22905283373.3089,Ethiopia,World Bank,Current US$,International Trade
+2022-12-31,NE.IMP.GNFS.CD,Imports of goods and services (current US$),23264741856.6496,Ethiopia,World Bank,Current US$,International Trade
+2021-12-31,NE.IMP.GNFS.CD,Imports of goods and services (current US$),18595574210.7915,Ethiopia,World Bank,Current US$,International Trade
+2020-12-31,NE.IMP.GNFS.CD,Imports of goods and services (current US$),18171455003.6686,Ethiopia,World Bank,Current US$,International Trade
+2019-12-31,NE.IMP.GNFS.CD,Imports of goods and services (current US$),20022068000.8819,Ethiopia,World Bank,Current US$,International Trade
+2018-12-31,NE.IMP.GNFS.CD,Imports of goods and services (current US$),19235875928.3992,Ethiopia,World Bank,Current US$,International Trade
+2017-12-31,NE.IMP.GNFS.CD,Imports of goods and services (current US$),19195112769.1069,Ethiopia,World Bank,Current US$,International Trade
+2016-12-31,NE.IMP.GNFS.CD,Imports of goods and services (current US$),20124738792.9724,Ethiopia,World Bank,Current US$,International Trade
+2015-12-31,NE.IMP.GNFS.CD,Imports of goods and services (current US$),19565922931.7937,Ethiopia,World Bank,Current US$,International Trade
+2023-12-31,BX.KLT.DINV.CD.WD,"Foreign direct investment, net inflows",3262966283.51939,Ethiopia,World Bank,Current US$,Capital Flows
+2022-12-31,BX.KLT.DINV.CD.WD,"Foreign direct investment, net inflows",3669991332.17486,Ethiopia,World Bank,Current US$,Capital Flows
+2021-12-31,BX.KLT.DINV.CD.WD,"Foreign direct investment, net inflows",4259445795.28263,Ethiopia,World Bank,Current US$,Capital Flows
+2020-12-31,BX.KLT.DINV.CD.WD,"Foreign direct investment, net inflows",2395799880.65984,Ethiopia,World Bank,Current US$,Capital Flows
+2019-12-31,BX.KLT.DINV.CD.WD,"Foreign direct investment, net inflows",2548743427.35754,Ethiopia,World Bank,Current US$,Capital Flows
+2018-12-31,BX.KLT.DINV.CD.WD,"Foreign direct investment, net inflows",3360419368.65295,Ethiopia,World Bank,Current US$,Capital Flows
+2017-12-31,BX.KLT.DINV.CD.WD,"Foreign direct investment, net inflows",4017159564.65434,Ethiopia,World Bank,Current US$,Capital Flows
+2016-12-31,BX.KLT.DINV.CD.WD,"Foreign direct investment, net inflows",4142937496.46329,Ethiopia,World Bank,Current US$,Capital Flows
+2015-12-31,BX.KLT.DINV.CD.WD,"Foreign direct investment, net inflows",2626517918.313,Ethiopia,World Bank,Current US$,Capital Flows
+2023-12-31,SP.POP.TOTL,"Population, total",128691692.0,Ethiopia,World Bank,Number of people,Demographics
+2022-12-31,SP.POP.TOTL,"Population, total",125384287.0,Ethiopia,World Bank,Number of people,Demographics
+2021-12-31,SP.POP.TOTL,"Population, total",122138588.0,Ethiopia,World Bank,Number of people,Demographics
+2020-12-31,SP.POP.TOTL,"Population, total",118917671.0,Ethiopia,World Bank,Number of people,Demographics
+2019-12-31,SP.POP.TOTL,"Population, total",115737383.0,Ethiopia,World Bank,Number of people,Demographics
+2018-12-31,SP.POP.TOTL,"Population, total",112664152.0,Ethiopia,World Bank,Number of people,Demographics
+2017-12-31,SP.POP.TOTL,"Population, total",109666481.0,Ethiopia,World Bank,Number of people,Demographics
+2016-12-31,SP.POP.TOTL,"Population, total",106718162.0,Ethiopia,World Bank,Number of people,Demographics
+2015-12-31,SP.POP.TOTL,"Population, total",103867135.0,Ethiopia,World Bank,Number of people,Demographics
+2023-12-31,PA.NUS.FCRF,Official exchange rate (ETB per US$),54.6009480676569,Ethiopia,World Bank,ETB per US$,Exchange Rate
+2022-12-31,PA.NUS.FCRF,Official exchange rate (ETB per US$),51.7562150334169,Ethiopia,World Bank,ETB per US$,Exchange Rate
+2021-12-31,PA.NUS.FCRF,Official exchange rate (ETB per US$),43.73377831884,Ethiopia,World Bank,ETB per US$,Exchange Rate
+2020-12-31,PA.NUS.FCRF,Official exchange rate (ETB per US$),34.9271654040404,Ethiopia,World Bank,ETB per US$,Exchange Rate
+2019-12-31,PA.NUS.FCRF,Official exchange rate (ETB per US$),29.06975,Ethiopia,World Bank,ETB per US$,Exchange Rate
+2018-12-31,PA.NUS.FCRF,Official exchange rate (ETB per US$),27.4293865941667,Ethiopia,World Bank,ETB per US$,Exchange Rate
+2017-12-31,PA.NUS.FCRF,Official exchange rate (ETB per US$),23.8661044574125,Ethiopia,World Bank,ETB per US$,Exchange Rate
+2016-12-31,PA.NUS.FCRF,Official exchange rate (ETB per US$),21.7315472222222,Ethiopia,World Bank,ETB per US$,Exchange Rate
+2015-12-31,PA.NUS.FCRF,Official exchange rate (ETB per US$),20.57684875,Ethiopia,World Bank,ETB per US$,Exchange Rate
+2023-12-31,GC.REV.XGRT.GD.ZS,"Revenue, excluding grants (% of GDP)",4.50538091523482,Ethiopia,World Bank,% of GDP,Public Finance
+2022-12-31,GC.REV.XGRT.GD.ZS,"Revenue, excluding grants (% of GDP)",5.05571937050665,Ethiopia,World Bank,% of GDP,Public Finance
+2021-12-31,GC.REV.XGRT.GD.ZS,"Revenue, excluding grants (% of GDP)",6.55460469638638,Ethiopia,World Bank,% of GDP,Public Finance
+2020-12-31,GC.REV.XGRT.GD.ZS,"Revenue, excluding grants (% of GDP)",7.1046286242862,Ethiopia,World Bank,% of GDP,Public Finance
+2019-12-31,GC.REV.XGRT.GD.ZS,"Revenue, excluding grants (% of GDP)",7.78822030544149,Ethiopia,World Bank,% of GDP,Public Finance
+2018-12-31,GC.REV.XGRT.GD.ZS,"Revenue, excluding grants (% of GDP)",8.97336366776418,Ethiopia,World Bank,% of GDP,Public Finance
+2017-12-31,GC.REV.XGRT.GD.ZS,"Revenue, excluding grants (% of GDP)",9.44482816270803,Ethiopia,World Bank,% of GDP,Public Finance
+2016-12-31,GC.REV.XGRT.GD.ZS,"Revenue, excluding grants (% of GDP)",9.35821999243861,Ethiopia,World Bank,% of GDP,Public Finance
+2015-12-31,GC.REV.XGRT.GD.ZS,"Revenue, excluding grants (% of GDP)",9.94334434408776,Ethiopia,World Bank,% of GDP,Public Finance
+2023-12-31,GC.XPN.TOTL.GD.ZS,Expense (% of GDP),6.12218921872514,Ethiopia,World Bank,% of GDP,Public Finance
+2022-12-31,GC.XPN.TOTL.GD.ZS,Expense (% of GDP),7.30178341290382,Ethiopia,World Bank,% of GDP,Public Finance
+2021-12-31,GC.XPN.TOTL.GD.ZS,Expense (% of GDP),8.41741970874706,Ethiopia,World Bank,% of GDP,Public Finance
+2020-12-31,GC.XPN.TOTL.GD.ZS,Expense (% of GDP),8.41226851464806,Ethiopia,World Bank,% of GDP,Public Finance
+2019-12-31,GC.XPN.TOTL.GD.ZS,Expense (% of GDP),9.70541703490996,Ethiopia,World Bank,% of GDP,Public Finance
+2018-12-31,GC.XPN.TOTL.GD.ZS,Expense (% of GDP),10.8174753935638,Ethiopia,World Bank,% of GDP,Public Finance
+2017-12-31,GC.XPN.TOTL.GD.ZS,Expense (% of GDP),11.232503563404,Ethiopia,World Bank,% of GDP,Public Finance
+2016-12-31,GC.XPN.TOTL.GD.ZS,Expense (% of GDP),10.0892965416291,Ethiopia,World Bank,% of GDP,Public Finance
+2015-12-31,GC.XPN.TOTL.GD.ZS,Expense (% of GDP),10.3776370135472,Ethiopia,World Bank,% of GDP,Public Finance
+2023-12-31,DT.DOD.DECT.CD,"External debt stocks, total",33290272173.2,Ethiopia,World Bank,Current US$,External Debt
+2022-12-31,DT.DOD.DECT.CD,"External debt stocks, total",30636877243.1,Ethiopia,World Bank,Current US$,External Debt
+2021-12-31,DT.DOD.DECT.CD,"External debt stocks, total",32000087807.2,Ethiopia,World Bank,Current US$,External Debt
+2020-12-31,DT.DOD.DECT.CD,"External debt stocks, total",32363947104.1,Ethiopia,World Bank,Current US$,External Debt
+2019-12-31,DT.DOD.DECT.CD,"External debt stocks, total",30377335498.2,Ethiopia,World Bank,Current US$,External Debt
+2018-12-31,DT.DOD.DECT.CD,"External debt stocks, total",29842524863.7,Ethiopia,World Bank,Current US$,External Debt
+2017-12-31,DT.DOD.DECT.CD,"External debt stocks, total",26170602394.7,Ethiopia,World Bank,Current US$,External Debt
+2016-12-31,DT.DOD.DECT.CD,"External debt stocks, total",23396722284.1,Ethiopia,World Bank,Current US$,External Debt
+2015-12-31,DT.DOD.DECT.CD,"External debt stocks, total",20443875424.1,Ethiopia,World Bank,Current US$,External Debt
+2023-12-31,NV.AGR.TOTL.ZS,"Agriculture, value added (% of GDP)",35.7897991219755,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2022-12-31,NV.AGR.TOTL.ZS,"Agriculture, value added (% of GDP)",37.6422282713295,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2021-12-31,NV.AGR.TOTL.ZS,"Agriculture, value added (% of GDP)",37.5791156879114,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2020-12-31,NV.AGR.TOTL.ZS,"Agriculture, value added (% of GDP)",35.5582693458206,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2019-12-31,NV.AGR.TOTL.ZS,"Agriculture, value added (% of GDP)",33.6333290594336,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2018-12-31,NV.AGR.TOTL.ZS,"Agriculture, value added (% of GDP)",31.2188007841387,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2017-12-31,NV.AGR.TOTL.ZS,"Agriculture, value added (% of GDP)",33.7792806688833,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2016-12-31,NV.AGR.TOTL.ZS,"Agriculture, value added (% of GDP)",34.6988795973718,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2015-12-31,NV.AGR.TOTL.ZS,"Agriculture, value added (% of GDP)",36.0569753905786,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2023-12-31,NV.IND.TOTL.ZS,"Industry, value added (% of GDP)",24.4766764370164,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2022-12-31,NV.IND.TOTL.ZS,"Industry, value added (% of GDP)",22.7175278117724,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2021-12-31,NV.IND.TOTL.ZS,"Industry, value added (% of GDP)",21.8500273668148,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2020-12-31,NV.IND.TOTL.ZS,"Industry, value added (% of GDP)",23.1022948090627,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2019-12-31,NV.IND.TOTL.ZS,"Industry, value added (% of GDP)",24.8223675100372,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2018-12-31,NV.IND.TOTL.ZS,"Industry, value added (% of GDP)",27.3057021409277,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2017-12-31,NV.IND.TOTL.ZS,"Industry, value added (% of GDP)",23.5819061799905,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2016-12-31,NV.IND.TOTL.ZS,"Industry, value added (% of GDP)",21.9325682020946,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2015-12-31,NV.IND.TOTL.ZS,"Industry, value added (% of GDP)",16.2977936386153,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2023-12-31,NV.SRV.TOTL.ZS,"Services, value added (% of GDP)",36.9830215351258,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2022-12-31,NV.SRV.TOTL.ZS,"Services, value added (% of GDP)",36.543773679291,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2021-12-31,NV.SRV.TOTL.ZS,"Services, value added (% of GDP)",36.535745252733,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2020-12-31,NV.SRV.TOTL.ZS,"Services, value added (% of GDP)",36.8280720006566,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2019-12-31,NV.SRV.TOTL.ZS,"Services, value added (% of GDP)",37.1475828867108,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2018-12-31,NV.SRV.TOTL.ZS,"Services, value added (% of GDP)",36.4097271468251,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2017-12-31,NV.SRV.TOTL.ZS,"Services, value added (% of GDP)",36.6336545565058,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2016-12-31,NV.SRV.TOTL.ZS,"Services, value added (% of GDP)",36.7245899328932,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2015-12-31,NV.SRV.TOTL.ZS,"Services, value added (% of GDP)",39.5457091545031,Ethiopia,World Bank,% of GDP,Sectoral GDP
+2015-12-31,SE.PRM.NENR,"School enrollment, primary (% net)",84.62346,Ethiopia,World Bank,% net enrollment,Education
+2022-12-31,SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2.85274577,Ethiopia,World Bank,% of GDP,Health
+2021-12-31,SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),3.2075386,Ethiopia,World Bank,% of GDP,Health
+2020-12-31,SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),3.48096275,Ethiopia,World Bank,% of GDP,Health
+2019-12-31,SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),3.24287128,Ethiopia,World Bank,% of GDP,Health
+2018-12-31,SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),3.30371761,Ethiopia,World Bank,% of GDP,Health
+2017-12-31,SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),3.45336914,Ethiopia,World Bank,% of GDP,Health
+2016-12-31,SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),3.60033751,Ethiopia,World Bank,% of GDP,Health
+2015-12-31,SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),3.82316828,Ethiopia,World Bank,% of GDP,Health
+2022-12-31,AG.LND.ARBL.ZS,Arable land (% of land area),14.5316211273828,Ethiopia,World Bank,% of land area,Agriculture
+2021-12-31,AG.LND.ARBL.ZS,Arable land (% of land area),14.559266697703,Ethiopia,World Bank,% of land area,Agriculture
+2020-12-31,AG.LND.ARBL.ZS,Arable land (% of land area),14.3500889708883,Ethiopia,World Bank,% of land area,Agriculture
+2019-12-31,AG.LND.ARBL.ZS,Arable land (% of land area),14.3473484917961,Ethiopia,World Bank,% of land area,Agriculture
+2018-12-31,AG.LND.ARBL.ZS,Arable land (% of land area),14.3430388457376,Ethiopia,World Bank,% of land area,Agriculture
+2017-12-31,AG.LND.ARBL.ZS,Arable land (% of land area),14.1501576177916,Ethiopia,World Bank,% of land area,Agriculture
+2016-12-31,AG.LND.ARBL.ZS,Arable land (% of land area),14.0409203421887,Ethiopia,World Bank,% of land area,Agriculture
+2015-12-31,AG.LND.ARBL.ZS,Arable land (% of land area),13.9303953410931,Ethiopia,World Bank,% of land area,Agriculture
+2022-12-31,EG.USE.ELEC.KH.PC,Electric power consumption (kWh per capita),92.4358249132126,Ethiopia,World Bank,kWh per capita,Energy
+2021-12-31,EG.USE.ELEC.KH.PC,Electric power consumption (kWh per capita),83.8801247645011,Ethiopia,World Bank,kWh per capita,Energy
+2020-12-31,EG.USE.ELEC.KH.PC,Electric power consumption (kWh per capita),93.3839345037291,Ethiopia,World Bank,kWh per capita,Energy
+2019-12-31,EG.USE.ELEC.KH.PC,Electric power consumption (kWh per capita),92.3124380650632,Ethiopia,World Bank,kWh per capita,Energy
+2018-12-31,EG.USE.ELEC.KH.PC,Electric power consumption (kWh per capita),91.919211356599,Ethiopia,World Bank,kWh per capita,Energy
+2017-12-31,EG.USE.ELEC.KH.PC,Electric power consumption (kWh per capita),80.8177660045461,Ethiopia,World Bank,kWh per capita,Energy
+2016-12-31,EG.USE.ELEC.KH.PC,Electric power consumption (kWh per capita),81.1483241249976,Ethiopia,World Bank,kWh per capita,Energy
+2015-12-31,EG.USE.ELEC.KH.PC,Electric power consumption (kWh per capita),73.8443396941679,Ethiopia,World Bank,kWh per capita,Energy
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),44.9,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),45.5,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),46.6,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),47.5,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),48.5,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),48.7,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),48.4,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),47.7,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),47.3,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),47.1,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),46.8,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),46.6,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),45.9,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),45.4,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),44.5,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),42.3,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),40.9,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),39.7,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),38.8,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),37.5,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),37.0,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),35.5,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),34.5,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),33.6,Ethiopia,UN Statistics,,Sustainable Development
+2023-12-31,UN_SDG,Proportion of population below international poverty line (%),32.8,Ethiopia,UN Statistics,,Sustainable Development
