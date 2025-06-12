@@ -807,3 +807,163 @@ def update_indicator_api(indicator_id):
         }), 500
 
 
+
+# Financial Statement API endpoints
+@main_bp.route('/admin/api/financial-statement/<int:statement_id>', methods=['GET'])
+@login_required
+@admin_required
+def get_financial_statement_api(statement_id):
+    """API endpoint to get financial statement details"""
+    try:
+        from models import FinancialStatement
+        statement = FinancialStatement.query.get_or_404(statement_id)
+        
+        statement_data = {
+            'id': statement.id,
+            'company_id': statement.company_id,
+            'company_name': statement.company.name if statement.company else None,
+            'ticker_symbol': statement.company.ticker_symbol if statement.company else None,
+            'statement_type': statement.statement_type,
+            'reporting_period': statement.reporting_period,
+            'fiscal_year': statement.fiscal_year,
+            'period_start_date': statement.period_start_date.strftime('%Y-%m-%d') if statement.period_start_date else None,
+            'period_end_date': statement.period_end_date.strftime('%Y-%m-%d') if statement.period_end_date else None,
+            'filing_date': statement.filing_date.strftime('%Y-%m-%d') if statement.filing_date else None,
+            
+            # Income Statement Data
+            'revenue': float(statement.revenue) if statement.revenue else None,
+            'cost_of_goods_sold': float(statement.cost_of_goods_sold) if statement.cost_of_goods_sold else None,
+            'gross_profit': float(statement.gross_profit) if statement.gross_profit else None,
+            'operating_expenses': float(statement.operating_expenses) if statement.operating_expenses else None,
+            'operating_income': float(statement.operating_income) if statement.operating_income else None,
+            'interest_expense': float(statement.interest_expense) if statement.interest_expense else None,
+            'interest_income': float(statement.interest_income) if statement.interest_income else None,
+            'net_income': float(statement.net_income) if statement.net_income else None,
+            'earnings_per_share': float(statement.earnings_per_share) if statement.earnings_per_share else None,
+            
+            # Balance Sheet Data
+            'total_assets': float(statement.total_assets) if statement.total_assets else None,
+            'current_assets': float(statement.current_assets) if statement.current_assets else None,
+            'cash_and_equivalents': float(statement.cash_and_equivalents) if statement.cash_and_equivalents else None,
+            'accounts_receivable': float(statement.accounts_receivable) if statement.accounts_receivable else None,
+            'inventory': float(statement.inventory) if statement.inventory else None,
+            'total_liabilities': float(statement.total_liabilities) if statement.total_liabilities else None,
+            'current_liabilities': float(statement.current_liabilities) if statement.current_liabilities else None,
+            'long_term_debt': float(statement.long_term_debt) if statement.long_term_debt else None,
+            'shareholders_equity': float(statement.shareholders_equity) if statement.shareholders_equity else None,
+            
+            # Cash Flow Data
+            'operating_cash_flow': float(statement.operating_cash_flow) if statement.operating_cash_flow else None,
+            'investing_cash_flow': float(statement.investing_cash_flow) if statement.investing_cash_flow else None,
+            'financing_cash_flow': float(statement.financing_cash_flow) if statement.financing_cash_flow else None,
+            'free_cash_flow': float(statement.free_cash_flow) if statement.free_cash_flow else None,
+            
+            # Banking-specific metrics
+            'deposits': float(statement.deposits) if statement.deposits else None,
+            'loans_and_advances': float(statement.loans_and_advances) if statement.loans_and_advances else None,
+            'loan_loss_provisions': float(statement.loan_loss_provisions) if statement.loan_loss_provisions else None,
+            'net_interest_income': float(statement.net_interest_income) if statement.net_interest_income else None,
+            'non_interest_income': float(statement.non_interest_income) if statement.non_interest_income else None,
+            
+            # Metadata
+            'currency': statement.currency,
+            'is_audited': statement.is_audited,
+            'auditor_name': statement.auditor_name,
+            'data_source': statement.data_source
+        }
+        
+        return jsonify({
+            'success': True,
+            'statement': statement_data
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in get_financial_statement_api: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Error retrieving financial statement: {str(e)}'
+        }), 500
+
+@main_bp.route('/admin/api/financial-statement/<int:statement_id>', methods=['PUT'])
+@login_required
+@admin_required
+def update_financial_statement_api(statement_id):
+    """API endpoint to update financial statement"""
+    try:
+        from models import FinancialStatement
+        statement = FinancialStatement.query.get_or_404(statement_id)
+        data = request.get_json()
+        
+        # Update basic information
+        if 'reporting_period' in data:
+            statement.reporting_period = data['reporting_period']
+        if 'fiscal_year' in data:
+            statement.fiscal_year = data['fiscal_year']
+        if 'period_start_date' in data and data['period_start_date']:
+            from datetime import datetime
+            statement.period_start_date = datetime.strptime(data['period_start_date'], '%Y-%m-%d').date()
+        if 'period_end_date' in data and data['period_end_date']:
+            from datetime import datetime
+            statement.period_end_date = datetime.strptime(data['period_end_date'], '%Y-%m-%d').date()
+            
+        # Update Income Statement fields
+        income_fields = [
+            'revenue', 'cost_of_goods_sold', 'gross_profit', 'operating_expenses', 
+            'operating_income', 'interest_expense', 'interest_income', 'net_income', 'earnings_per_share'
+        ]
+        for field in income_fields:
+            if field in data:
+                setattr(statement, field, data[field])
+        
+        # Update Balance Sheet fields
+        balance_fields = [
+            'total_assets', 'current_assets', 'cash_and_equivalents', 'accounts_receivable',
+            'inventory', 'total_liabilities', 'current_liabilities', 'long_term_debt', 'shareholders_equity'
+        ]
+        for field in balance_fields:
+            if field in data:
+                setattr(statement, field, data[field])
+        
+        # Update Cash Flow fields
+        cashflow_fields = [
+            'operating_cash_flow', 'investing_cash_flow', 'financing_cash_flow', 'free_cash_flow'
+        ]
+        for field in cashflow_fields:
+            if field in data:
+                setattr(statement, field, data[field])
+        
+        # Update Banking-specific fields
+        banking_fields = [
+            'deposits', 'loans_and_advances', 'loan_loss_provisions', 'net_interest_income', 'non_interest_income'
+        ]
+        for field in banking_fields:
+            if field in data:
+                setattr(statement, field, data[field])
+        
+        # Auto-calculate derived fields
+        if 'revenue' in data and 'cost_of_goods_sold' in data:
+            if statement.revenue and statement.cost_of_goods_sold:
+                statement.gross_profit = statement.revenue - statement.cost_of_goods_sold
+        
+        if 'gross_profit' in data and 'operating_expenses' in data:
+            if statement.gross_profit and statement.operating_expenses:
+                statement.operating_income = statement.gross_profit - statement.operating_expenses
+        
+        if 'operating_cash_flow' in data and 'investing_cash_flow' in data:
+            if statement.operating_cash_flow and statement.investing_cash_flow:
+                statement.free_cash_flow = statement.operating_cash_flow + statement.investing_cash_flow
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Financial statement updated successfully'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in update_financial_statement_api: {str(e)}")
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': f'Error updating financial statement: {str(e)}'
+        }), 500
