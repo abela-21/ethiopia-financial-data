@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from models import Company, Stock, Financial, MacroIndicators, Bank, ResearchDocument, EconomicSector, db
 from functools import wraps
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, text
 from datetime import datetime, timedelta
 import logging
 import os
@@ -1271,4 +1271,182 @@ def download_import_template(template_type):
         
     except Exception as e:
         logger.error(f"Error downloading template: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@main_bp.route('/admin/external-data')
+@login_required
+@admin_required
+def admin_external_data():
+    """External data integration interface"""
+    return render_template('admin/external_data.html')
+
+@main_bp.route('/admin/external-data/sync', methods=['POST'])
+@login_required
+@admin_required
+def admin_external_data_sync():
+    """Sync data from external sources"""
+    try:
+        from Data.enhanced_external_apis import EnhancedExternalDataIntegrator
+        
+        integrator = EnhancedExternalDataIntegrator()
+        
+        # Fetch data from all sources
+        all_data = integrator.fetch_all_external_data()
+        
+        if all_data:
+            # Store in database
+            db_results = integrator.store_in_database(all_data)
+            
+            # Export to files
+            export_results = integrator.export_to_files(all_data)
+            
+            # Create summary
+            sources = list(set([record['source'] for record in all_data]))
+            
+            return jsonify({
+                'success': True,
+                'total_records': len(all_data),
+                'new_records': db_results.get('new', 0),
+                'updated_records': db_results.get('updated', 0),
+                'sources': sources,
+                'exports': export_results
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'No data retrieved from external sources'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error syncing external data: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@main_bp.route('/admin/external-data/overview')
+@login_required
+@admin_required
+def admin_external_data_overview():
+    """Get overview of external data"""
+    try:
+        from sqlalchemy import func
+        
+        # Get statistics from database
+        with db.engine.connect() as conn:
+            # Total records
+            total_records = conn.execute(
+                text("SELECT COUNT(*) FROM external_data_sources")
+            ).scalar() or 0
+            
+            # Total indicators
+            total_indicators = conn.execute(
+                text("SELECT COUNT(DISTINCT indicator_code) FROM external_data_sources")
+            ).scalar() or 0
+            
+            # Sources count
+            sources_count = conn.execute(
+                text("SELECT COUNT(DISTINCT source) FROM external_data_sources")
+            ).scalar() or 0
+            
+            # Last update
+            last_update = conn.execute(
+                text("SELECT MAX(last_updated) FROM external_data_sources")
+            ).scalar()
+            
+            # Recent data (last 10 records)
+            recent_data = conn.execute(
+                text("""
+                    SELECT indicator_name, source, date, value, unit
+                    FROM external_data_sources 
+                    ORDER BY last_updated DESC 
+                    LIMIT 10
+                """)
+            ).fetchall()
+            
+            recent_data_list = []
+            for record in recent_data:
+                recent_data_list.append({
+                    'indicator_name': record.indicator_name,
+                    'source': record.source,
+                    'date': str(record.date),
+                    'value': float(record.value) if record.value else 0,
+                    'unit': record.unit or ''
+                })
+        
+        return jsonify({
+            'total_records': total_records,
+            'total_indicators': total_indicators,
+            'sources_count': sources_count,
+            'last_update': str(last_update) if last_update else 'Never',
+            'recent_data': recent_data_list
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting external data overview: {str(e)}")
+        return jsonify({
+            'total_records': 0,
+            'total_indicators': 0,
+            'sources_count': 0,
+            'last_update': 'Error',
+            'recent_data': []
+        })
+
+@main_bp.route('/admin/external-data/export/<format_type>')
+@login_required
+@admin_required
+def admin_external_data_export(format_type):
+    """Export external data in specified format"""
+    try:
+        if format_type not in ['csv', 'excel', 'json']:
+            return jsonify({'error': 'Invalid format type'}), 400
+        
+        # Get all external data
+        with db.engine.connect() as conn:
+            records = conn.execute(
+                text("""
+                    SELECT * FROM external_data_sources 
+                    ORDER BY date DESC, source, indicator_code
+                """)
+            ).fetchall()
+        
+        if not records:
+            return jsonify({'error': 'No data available for export'}), 404
+        
+        # Convert to DataFrame
+        import pandas as pd
+        data = []
+        for record in records:
+            data.append({
+                'indicator_code': record.indicator_code,
+                'indicator_name': record.indicator_name,
+                'date': str(record.date),
+                'value': float(record.value) if record.value else None,
+                'country': record.country,
+                'source': record.source,
+                'unit': record.unit or '',
+                'last_updated': str(record.last_updated)
+            })
+        
+        df = pd.DataFrame(data)
+        
+        if format_type == 'csv':
+            filename = f'Data/external_data_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+            df.to_csv(filename, index=False)
+            return send_file(filename, as_attachment=True)
+            
+        elif format_type == 'excel':
+            filename = f'Data/external_data_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+            df.to_excel(filename, index=False)
+            return send_file(filename, as_attachment=True)
+            
+        elif format_type == 'json':
+            return jsonify({
+                'success': True,
+                'data': data,
+                'total_records': len(data)
+            })
+        
+    except Exception as e:
+        logger.error(f"Error exporting external data: {str(e)}")
         return jsonify({'error': str(e)}), 500
