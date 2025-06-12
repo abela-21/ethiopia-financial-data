@@ -51,6 +51,7 @@ class EthiopianDataMigration:
                 db.session.execute(text("DELETE FROM research_document"))
                 db.session.execute(text("DELETE FROM bank"))
                 db.session.execute(text("DELETE FROM macro_indicators"))
+                db.session.execute(text("DELETE FROM economic_sector"))
                 
                 db.session.commit()
                 print("✅ Existing data cleared successfully")
@@ -492,19 +493,35 @@ class EthiopianDataMigration:
         with self.app.app_context():
             try:
                 for sector_data in sectors_data:
-                    sector = EconomicSector(
-                        id=sector_data["id"],
-                        sector_name=sector_data["sector_name"],
-                        sector_code=sector_data["sector_code"],
-                        gdp_contribution=sector_data["gdp_contribution"],
-                        employment_share=sector_data["employment_share"],
-                        growth_rate=sector_data["growth_rate"],
-                        investment_share=sector_data["investment_share"],
-                        export_contribution=sector_data["export_contribution"],
-                        last_updated=datetime.strptime(sector_data["last_updated"], "%Y-%m-%d").date()
-                    )
-                    db.session.add(sector)
-                    self.logger.info(f"Added economic sector: {sector_data['sector_name']}")
+                    # Check if sector already exists
+                    existing_sector = EconomicSector.query.filter_by(id=sector_data["id"]).first()
+                    
+                    if existing_sector:
+                        # Update existing sector
+                        existing_sector.sector_name = sector_data["sector_name"]
+                        existing_sector.sector_code = sector_data["sector_code"]
+                        existing_sector.gdp_contribution = sector_data["gdp_contribution"]
+                        existing_sector.employment_share = sector_data["employment_share"]
+                        existing_sector.growth_rate = sector_data["growth_rate"]
+                        existing_sector.investment_share = sector_data["investment_share"]
+                        existing_sector.export_contribution = sector_data["export_contribution"]
+                        existing_sector.last_updated = datetime.strptime(sector_data["last_updated"], "%Y-%m-%d").date()
+                        self.logger.info(f"Updated economic sector: {sector_data['sector_name']}")
+                    else:
+                        # Create new sector
+                        sector = EconomicSector(
+                            id=sector_data["id"],
+                            sector_name=sector_data["sector_name"],
+                            sector_code=sector_data["sector_code"],
+                            gdp_contribution=sector_data["gdp_contribution"],
+                            employment_share=sector_data["employment_share"],
+                            growth_rate=sector_data["growth_rate"],
+                            investment_share=sector_data["investment_share"],
+                            export_contribution=sector_data["export_contribution"],
+                            last_updated=datetime.strptime(sector_data["last_updated"], "%Y-%m-%d").date()
+                        )
+                        db.session.add(sector)
+                        self.logger.info(f"Added economic sector: {sector_data['sector_name']}")
                 
                 db.session.commit()
                 print(f"✅ Successfully loaded {len(sectors_data)} economic sectors")
