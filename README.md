@@ -1,196 +1,264 @@
-# Ethiopia Economic Intelligence Platform
+# Ethiopia Economic Data Platform
+
+A comprehensive financial data platform specializing in Ethiopia's capital market, providing authenticated economic insights and banking sector analytics.
 
 ## Overview
-A comprehensive financial data platform for Ethiopia's capital market, providing authentic banking sector data, economic indicators, and downloadable financial metrics for listed companies.
 
-## Key Features
+This platform serves researchers, consultants, analysts, portfolio managers, and investors with authentic Ethiopian economic data sourced from international authorities including the World Bank, UN Statistics, and National Bank of Ethiopia.
 
-### 🏦 Banking Sector Intelligence
-- Complete profiles of 18 Ethiopian banks including Commercial Bank of Ethiopia, Awash Bank, Wegagen Bank
-- Financial performance metrics: assets, deposits, capital adequacy ratios, NPL ratios
-- Sector-wide analysis and comparative banking statistics
-- Authentic data from National Bank of Ethiopia and individual bank reports
+## Features
 
-### 📊 Financial Data Downloads
-- **5 Ethiopian Stock Exchange Listed Companies**:
-  - Wegagen Bank (WB) - 10 banking-specific financial metrics
-  - Ethio Telecom (ETHIO) - 8 telecommunications metrics  
-  - Ethiopian Airlines (ETH) - 6 aviation industry metrics
-  - East African Bottling (EABC) - 5 consumer goods metrics
-  - Dangote Cement Ethiopia (DANGOTE) - 4 materials sector metrics
+### Core Functionality
+- **Economic Indicators Dashboard** - Real-time display of GDP growth, inflation, unemployment, and exchange rates
+- **Banking Sector Analytics** - Performance metrics for 18 Ethiopian banks
+- **Research Document Library** - Comprehensive collection of economic research and reports
+- **Data Export Tools** - Multi-format export (CSV, Excel, JSON, PDF)
+- **Admin Panel** - Complete data management and user administration
 
-- **Download Formats**: Excel (.xlsx) and CSV files
-- **Bulk Download**: Select multiple companies and metric categories
-- **Individual Company Data**: Detailed financial profiles with quarterly/annual data
+### Data Sources
+- **World Bank Open Data API** - 171+ authentic Ethiopian economic indicators
+- **UN Statistics Division** - Sustainable Development Goals metrics
+- **National Bank of Ethiopia** - Monetary policy and banking statistics
+- **Ethiopian Statistics Service** - National accounts and labor statistics
 
-### 📈 Economic Research
-- 8 research documents covering banking sector analysis, monetary policy, and economic forecasts
-- Documents from National Bank of Ethiopia, Ministry of Finance, and academic institutions
-- Download tracking and citation information
+### User Roles
+- **Public Users** - Access to basic economic indicators and research
+- **Authenticated Users** - Advanced analytics and data export capabilities
+- **Administrators** - Full data management and platform administration
 
-### 🔍 Market Intelligence
-- Real-time economic indicators and macroeconomic data
-- Sector performance analysis across 10 major economic sectors
-- Banking digital transformation metrics and financial inclusion data
-
-## Data Sources & Authenticity
-
-All financial data is sourced from verified Ethiopian institutions:
-
-- **Ethiopian Stock Exchange**: Official listing and trading data
-- **National Bank of Ethiopia**: Banking supervision reports and monetary statistics
-- **Company Annual Reports**: Audited financial statements from listed companies
-- **Ministry of Finance**: Government economic publications
-- **Ethiopian Statistical Service**: Official economic indicators
-
-## Technical Architecture
+## Technology Stack
 
 ### Backend
-- **Framework**: Flask with SQLAlchemy ORM
-- **Database**: PostgreSQL with comprehensive financial data models
-- **APIs**: RESTful endpoints for financial data retrieval
-- **File Generation**: Dynamic Excel/CSV export with authentic financial metrics
+- **Flask** - Web application framework
+- **SQLAlchemy** - Database ORM
+- **PostgreSQL** - Primary database
+- **Redis** - Caching layer
+- **Gunicorn** - WSGI server
 
 ### Frontend
-- **UI Framework**: Bootstrap 5 with responsive design
-- **Data Visualization**: Chart.js for interactive financial charts
-- **User Experience**: Modern interface with company cards, bulk selection, and download progress
+- **Chart.js** - Data visualization
+- **Bootstrap 5** - Responsive UI framework
+- **JavaScript ES6+** - Interactive functionality
 
-### Security & Performance
-- Rate limiting on API endpoints
-- Data validation and error handling
-- Optimized database queries for large financial datasets
-- Secure file generation and download mechanisms
+### Infrastructure
+- **Docker** - Containerization
+- **GitHub Actions** - CI/CD pipeline
+- **Replit** - Development and deployment platform
 
-## API Endpoints
-
-### Financial Data API
-```
-GET /api/financial/companies - List all listed companies
-GET /api/financial/companies/{id}/metrics - Company financial metrics
-POST /api/financial/download/metrics - Bulk download financial data
-```
-
-### Banking API
-```
-GET /api/banking/banks - Ethiopian banks directory
-GET /api/banking/metrics - Banking sector statistics
-GET /api/banking/performance - Sector performance analysis
-```
-
-### Research API
-```
-GET /api/research/documents - Research publications
-GET /api/research/download/{id} - Download research document
-```
-
-## Usage Guide
-
-### Downloading Financial Data
-
-1. **Navigate to Financial Data Section** (`/financial-data`)
-2. **Browse Companies**: View cards for all 5 listed companies with key metrics
-3. **Individual Download**: Click "Download Data" on any company card
-4. **Bulk Download**: 
-   - Select companies using checkboxes
-   - Choose metric categories (Revenue, Assets, Ratios, Banking, Telecom)
-   - Select format (Excel or CSV)
-   - Click "Download Financial Data"
-
-### Available Financial Metrics
-
-#### Wegagen Bank (Banking Metrics)
-- Total Assets, Deposits, Loans and Advances
-- Net Interest Income, Operating Income
-- Capital Adequacy Ratio, NPL Ratio, Return on Assets
-- Digital Banking Users, Branch Network
-
-#### Ethio Telecom (Telecommunications)  
-- Total Revenue, Mobile Subscribers, Internet Subscribers
-- ARPU (Average Revenue Per User), Network Coverage
-- EBITDA, Customer Growth Rate, Data Revenue
-
-#### Ethiopian Airlines (Aviation)
-- Operating Revenue, Passenger Count, Cargo Volume
-- Fleet Size, Route Network, Load Factor
-
-#### East African Bottling (Consumer Goods)
-- Net Sales, Production Volume, Market Share
-- Distribution Network, Brand Portfolio
-
-#### Dangote Cement Ethiopia (Materials)
-- Revenue, Production Capacity, Market Position
-- Cement Sales Volume
-
-## Development Setup
+## Quick Start
 
 ### Prerequisites
 - Python 3.11+
-- PostgreSQL 12+
-- Node.js 18+ (for frontend assets)
+- PostgreSQL 15+
+- Redis (optional, for caching)
 
 ### Installation
+
+1. Clone the repository
 ```bash
-# Clone repository
-git clone <repository-url>
+git clone https://github.com/your-username/ethiopia-economic-platform.git
 cd ethiopia-economic-platform
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Set environment variables
-export DATABASE_URL="postgresql://user:password@localhost/ethiopia_economic"
-export SESSION_SECRET="your-secret-key"
-
-# Initialize database
-python init_db.py
-
-# Populate financial data
-python populate_listed_companies.py
-
-# Run development server
-gunicorn --bind 0.0.0.0:5000 --reload main:app
 ```
 
-### Database Migration
+2. Install dependencies
 ```bash
-# Populate banking sector data
-python data_migration.py
-
-# Load research documents
-python populate_database.py
+pip install -r requirements.txt
 ```
 
-## Data Update Schedule
+3. Set up environment variables
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
 
-- **Company Financial Metrics**: Quarterly updates following ESX reporting schedule
-- **Banking Sector Data**: Monthly updates from NBE reports
-- **Economic Indicators**: Real-time updates from Ethiopian Statistical Service
-- **Research Documents**: Continuous addition of new publications
+4. Initialize the database
+```bash
+python scripts/create_admin.py
+python scripts/data_migration.py
+```
 
-## Compliance & Data Integrity
+5. Run the application
+```bash
+python main.py
+```
 
-- All financial data verified against official company filings
-- Banking metrics cross-referenced with NBE supervision reports
-- Regular data validation and accuracy checks
-- Proper attribution to original data sources
+The application will be available at `http://localhost:5000`
 
-## Support & Maintenance
+### Default Admin Credentials
+- **Email**: admin@ethiopia-economic.com
+- **Password**: EthiopiaAdmin2024!
 
-### Data Quality Assurance
-- Automated data validation on import
-- Regular reconciliation with source systems
-- Error logging and monitoring for data discrepancies
+## Project Structure
 
-### Performance Optimization
-- Database indexing for fast financial data queries
-- Caching of frequently accessed company metrics
-- Optimized file generation for large downloads
+```
+ethiopia-economic-platform/
+├── api/                    # API route modules
+│   ├── economic_routes.py  # Economic indicators endpoints
+│   ├── banking_routes.py   # Banking sector APIs
+│   └── ...
+├── data/                   # Data files and templates
+│   ├── Data/              # External data integration
+│   └── ...
+├── docs/                   # Documentation
+│   ├── ARCHITECTURE.md     # System architecture
+│   ├── DEPLOYMENT.md       # Deployment guide
+│   └── ...
+├── scripts/               # Utility scripts
+│   ├── data_migration.py   # Database setup
+│   ├── create_admin.py     # Admin user creation
+│   └── ...
+├── static/                # Static assets
+│   ├── css/               # Stylesheets
+│   ├── js/                # JavaScript files
+│   └── templates/         # HTML templates
+├── templates/             # Jinja2 templates
+│   ├── admin/             # Admin panel templates
+│   ├── auth/              # Authentication pages
+│   └── ...
+├── tests/                 # Test suite
+├── utils/                 # Utility modules
+├── app.py                 # Flask application factory
+├── models.py              # Database models
+├── routes.py              # Main route definitions
+└── main.py                # Application entry point
+```
 
-## License & Usage Rights
+## API Documentation
 
-This platform provides access to publicly available financial data from Ethiopian institutions. All data remains property of original sources. Users must comply with applicable securities regulations and data usage policies.
+### Economic Indicators
+```
+GET /api/v1/economic/indicators
+GET /api/v1/economic/indicators/trends
+POST /api/v1/economic/indicators
+```
+
+### Banking Data
+```
+GET /api/v1/banking/banks
+GET /api/v1/banking/banks/{id}/performance
+GET /api/v1/banking/sector-overview
+```
+
+### Data Export
+```
+POST /api/v1/export/economic/{format}
+POST /api/v1/export/banking/{format}
+```
+
+## Data Management
+
+### Bulk Import
+The platform supports bulk import of data via CSV/Excel files:
+- Economic indicators
+- Banking financial statements
+- Company information
+- Research documents
+
+### External API Integration
+Automated data refresh from external sources:
+- Daily updates from World Bank API
+- Weekly synchronization with UN Statistics
+- Monthly banking sector data updates
+
+## Development
+
+### Running Tests
+```bash
+# Run all tests
+python -m pytest tests/
+
+# Run specific test category
+python -m pytest tests/test_economic_indicators.py
+```
+
+### Code Quality
+```bash
+# Linting
+flake8 .
+
+# Type checking
+mypy .
+
+# Security scanning
+bandit -r .
+```
+
+### Database Migrations
+```bash
+# Generate migration
+flask db migrate -m "Description of changes"
+
+# Apply migration
+flask db upgrade
+```
+
+## Deployment
+
+### Production Deployment
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment instructions.
+
+### Environment Configuration
+```bash
+# Production settings
+FLASK_ENV=production
+DATABASE_URL=postgresql://user:pass@host:port/db
+REDIS_URL=redis://host:port/0
+SECRET_KEY=your-secret-key
+```
+
+## Contributing
+
+Please read [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## Data Integrity
+
+This platform maintains strict data integrity standards:
+- All economic data sourced from authenticated international organizations
+- Source attribution for every data point
+- Audit trails for all data modifications
+- Regular validation against authoritative sources
+
+## Security
+
+- JWT-based authentication
+- Role-based access control
+- API rate limiting
+- Input validation and sanitization
+- Regular security audits
+
+## Performance
+
+- Redis caching for frequently accessed data
+- Database query optimization
+- Lazy loading for large datasets
+- CDN integration for static assets
+
+## Monitoring
+
+- Application performance monitoring
+- Data freshness alerts
+- External API status monitoring
+- User activity analytics
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For support and questions:
+- Create an issue on GitHub
+- Email: support@ethiopia-economic.com
+- Documentation: [docs/](docs/)
+
+## Acknowledgments
+
+- World Bank Open Data initiative
+- UN Statistics Division
+- National Bank of Ethiopia
+- Ethiopian Statistics Service
+- Open source community contributors
 
 ---
 
-**Ethiopia Economic Intelligence Platform** - Transforming Ethiopian financial data into actionable insights for researchers, analysts, and portfolio managers.
+**Ethiopia Economic Data Platform** - Empowering decision-making with authentic economic intelligence.

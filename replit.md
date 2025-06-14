@@ -1,117 +1,97 @@
-# Ethiopia Economic Intelligence Platform
+# Ethiopia Economic Data Platform
 
 ## Overview
 
-This is a comprehensive financial data platform for Ethiopia's capital market, providing authentic banking sector data, economic indicators, and downloadable financial metrics. The platform serves as a central hub for Ethiopian economic intelligence, featuring data on 18 licensed banks, listed companies, macroeconomic indicators, and research documents.
+The Ethiopia Economic Data Platform is a comprehensive Flask-based web application designed to serve as a centralized hub for Ethiopian economic and financial data. The platform provides banking sector analysis, economic indicators, financial data management, and research document access for investors, analysts, and researchers interested in Ethiopia's emerging capital market.
 
 ## System Architecture
 
-### Frontend Architecture
-- **Framework**: Server-side rendered HTML templates using Jinja2
-- **CSS Framework**: Bootstrap 5 for responsive design
-- **JavaScript**: Vanilla JavaScript with Chart.js for data visualization
-- **UI Components**: Modular template system with reusable components
-- **Responsive Design**: Mobile-first approach with responsive navigation
-
 ### Backend Architecture
-- **Framework**: Flask web framework with application factory pattern
-- **ORM**: SQLAlchemy for database operations
-- **Authentication**: Flask-Login with role-based access control (user/admin)
-- **API Design**: RESTful endpoints for data access and management
+- **Framework**: Flask with application factory pattern
+- **Database**: SQLAlchemy ORM with PostgreSQL (production) / SQLite (development)
+- **Authentication**: Flask-Login with session management and JWT tokens
 - **Caching**: Flask-Caching for performance optimization
 - **Rate Limiting**: Flask-Limiter for API protection
+- **Migration**: Flask-Migrate for database schema management
 
-### Database Architecture
-- **Primary Database**: PostgreSQL for production, SQLite for development
-- **Schema Design**: Normalized relational schema with proper foreign key relationships
-- **Key Tables**: Users, Companies, Banks, MacroIndicators, FinancialStatements, ResearchDocuments
-- **Data Integrity**: Referential integrity constraints and proper indexing
+### Frontend Architecture
+- **Template Engine**: Jinja2 templates with Bootstrap 5
+- **CSS Framework**: Bootstrap 5 with custom styling
+- **JavaScript Libraries**: Chart.js for data visualization
+- **Icons**: Font Awesome 6.4.0
+- **Responsive Design**: Mobile-first approach
+
+### Deployment Strategy
+- **WSGI Server**: Gunicorn for production deployment
+- **Platform**: Replit with auto-scaling deployment target
+- **Port Configuration**: Application runs on port 5000
+- **Environment**: Python 3.11 with PostgreSQL 16
 
 ## Key Components
 
-### Data Management System
-- **Banking Sector**: 18 Ethiopian banks with financial metrics, NBE ratings, and branch networks
-- **Listed Companies**: 5 ESX-listed companies with comprehensive financial data
-- **Economic Indicators**: 35+ macroeconomic variables including GDP, inflation, exchange rates
-- **Research Documents**: Academic and institutional research papers with download tracking
+### Models (models.py)
+- **User**: Authentication and user management with role-based access
+- **Company**: Listed companies with ticker symbols and industry classification
+- **Additional Models**: Banking institutions, financial statements, economic indicators (referenced but not fully visible)
 
-### Authentication & Authorization
-- **User Management**: Registration, login, and profile management
-- **Role-Based Access**: Admin and user roles with different permission levels
-- **Session Management**: Secure session handling with Flask-Login
-- **Admin Panel**: Comprehensive data management interface for administrators
+### Authentication System (auth_routes.py)
+- User registration with email validation
+- Password hashing using Werkzeug security
+- Session-based authentication with Flask-Login
+- Username generation from email addresses
+- Form validation and error handling
 
-### Export & Download System
-- **Multi-Format Support**: Excel (.xlsx), CSV, JSON, and PDF exports
-- **Bulk Downloads**: Select multiple companies and data categories
-- **Real-Time Generation**: Dynamic report generation with proper formatting
-- **Download Tracking**: User activity logging and analytics
+### Data Management Routes (routes.py)
+- Admin-only data management interface
+- Company listings with search and filtering
+- Financial data visualization
+- Economic indicators dashboard
+- Export functionality for data downloads
 
-### API Layer
-- **Public APIs**: Company data, stock prices, economic indicators
-- **Admin APIs**: Data management, user administration, bulk operations
-- **External Integration**: World Bank, IMF, and NBE data integration capabilities
-- **Error Handling**: Comprehensive error responses and logging
+### Configuration Management
+- Environment variable-based configuration
+- Separate settings for development and production
+- Database connection pooling and optimization
+- JWT token expiration settings
 
 ## Data Flow
 
-### Data Input
-1. **Manual Entry**: Admin interface for direct data entry and editing
-2. **Bulk Import**: CSV/Excel template-based import system
-3. **External APIs**: Integration with international data sources
-4. **Database Migration**: Automated population scripts for initial setup
-
-### Data Processing
-1. **Validation**: Input validation and data integrity checks
-2. **Transformation**: Data normalization and formatting
-3. **Storage**: Optimized database storage with proper indexing
-4. **Caching**: Performance optimization through strategic caching
-
-### Data Output
-1. **Web Interface**: Real-time data display with filtering and search
-2. **API Endpoints**: Programmatic access to all data
-3. **Export System**: Multi-format download capabilities
-4. **Reporting**: Automated report generation and analytics
+1. **User Authentication**: Users register/login through secure forms with password hashing
+2. **Data Access**: Authenticated users access dashboard and financial data
+3. **Admin Functions**: Admin users manage data through dedicated interfaces
+4. **Data Export**: Users can download financial data in various formats
+5. **Real-time Updates**: Economic indicators and market data refresh capabilities
 
 ## External Dependencies
 
-### Core Dependencies
-- **Flask**: Web framework and extensions (SQLAlchemy, Login, Migrate)
-- **Database**: PostgreSQL with psycopg2-binary driver
-- **Security**: Werkzeug for password hashing, JWT for API authentication
-- **Data Processing**: Pandas for data manipulation, xlsxwriter for Excel generation
-- **Web Server**: Gunicorn for production deployment
+### Python Packages
+- **Core**: Flask, SQLAlchemy, Werkzeug
+- **Authentication**: Flask-Login, Flask-JWT-Extended, PyJWT
+- **Data Processing**: Pandas, OpenPyXL, XlsxWriter
+- **Web Enhancement**: Flask-CORS, Flask-Caching, Flask-Limiter
+- **Database**: psycopg2-binary for PostgreSQL connectivity
+- **HTTP Requests**: requests, oauthlib for external API integration
+- **Content Processing**: trafilatura for research document processing
 
 ### Frontend Dependencies
-- **Bootstrap 5**: CSS framework for responsive design
-- **Font Awesome**: Icon library for UI elements
-- **Chart.js**: JavaScript charting library for data visualization
+- **Bootstrap 5**: UI framework and components
+- **Chart.js**: Data visualization and charting
+- **Font Awesome**: Icon library
+- **Custom CSS**: Platform-specific styling
 
-### Development Dependencies
-- **Flask-Migrate**: Database schema migrations
-- **Flask-CORS**: Cross-origin resource sharing
-- **Python 3.11+**: Runtime environment
+### External Services
+- **World Bank API**: Economic indicator data
+- **UN Statistics**: Development indicators
+- **African Development Bank**: Regional economic data
 
 ## Deployment Strategy
 
-### Replit Deployment (Primary)
-- **Platform**: Replit Deployments with autoscale configuration
-- **Runtime**: Python 3.11 with PostgreSQL 16
-- **Process**: Gunicorn WSGI server on port 5000
-- **Environment**: Production-ready with TLS/SSL certificates
-- **Health Checks**: Automated health monitoring and restart capabilities
+The application uses Gunicorn WSGI server with auto-scaling deployment on Replit platform. The deployment configuration includes:
 
-### Configuration Management
-- **Environment Variables**: DATABASE_URL, SESSION_SECRET, JWT_SECRET_KEY
-- **Database**: PostgreSQL connection with connection pooling
-- **Static Assets**: Served directly through Flask in production
-- **Logging**: Structured logging with multiple output handlers
-
-### Scalability Considerations
-- **Database**: Connection pooling and query optimization
-- **Caching**: Redis-compatible caching layer for high-traffic scenarios
-- **Rate Limiting**: API rate limiting to prevent abuse
-- **Load Balancing**: Ready for horizontal scaling with load balancers
+- **Development**: Local SQLite database with debug mode
+- **Production**: PostgreSQL database with connection pooling
+- **Scaling**: Auto-scale deployment target for handling variable load
+- **Security**: Environment-based secrets and JWT token management
 
 ## Changelog
 
