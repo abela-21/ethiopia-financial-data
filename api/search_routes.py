@@ -21,7 +21,7 @@ limiter = Limiter(
     default_limits=["200 per day", "50 per hour"]
 )
 
-search_bp = Blueprint('search', __name__, url_prefix='/api/search')
+search_bp = Blueprint('search', __name__, url_prefix='/search')
 
 @search_bp.route('/companies', methods=['POST'])
 @limiter.limit("60 per minute")

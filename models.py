@@ -46,8 +46,8 @@ class Company(db.Model):
     shares_outstanding = db.Column(db.BigInteger)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    created_by = db.Column(db.Integer, db.ForeignKey("user.id"))
-    updated_by = db.Column(db.Integer, db.ForeignKey("user.id"))
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
+    updated_by = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     # Relationships
     financials = db.relationship("Financial", backref="company", lazy=True, cascade="all, delete-orphan")
@@ -64,7 +64,7 @@ class CompanyAudit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)
     action = db.Column(db.String(50), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     details = db.Column(db.JSON)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -120,8 +120,8 @@ class Financial(db.Model):
     # Metadata
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    created_by = db.Column(db.Integer, db.ForeignKey("user.id"))
-    updated_by = db.Column(db.Integer, db.ForeignKey("user.id"))
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
+    updated_by = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     def __repr__(self):
         return f"<Financial {self.company.ticker} - {self.year} {self.period}>"
@@ -156,7 +156,7 @@ class CompanyNews(db.Model):
     category = db.Column(db.String(50), index=True)  # Company/Industry/Regulatory
     url = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    created_by = db.Column(db.Integer, db.ForeignKey("user.id"))
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     def __repr__(self):
         return f"<CompanyNews {self.company.ticker}: {self.title[:30]}...>"
@@ -400,7 +400,7 @@ class ListedCompany(db.Model):
     description = db.Column(db.Text)
     ceo_name = db.Column(db.String(100))
     employee_count = db.Column(db.Integer)
-    fiscal_year_end = db.Column(db.String(10))  # 'June 30', 'December 31'
+    fiscal_year_end = db.Column(db.String(20))  # 'June 30', 'December 31'
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -741,3 +741,18 @@ class DataExportLog(db.Model):
     
     # Relationships
     user = db.relationship('User', backref='export_logs')
+
+class ExternalEconomicData(db.Model):
+    """Indicator values pulled from external APIs (World Bank, UN, etc.)"""
+    __tablename__ = 'external_economic_data'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    indicator_code = db.Column(db.String(100), nullable=False, index=True)
+    indicator_name = db.Column(db.String(255))
+    date = db.Column(db.Date, nullable=False, index=True)
+    value = db.Column(db.Float)
+    country = db.Column(db.String(10))
+    source = db.Column(db.String(100))
+    unit = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)

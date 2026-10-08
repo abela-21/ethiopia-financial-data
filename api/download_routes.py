@@ -18,7 +18,7 @@ limiter = Limiter(
     default_limits=["200 per day", "50 per hour"]
 )
 
-download_bp = Blueprint('download', __name__, url_prefix='/api/downloads')
+download_bp = Blueprint('download', __name__, url_prefix='/downloads')
 
 @download_bp.route('/track', methods=['POST'])
 @limiter.limit("100/minute")

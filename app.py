@@ -76,7 +76,8 @@ def create_app():
                        ResearchDocument, DocumentCategory, DataCitation, EconomicForecast, EconomicEvent,
                        ListedCompany, CompanyFinancialMetric, UserWatchlist, WatchlistCompany, 
                        UserAlert, UserPreference, SavedSearch,
-                       ExternalDataSource, DataIntegration, RealTimeQuote, CurrencyRate, DataExportLog)
+                       ExternalDataSource, DataIntegration, RealTimeQuote, CurrencyRate, DataExportLog,
+                       ExternalEconomicData)
     
     # Initialize Flask-Login
     from flask_login import LoginManager

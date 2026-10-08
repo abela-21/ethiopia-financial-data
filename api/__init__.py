@@ -21,7 +21,7 @@ api_bp.register_blueprint(economic_routes.economic_api, url_prefix='/economic')
 api_bp.register_blueprint(financial_routes.financial_bp, url_prefix='/financial')
 
 api_bp.register_blueprint(search_routes.search_bp)
-api_bp.register_blueprint(dashboard_routes.dashboard_bp, url_prefix='/dashboard')
+api_bp.register_blueprint(dashboard_routes.dashboard_bp)
 api_bp.register_blueprint(external_data_routes.external_data_bp, url_prefix='/external-data')
 api_bp.register_blueprint(export_routes.export_bp, url_prefix='/export')
 
