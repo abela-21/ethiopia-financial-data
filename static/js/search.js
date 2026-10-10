@@ -783,28 +783,67 @@ class AdvancedSearch {
     }
 
     // Action methods
+    findResult(companyId) {
+        return this.searchResults.find(c => String(c.id) === String(companyId));
+    }
+
     viewCompany(companyId) {
-        window.location.href = `/companies/${companyId}`;
+        // Search results are listed companies; their ids don't match the
+        // Companies table, so look them up there by ticker instead.
+        const company = this.findResult(companyId);
+        const query = company ? company.ticker_symbol : '';
+        window.location.href = `/companies?search=${encodeURIComponent(query)}`;
     }
 
     async addToWatchlist(companyId) {
         try {
+            const company = this.findResult(companyId);
             const response = await fetch('/api/watchlist/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ company_id: companyId })
+                body: JSON.stringify({ ticker: company ? company.ticker_symbol : null })
             });
-            
-            if (response.ok) {
-                this.showToast('Company added to watchlist', 'success');
+            const result = await response.json().catch(() => ({}));
+
+            if (response.status === 401 || response.redirected) {
+                this.showToast('Please log in to use watchlists', 'error');
+            } else if (response.ok) {
+                this.showToast(result.message || 'Company added to watchlist', 'success');
+            } else {
+                this.showToast(result.message || 'Failed to add to watchlist', 'error');
             }
         } catch (error) {
             this.showToast('Failed to add to watchlist', 'error');
         }
     }
 
+    async downloadStatements(companyIds) {
+        try {
+            const response = await fetch('/api/financial/download/statements', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ company_ids: companyIds.map(Number), format: 'excel' })
+            });
+            if (!response.ok) {
+                const result = await response.json().catch(() => ({}));
+                this.showToast(result.error || 'Download failed', 'error');
+                return;
+            }
+            const blob = await response.blob();
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'financial_statements.xlsx';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+        } catch (error) {
+            this.showToast('Download failed', 'error');
+        }
+    }
+
     downloadCompanyData(companyId) {
-        window.location.href = `/api/financial/companies/${companyId}/download`;
+        this.downloadStatements([companyId]);
     }
 
     addSelectedToWatchlist() {
@@ -831,8 +870,7 @@ class AdvancedSearch {
             return;
         }
         
-        const params = selectedIds.map(id => `company_ids=${id}`).join('&');
-        window.location.href = `/api/financial/companies/export?${params}`;
+        this.downloadStatements(selectedIds);
     }
 
     showToast(message, type = 'info') {

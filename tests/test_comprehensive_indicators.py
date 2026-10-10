@@ -3,12 +3,13 @@
 Test comprehensive indicators view with all 35 economic variables
 """
 
+import os
 import requests
 from urllib.parse import urljoin
 
 BASE_URL = "http://localhost:5000"
-ADMIN_EMAIL = "admin@ethiopia-economic.com"
-ADMIN_PASSWORD = "EthiopiaAdmin2024!"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@ethiopia-economic.com")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 def test_comprehensive_indicators_view():
     """Test that all economic variables are accessible through the tabbed interface"""

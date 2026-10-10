@@ -3,13 +3,14 @@
 Test the Bootstrap 5 modal functionality directly
 """
 
+import os
 import requests
 from urllib.parse import urljoin
 import json
 
 BASE_URL = "http://localhost:5000"
-ADMIN_EMAIL = "admin@ethiopia-economic.com"
-ADMIN_PASSWORD = "EthiopiaAdmin2024!"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@ethiopia-economic.com")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 def test_bootstrap_modal_fix():
     """Test the fixed Bootstrap 5 modal functionality"""

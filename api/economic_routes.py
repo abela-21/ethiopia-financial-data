@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from werkzeug.exceptions import HTTPException
 from models import EconomicSector, MacroIndicators, EconomicForecast, EconomicDataSource, db
 from utils.cache import cache
 from utils.limiter import limiter
@@ -69,6 +70,8 @@ def get_sector_by_id(sector_id):
         sector = EconomicSector.query.get_or_404(sector_id)
         return jsonify(serialize_economic_sector(sector))
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in get_sector_by_id: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500

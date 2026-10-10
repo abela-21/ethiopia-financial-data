@@ -10,7 +10,7 @@ from datetime import datetime, date
 from decimal import Decimal
 
 # Add project root to path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import app, db
 from models import ListedCompany, CompanyFinancialMetric, FinancialStatement

@@ -97,25 +97,25 @@
                                     {% if latest_financial.revenue %}
                                     <tr>
                                         <td>Revenue</td>
-                                        <td class="text-end fw-bold">{{ "{:,.0f}"|format(latest_financial.revenue) }} ETB</td>
+                                        <td class="text-end fw-bold">{{ "{:,.0f}".format(latest_financial.revenue) }} ETB</td>
                                     </tr>
                                     {% endif %}
                                     {% if latest_financial.gross_profit %}
                                     <tr>
                                         <td>Gross Profit</td>
-                                        <td class="text-end">{{ "{:,.0f}"|format(latest_financial.gross_profit) }} ETB</td>
+                                        <td class="text-end">{{ "{:,.0f}".format(latest_financial.gross_profit) }} ETB</td>
                                     </tr>
                                     {% endif %}
                                     {% if latest_financial.operating_income %}
                                     <tr>
                                         <td>Operating Income</td>
-                                        <td class="text-end">{{ "{:,.0f}"|format(latest_financial.operating_income) }} ETB</td>
+                                        <td class="text-end">{{ "{:,.0f}".format(latest_financial.operating_income) }} ETB</td>
                                     </tr>
                                     {% endif %}
                                     {% if latest_financial.net_income %}
                                     <tr>
                                         <td>Net Income</td>
-                                        <td class="text-end fw-bold">{{ "{:,.0f}"|format(latest_financial.net_income) }} ETB</td>
+                                        <td class="text-end fw-bold">{{ "{:,.0f}".format(latest_financial.net_income) }} ETB</td>
                                     </tr>
                                     {% endif %}
                                 </table>
@@ -128,19 +128,19 @@
                                     {% if latest_financial.total_assets %}
                                     <tr>
                                         <td>Total Assets</td>
-                                        <td class="text-end fw-bold">{{ "{:,.0f}"|format(latest_financial.total_assets) }} ETB</td>
+                                        <td class="text-end fw-bold">{{ "{:,.0f}".format(latest_financial.total_assets) }} ETB</td>
                                     </tr>
                                     {% endif %}
                                     {% if latest_financial.total_liabilities %}
                                     <tr>
                                         <td>Total Liabilities</td>
-                                        <td class="text-end">{{ "{:,.0f}"|format(latest_financial.total_liabilities) }} ETB</td>
+                                        <td class="text-end">{{ "{:,.0f}".format(latest_financial.total_liabilities) }} ETB</td>
                                     </tr>
                                     {% endif %}
                                     {% if latest_financial.total_equity %}
                                     <tr>
                                         <td>Total Equity</td>
-                                        <td class="text-end fw-bold">{{ "{:,.0f}"|format(latest_financial.total_equity) }} ETB</td>
+                                        <td class="text-end fw-bold">{{ "{:,.0f}".format(latest_financial.total_equity) }} ETB</td>
                                     </tr>
                                     {% endif %}
                                 </table>

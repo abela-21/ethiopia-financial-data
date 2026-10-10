@@ -101,21 +101,29 @@ def get_research_documents():
 
 @research_api.route('/documents/<int:document_id>')
 @limiter.limit("100/minute")
-
 def get_document_by_id(document_id):
     """Get detailed document information"""
-    try:
-        document = ResearchDocument.query.get_or_404(document_id)
-        
-        # Increment download count
-        document.download_count += 1
-        db.session.commit()
-        
-        return jsonify(serialize_document(document))
+    document = db.session.get(ResearchDocument, document_id)
+    if document is None:
+        return jsonify({"error": "Document not found"}), 404
+    return jsonify(serialize_document(document))
 
+@research_api.route('/documents/<int:document_id>/download', methods=['POST'])
+@limiter.limit("100/minute")
+def track_document_download(document_id):
+    """Record a download of a research document and return its file URL"""
+    document = db.session.get(ResearchDocument, document_id)
+    if document is None:
+        return jsonify({"error": "Document not found"}), 404
+    try:
+        document.download_count = (document.download_count or 0) + 1
+        db.session.commit()
     except Exception as e:
-        logger.error(f"Error in get_document_by_id: {str(e)}")
+        db.session.rollback()
+        logger.error(f"Error tracking download for document {document_id}: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
+    return jsonify({"success": True, "download_count": document.download_count,
+                    "file_url": document.file_url})
 
 @research_api.route('/documents/entity/<int:entity_id>/<entity_type>')
 @limiter.limit("50/minute")

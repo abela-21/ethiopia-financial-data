@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from werkzeug.exceptions import HTTPException
 from models import db, ExternalDataSource, DataIntegration, RealTimeQuote, CurrencyRate
 from datetime import datetime, timedelta
 import logging
@@ -122,6 +123,8 @@ def trigger_data_sync(source_id):
             'integration_id': integration.id
         })
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error triggering data sync: {str(e)}")
         return jsonify({'error': 'Failed to trigger sync'}), 500

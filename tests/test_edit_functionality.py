@@ -3,13 +3,14 @@
 Test the edit functionality in data management section
 """
 
+import os
 import requests
 import json
 from urllib.parse import urljoin
 
 BASE_URL = "http://localhost:5000"
-ADMIN_EMAIL = "admin@ethiopia-economic.com"
-ADMIN_PASSWORD = "EthiopiaAdmin2024!"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@ethiopia-economic.com")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 def login_and_test_edit():
     """Login as admin and test the edit functionality"""

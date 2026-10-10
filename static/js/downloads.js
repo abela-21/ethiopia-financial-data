@@ -2,8 +2,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Load companies for dropdowns
     loadCompanies();
-    
-    // Handle variable selection for financial data
+
+    // "All Variables" toggles the financial variable checkboxes
     const varAllCheckbox = document.getElementById('var_all');
     if (varAllCheckbox) {
         varAllCheckbox.addEventListener('change', function() {
@@ -19,163 +19,85 @@ async function loadCompanies() {
     try {
         const response = await fetch('/api/companies?per_page=1000');
         const data = await response.json();
-        
-        const stockCompanySelect = document.getElementById('stockCompany');
-        const financialCompanySelect = document.getElementById('financialCompany');
-        
-        if (stockCompanySelect && data.companies) {
+
+        ['stockCompany', 'financialCompany'].forEach(id => {
+            const select = document.getElementById(id);
+            if (!select || !data.companies) return;
             data.companies.forEach(company => {
-                const option = document.createElement('option');
-                option.value = company.id;
-                option.textContent = `${company.name} (${company.ticker})`;
-                stockCompanySelect.appendChild(option);
+                select.appendChild(new Option(`${company.name} (${company.ticker})`, company.id));
             });
-        }
-        
-        if (financialCompanySelect && data.companies) {
-            data.companies.forEach(company => {
-                const option = document.createElement('option');
-                option.value = company.id;
-                option.textContent = `${company.name} (${company.ticker})`;
-                financialCompanySelect.appendChild(option);
-            });
-        }
+        });
     } catch (error) {
         console.error('Error loading companies:', error);
     }
 }
 
+// Form values as query parameters, skipping blanks (multi-selects repeat the key).
+function formParams(form, skip = []) {
+    const params = new URLSearchParams();
+    for (const [key, value] of new FormData(form).entries()) {
+        if (!skip.includes(key) && String(value).trim()) {
+            params.append(key, value);
+        }
+    }
+    return params;
+}
+
 function downloadCompanies(event) {
     event.preventDefault();
-    
-    const form = event.target;
-    const formData = new FormData(form);
-    const params = new URLSearchParams();
-    
-    for (const [key, value] of formData.entries()) {
-        if (value) params.append(key, value);
-    }
-    
-    const url = `/api/download/companies?${params.toString()}`;
-    downloadFile(url, 'companies');
+    downloadFile(`/api/download/companies?${formParams(event.target)}`, event.target);
 }
 
 function downloadMacro(event) {
     event.preventDefault();
-    
-    const form = event.target;
-    const formData = new FormData(form);
-    const params = new URLSearchParams();
-    
-    // Handle basic form fields
-    for (const [key, value] of formData.entries()) {
-        if (value && key !== 'variables') {
-            params.append(key, value);
-        }
-    }
-    
-    // Handle variable selection from multi-select dropdown
-    const variableSelect = document.getElementById('macroVariables');
-    const selectedVariables = Array.from(variableSelect.selectedOptions)
-        .map(option => option.value)
-        .filter(value => value !== ''); // Remove empty values
-    
-    console.log('Selected macro variables:', selectedVariables); // Debug log
-    
-    if (selectedVariables.length > 0) {
-        params.append('variables', selectedVariables.join(','));
-    }
-    
-    const url = `/api/download/macro_indicators?${params.toString()}`;
-    console.log('Macro download URL:', url); // Debug log
-    downloadFile(url, 'macro_indicators');
+    downloadFile(`/api/download/macro_indicators?${formParams(event.target)}`, event.target);
 }
 
 function downloadFinancials(event) {
     event.preventDefault();
-    
-    const form = event.target;
-    const formData = new FormData(form);
-    const params = new URLSearchParams();
-    
-    // Handle basic form fields
-    for (const [key, value] of formData.entries()) {
-        if (value && key !== 'variables') {
-            params.append(key, value);
-        }
-    }
-    
-    // Handle variable selection
-    const selectedVariables = [];
-    const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked:not(#var_all)');
-    checkboxes.forEach(checkbox => {
-        selectedVariables.push(checkbox.value);
-    });
-    
-    if (selectedVariables.length > 0 && !selectedVariables.includes('all')) {
-        params.append('variables', selectedVariables.join(','));
-    }
-    
-    const url = `/api/download/financials?${params.toString()}`;
-    downloadFile(url, 'financials');
+    // Company is optional: blank downloads every company's financials.
+    downloadFile(`/api/download/financials?${formParams(event.target)}`, event.target);
 }
 
 function downloadStocks(event) {
     event.preventDefault();
-    
-    const form = event.target;
-    const formData = new FormData(form);
-    const params = new URLSearchParams();
-    
-    for (const [key, value] of formData.entries()) {
-        if (value) {
-            // Map form field names to API parameter names
-            if (key === 'start_date') {
-                params.append('date_from', value);
-            } else if (key === 'end_date') {
-                params.append('date_to', value);
-            } else {
-                params.append(key, value);
-            }
-        }
+    const companyId = new FormData(event.target).get('company_id');
+    if (!companyId) {
+        alert('Please select a company');
+        return;
     }
-    
-    const url = `/api/download/stocks?${params.toString()}`;
-    downloadFile(url, 'stocks');
+    downloadFile(`/api/download/stocks/${companyId}?${formParams(event.target, ['company_id'])}`, event.target);
 }
 
-// Helper function to handle file downloads properly
-function downloadFile(url, dataType) {
-    // Show loading indicator
-    const button = event.target.querySelector('button[type="submit"]') || event.target;
+async function downloadFile(url, form) {
+    const button = form.querySelector('button[type="submit"]');
     const originalText = button.innerHTML;
     button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Downloading...';
     button.disabled = true;
-    
-    // Use direct window.location for more reliable file downloads
+
     try {
-        // Create hidden iframe for download to avoid page navigation
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = url;
-        document.body.appendChild(iframe);
-        
-        // Remove iframe after download starts
-        setTimeout(() => {
-            document.body.removeChild(iframe);
-        }, 2000);
-        
-        // Reset button after brief delay
-        setTimeout(() => {
-            button.innerHTML = originalText;
-            button.disabled = false;
-        }, 1500);
-        
+        const response = await fetch(url);
+        if (!response.ok) {
+            const result = await response.json().catch(() => ({}));
+            throw new Error(result.error || `Download failed (HTTP ${response.status})`);
+        }
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+        const filename = match ? decodeURIComponent(match[1]) : 'download';
+
+        const blob = await response.blob();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        // Give the browser time to start the download before releasing the blob.
+        setTimeout(() => URL.revokeObjectURL(link.href), 10000);
     } catch (error) {
         console.error('Download error:', error);
-        alert('Download failed. Please try again.');
-        
-        // Reset button on error
+        alert(error.message);
+    } finally {
         button.innerHTML = originalText;
         button.disabled = false;
     }

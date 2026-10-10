@@ -9,7 +9,8 @@ services:
       - DATABASE_URL=postgresql://postgres:password@db:5432/ethiopia_economic
       - REDIS_URL=redis://redis:6379/0
       - FLASK_ENV=production
-      - SECRET_KEY=production-secret-key-change-this
+      - SESSION_SECRET=${SESSION_SECRET:?set SESSION_SECRET in the environment}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?set JWT_SECRET_KEY in the environment}
     depends_on:
       - db
       - redis
@@ -26,7 +27,6 @@ services:
       - POSTGRES_PASSWORD=password
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     restart: unless-stopped

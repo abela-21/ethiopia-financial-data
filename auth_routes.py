@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from flask_jwt_extended import create_access_token
+from urllib.parse import urlsplit
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import User, db
@@ -8,6 +10,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 auth_bp = Blueprint('auth', __name__)
+
+
+def is_safe_redirect(target):
+    """Only allow relative, same-site paths (blocks //evil.com and https://evil.com)."""
+    if not target:
+        return False
+    target = target.replace('\\', '/')
+    parts = urlsplit(target)
+    return not parts.scheme and not parts.netloc and target.startswith('/') and not target.startswith('//')
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -114,7 +125,7 @@ def login():
                 
                 # Redirect to requested page or dashboard
                 next_page = request.args.get('next')
-                if next_page:
+                if is_safe_redirect(next_page):
                     return redirect(next_page)
                 return redirect(url_for('main.dashboard'))
             else:
@@ -148,8 +159,13 @@ def edit_profile():
     if request.method == 'POST':
         try:
             # Update user information
-            current_user.first_name = request.form.get('first_name', '').strip()
-            current_user.last_name = request.form.get('last_name', '').strip()
+            first_name = request.form.get('first_name', '').strip()
+            last_name = request.form.get('last_name', '').strip()
+            if not first_name or not last_name:
+                flash('First and last name are required', 'error')
+                return render_template('auth/edit_profile.html', user=current_user)
+            current_user.first_name = first_name
+            current_user.last_name = last_name
             
             # Handle password change if provided
             current_password = request.form.get('current_password', '')
@@ -185,3 +201,17 @@ def edit_profile():
             flash('Profile update failed. Please try again.', 'error')
     
     return render_template('auth/edit_profile.html', user=current_user)
+
+@auth_bp.route('/token', methods=['POST'])
+def issue_token():
+    """Exchange email/password for a JWT access token (for API clients)"""
+    data = request.get_json(silent=True) or {}
+    email = str(data.get('email', '')).strip().lower()
+    password = str(data.get('password', ''))
+    user = User.query.filter_by(email=email).first() if email else None
+    if not user or not user.check_password(password):
+        return jsonify({'error': 'Invalid email or password'}), 401
+    if not user.active:
+        return jsonify({'error': 'Account is deactivated'}), 403
+    token = create_access_token(identity=str(user.id), additional_claims={'role': user.role})
+    return jsonify({'access_token': token, 'token_type': 'Bearer'})

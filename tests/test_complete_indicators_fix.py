@@ -3,13 +3,14 @@
 Test complete indicators display and edit functionality with fixed column names
 """
 
+import os
 import requests
 from urllib.parse import urljoin
 import json
 
 BASE_URL = "http://localhost:5000"
-ADMIN_EMAIL = "admin@ethiopia-economic.com"
-ADMIN_PASSWORD = "EthiopiaAdmin2024!"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@ethiopia-economic.com")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 def test_complete_indicators_functionality():
     """Test that all 32 indicators are displayed and editable"""

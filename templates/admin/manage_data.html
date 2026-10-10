@@ -638,28 +638,19 @@
                             <input type="date" class="form-control" id="indicatorDate" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Category</label>
-                            <select class="form-control" id="indicatorCategory" required>
-                                <option value="">Select Category</option>
-                                <option value="Key Indicators">Key Indicators</option>
-                                <option value="GDP & Growth">GDP & Growth</option>
-                                <option value="Trade & FX">Trade & FX</option>
-                                <option value="Banking">Banking</option>
-                                <option value="Government">Government</option>
-                                <option value="Commodities">Commodities</option>
-                            </select>
+                            <label class="form-label">GDP Growth (%)</label>
+                            <input type="number" class="form-control" id="gdpGrowth" step="0.01">
                         </div>
                     </div>
                     
-                    <!-- Key Economic Indicators -->
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">GDP (Billion ETB)</label>
-                            <input type="number" class="form-control" id="gdp" step="0.01">
-                        </div>
                         <div class="col-md-6">
                             <label class="form-label">Inflation Rate (%)</label>
                             <input type="number" class="form-control" id="inflationRate" step="0.01">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Unemployment Rate (%)</label>
+                            <input type="number" class="form-control" id="unemploymentRate" step="0.01">
                         </div>
                     </div>
                     
@@ -669,8 +660,8 @@
                             <input type="number" class="form-control" id="exchangeRate" step="0.01">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Population (Millions)</label>
-                            <input type="number" class="form-control" id="population" step="0.01">
+                            <label class="form-label">Interest Rate (%)</label>
+                            <input type="number" class="form-control" id="interestRate" step="0.01">
                         </div>
                     </div>
                 </form>
@@ -720,12 +711,18 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Established Year</label>
-                            <input type="number" class="form-control" id="establishedYear" min="1900" max="2024">
+                            <input type="number" class="form-control" id="establishedYear" min="1800">
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" id="bankDescription" rows="3"></textarea>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">NBE License Number</label>
+                            <input type="text" class="form-control" id="bankLicenseNumber" maxlength="20" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">SWIFT Code</label>
+                            <input type="text" class="form-control" id="bankSwiftCode" maxlength="11">
+                        </div>
                     </div>
                 </form>
             </div>
@@ -914,10 +911,6 @@
                             </select>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Organization</label>
-                        <input type="text" class="form-control" id="userOrganization">
-                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -970,7 +963,8 @@ function showAddUserModal() {
 
 // Load companies for financial statement dropdown
 function loadCompaniesForDropdown() {
-    fetch('/admin/api/companies')
+    // Financial statements belong to listed companies, not the Companies table.
+    fetch('/admin/api/listed-companies')
         .then(response => response.json())
         .then(data => {
             const dropdown = document.getElementById('financialCompanyId');
@@ -1059,11 +1053,11 @@ function saveNewFinancialStatement() {
 function saveNewEconomicIndicator() {
     const formData = {
         date: document.getElementById('indicatorDate').value,
-        category: document.getElementById('indicatorCategory').value,
-        gdp: document.getElementById('gdp').value || null,
+        gdp_growth: document.getElementById('gdpGrowth').value || null,
         inflation_rate: document.getElementById('inflationRate').value || null,
-        exchange_rate: document.getElementById('exchangeRate').value || null,
-        population: document.getElementById('population').value || null
+        unemployment_rate: document.getElementById('unemploymentRate').value || null,
+        etb_usd: document.getElementById('exchangeRate').value || null,
+        interest_rate: document.getElementById('interestRate').value || null
     };
     
     fetch('/admin/api/economic-indicators', {
@@ -1092,7 +1086,8 @@ function saveNewBank() {
         bank_type: document.getElementById('bankType').value,
         headquarters: document.getElementById('headquarters').value,
         established_year: document.getElementById('establishedYear').value || null,
-        description: document.getElementById('bankDescription').value
+        license_number: document.getElementById('bankLicenseNumber').value,
+        swift_code: document.getElementById('bankSwiftCode').value
     };
     
     fetch('/admin/api/banks', {
@@ -1184,8 +1179,7 @@ function saveNewUser() {
         email: document.getElementById('userEmail').value,
         username: document.getElementById('username').value,
         password: document.getElementById('userPassword').value,
-        role: document.getElementById('userRole').value,
-        organization: document.getElementById('userOrganization').value
+        role: document.getElementById('userRole').value
     };
     
     fetch('/admin/api/users', {
@@ -1222,7 +1216,7 @@ function refreshPlatformData() {
     .then(data => {
         loadingModal.hide();
         if (data.success) {
-            alert('Platform data refreshed successfully!');
+            alert(data.message || 'Platform data refreshed successfully!');
             location.reload();
         } else {
             alert('Error refreshing data: ' + data.error);

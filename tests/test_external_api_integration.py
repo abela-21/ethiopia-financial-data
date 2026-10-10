@@ -24,7 +24,7 @@ def test_external_api_integration():
         
         login_data = {
             'email': 'admin@ethiopia-economic.com',
-            'password': 'EthiopiaAdmin2024!'
+            'password': os.environ.get("ADMIN_PASSWORD", "")
         }
         
         login_response = session.post(f'{base_url}/auth/login', data=login_data)

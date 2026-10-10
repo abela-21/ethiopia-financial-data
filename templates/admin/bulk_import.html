@@ -184,16 +184,8 @@ function handleFileSelect(dataType, input) {
 
 // Template download
 function downloadTemplate(dataType) {
-    const templateMap = {
-        'companies': '/static/templates/companies_import_template.xlsx',
-        'financial': '/static/templates/financial_statements_import_template.xlsx',
-        'macro': '/static/templates/macro_indicators_import_template.xlsx'
-    };
-    
-    const link = document.createElement('a');
-    link.href = templateMap[dataType];
-    link.download = templateMap[dataType].split('/').pop();
-    link.click();
+    // Served by /admin/bulk-import/templates/<type> (companies, financial, macro)
+    window.location.href = `/admin/bulk-import/templates/${encodeURIComponent(dataType)}`;
 }
 
 // File upload

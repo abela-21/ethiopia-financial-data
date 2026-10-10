@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from werkzeug.exceptions import HTTPException
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from models import Bank, BankFinancialMetric, ResearchDocument, db
@@ -164,6 +165,8 @@ def get_bank_by_id(bank_id):
         
         return jsonify(bank_data)
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in get_bank_by_id: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
@@ -197,6 +200,8 @@ def get_bank_financial_metrics(bank_id):
             "metrics": [serialize_bank_metrics(metric) for metric in metrics]
         })
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in get_bank_financial_metrics: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500

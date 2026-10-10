@@ -74,7 +74,7 @@ class MarketManager {
             await Promise.all([
                 this.loadMarketSummary(forceRefresh),
                 this.loadMarketLeaders(forceRefresh),
-                this.loadMarketTrends(30, forceRefresh) // Default to 30 days
+                this.loadMarketTrends(this.selectedTrendDays(), forceRefresh)
             ]);
             
             this.hideGlobalLoading();
@@ -84,6 +84,11 @@ class MarketManager {
         } finally {
             this.isLoading = false;
         }
+    }
+
+    selectedTrendDays() {
+        const checked = document.querySelector('input[name="trendsOptions"]:checked');
+        return checked ? parseInt(checked.value, 10) : 30;
     }
 
     async loadMarketSummary(forceRefresh = false) {
@@ -152,10 +157,16 @@ class MarketManager {
     }
 
     updateMarketLeaders(data) {
-        const leaders = data.market_leaders || {};
-        
-        this.updateLeadersList('gainersContent', leaders.top_gainers || []);
-        this.updateLeadersList('losersContent', leaders.top_losers || []);
+        // API rows: {ticker, name, current_price, percent_change, volume}
+        const normalize = rows => (rows || []).map(row => ({
+            ticker: row.ticker,
+            name: row.name || '',
+            price: row.current_price ?? row.price ?? 0,
+            change: row.percent_change ?? row.change ?? 0,
+            volume: row.volume || 0
+        }));
+        this.updateLeadersList('gainersContent', normalize(data.gainers));
+        this.updateLeadersList('losersContent', normalize(data.losers));
     }
 
     updateLeadersList(containerId, companies) {

@@ -14,7 +14,7 @@ import logging
 from decimal import Decimal
 
 # Add project root to path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import app, db
 from models import (
@@ -22,6 +22,8 @@ from models import (
     ResearchDocument, MacroIndicators
 )
 from sqlalchemy import text
+from contextlib import nullcontext
+from flask import has_app_context
 
 # Setup logging
 logging.basicConfig(
@@ -39,21 +41,24 @@ class EthiopianDataMigration:
     def __init__(self):
         self.app = app
         self.logger = logging.getLogger(__name__)
+
+    def _ctx(self):
+        """Reuse the current app context (and its DB session) when there is one."""
+        return nullcontext() if has_app_context() else self.app.app_context()
         
     def clear_existing_data(self):
-        """Clear all existing banking and economic data"""
+        """Clear seeded banking/sector/research data (macro indicator history is kept)"""
         print("🧹 Clearing existing banking and economic data...")
         
-        with self.app.app_context():
+        with self._ctx():
             try:
                 # Clear in correct order due to foreign keys
                 db.session.execute(text("DELETE FROM bank_financial_metric"))
                 db.session.execute(text("DELETE FROM research_document"))
                 db.session.execute(text("DELETE FROM bank"))
-                db.session.execute(text("DELETE FROM macro_indicators"))
                 db.session.execute(text("DELETE FROM economic_sector"))
                 
-                db.session.commit()
+                db.session.flush()
                 print("✅ Existing data cleared successfully")
                 self.logger.info("Database cleared successfully")
                 
@@ -341,7 +346,7 @@ class EthiopianDataMigration:
             }
         ]
         
-        with self.app.app_context():
+        with self._ctx():
             try:
                 for bank_data in banks_data:
                     bank = Bank(
@@ -362,7 +367,7 @@ class EthiopianDataMigration:
                     db.session.add(bank)
                     self.logger.info(f"Added bank: {bank_data['name']}")
                 
-                db.session.commit()
+                db.session.flush()
                 print(f"✅ Successfully loaded {len(banks_data)} Ethiopian banks")
                 self.logger.info(f"Successfully loaded {len(banks_data)} banks")
                 
@@ -490,7 +495,7 @@ class EthiopianDataMigration:
             }
         ]
         
-        with self.app.app_context():
+        with self._ctx():
             try:
                 for sector_data in sectors_data:
                     # Check if sector already exists
@@ -523,7 +528,7 @@ class EthiopianDataMigration:
                         db.session.add(sector)
                         self.logger.info(f"Added economic sector: {sector_data['sector_name']}")
                 
-                db.session.commit()
+                db.session.flush()
                 print(f"✅ Successfully loaded {len(sectors_data)} economic sectors")
                 self.logger.info(f"Successfully loaded {len(sectors_data)} economic sectors")
                 
@@ -653,7 +658,7 @@ class EthiopianDataMigration:
             }
         ]
         
-        with self.app.app_context():
+        with self._ctx():
             try:
                 for doc_data in documents_data:
                     document = ResearchDocument(
@@ -673,7 +678,7 @@ class EthiopianDataMigration:
                     db.session.add(document)
                     self.logger.info(f"Added research document: {doc_data['title']}")
                 
-                db.session.commit()
+                db.session.flush()
                 print(f"✅ Successfully loaded {len(documents_data)} research documents")
                 self.logger.info(f"Successfully loaded {len(documents_data)} research documents")
                 
@@ -684,144 +689,62 @@ class EthiopianDataMigration:
                 raise
 
     def load_economic_indicators(self):
-        """Load economic indicators from external data and populate macro_indicators table"""
+        """Merge the latest external indicator values into today's macro row"""
         print("📊 Loading economic indicators...")
-        
-        with self.app.app_context():
+        from utils.indicator_refresh import refresh_macro_indicators
+
+        with self._ctx():
             try:
-                # First, fetch external data
-                from Data.enhanced_external_apis import EnhancedExternalDataIntegrator
-                integrator = EnhancedExternalDataIntegrator()
-                
-                # Fetch all external data
-                all_data = integrator.fetch_all_external_data()
-                
-                if all_data:
-                    # Store in external_economic_data table
-                    integrator.store_in_database(all_data)
-                    
-                    # Now populate macro_indicators table with latest data
-                    from models import MacroIndicators
-                    
-                    # Get the most recent data for key indicators
-                    with db.engine.connect() as conn:
-                        # Get latest GDP data
-                        gdp_data = conn.execute(text("""
-                            SELECT value FROM external_economic_data 
-                            WHERE indicator_code = 'NY.GDP.MKTP.CD' 
-                            ORDER BY date DESC LIMIT 1
-                        """)).scalar()
-                        
-                        # Get latest GDP growth
-                        gdp_growth = conn.execute(text("""
-                            SELECT value FROM external_economic_data 
-                            WHERE indicator_code = 'NY.GDP.MKTP.KD.ZG' 
-                            ORDER BY date DESC LIMIT 1
-                        """)).scalar()
-                        
-                        # Get latest inflation
-                        inflation = conn.execute(text("""
-                            SELECT value FROM external_economic_data 
-                            WHERE indicator_code = 'FP.CPI.TOTL.ZG' 
-                            ORDER BY date DESC LIMIT 1
-                        """)).scalar()
-                        
-                        # Get latest unemployment
-                        unemployment = conn.execute(text("""
-                            SELECT value FROM external_economic_data 
-                            WHERE indicator_code = 'SL.UEM.TOTL.ZS' 
-                            ORDER BY date DESC LIMIT 1
-                        """)).scalar()
-                        
-                        # Get latest exchange rate
-                        exchange_rate = conn.execute(text("""
-                            SELECT value FROM external_economic_data 
-                            WHERE indicator_code = 'PA.NUS.FCRF' 
-                            ORDER BY date DESC LIMIT 1
-                        """)).scalar()
-                        
-                        # Get latest exports
-                        exports = conn.execute(text("""
-                            SELECT value FROM external_economic_data 
-                            WHERE indicator_code = 'NE.EXP.GNFS.CD' 
-                            ORDER BY date DESC LIMIT 1
-                        """)).scalar()
-                        
-                        # Get latest imports
-                        imports = conn.execute(text("""
-                            SELECT value FROM external_economic_data 
-                            WHERE indicator_code = 'NE.IMP.GNFS.CD' 
-                            ORDER BY date DESC LIMIT 1
-                        """)).scalar()
-                        
-                        # Get latest FDI
-                        fdi = conn.execute(text("""
-                            SELECT value FROM external_economic_data 
-                            WHERE indicator_code = 'BX.KLT.DINV.CD.WD' 
-                            ORDER BY date DESC LIMIT 1
-                        """)).scalar()
-                    
-                    # Create macro indicator record
-                    macro_indicator = MacroIndicators()
-                    macro_indicator.date = datetime.now().date()
-                    macro_indicator.gdp_growth = float(gdp_growth) if gdp_growth else None
-                    macro_indicator.inflation_rate = float(inflation) if inflation else None
-                    macro_indicator.unemployment_rate = float(unemployment) if unemployment else None
-                    macro_indicator.exports = float(exports) if exports else None
-                    macro_indicator.imports = float(imports) if imports else None
-                    macro_indicator.trade_balance = float(exports - imports) if exports and imports else None
-                    macro_indicator.fdi_inflow = float(fdi) if fdi else None
-                    macro_indicator.etb_usd = float(exchange_rate) if exchange_rate else None
-                    
-                    db.session.add(macro_indicator)
-                    db.session.commit()
-                    
-                    print(f"✅ Successfully loaded economic indicators from {len(all_data)} external data points")
-                    self.logger.info(f"Successfully loaded economic indicators from external data")
-                else:
-                    print("⚠️ No external data available for economic indicators")
-                    
+                result = refresh_macro_indicators(fetch=True)
+                print(("✅ " if result['success'] else "⚠️ ") + result['message'])
+                return result
             except Exception as e:
-                db.session.rollback()
                 print(f"❌ Error loading economic indicators: {e}")
                 self.logger.error(f"Error loading economic indicators: {e}")
                 # Don't raise - this is optional functionality
+                return {'success': False, 'message': str(e)}
+
+    def _reset_sequences(self):
+        """Seed rows use explicit ids; move Postgres sequences past them."""
+        if db.engine.dialect.name != 'postgresql':
+            return
+        for table in ('bank', 'economic_sector', 'research_document'):
+            db.session.execute(text(
+                f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), "
+                f"COALESCE((SELECT MAX(id) FROM {table}), 1))"
+            ))
 
     def run_full_migration(self):
-        """Execute complete data migration process"""
+        """
+        Reset banks, sectors and research documents to the seed data, then
+        refresh today's macro indicators.
+
+        The reset runs in a single transaction: if any step fails, nothing is
+        deleted. Historical macro indicators are never deleted.
+        """
         print("🚀 Starting Ethiopian Banking & Economic Data Migration")
         print("=" * 60)
-        
-        try:
-            # Step 1: Clear existing data
-            self.clear_existing_data()
-            
-            # Step 2: Load core banking data
-            self.load_ethiopian_banks()
-            
-            # Step 3: Load economic sectors
-            self.load_economic_sectors()
-            
-            # Step 4: Load research documents
-            self.load_research_documents()
-            
-            # Step 5: Load economic indicators from external data
-            self.load_economic_indicators()
-            
-            print("=" * 60)
-            print("🎉 Ethiopian Banking & Economic Data Migration Completed Successfully!")
-            print(f"📊 Total loaded:")
-            print(f"   • 18 Ethiopian Banks")
-            print(f"   • 10 Economic Sectors") 
-            print(f"   • 8 Research Documents")
-            print(f"   • Economic Indicators from World Bank API")
-            
-            self.logger.info("Full migration completed successfully")
-            
-        except Exception as e:
-            print(f"❌ Migration failed: {e}")
-            self.logger.error(f"Migration failed: {e}")
-            raise
+
+        with self._ctx():
+            try:
+                self.clear_existing_data()
+                self.load_ethiopian_banks()
+                self.load_economic_sectors()
+                self.load_research_documents()
+                self._reset_sequences()
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                print(f"❌ Migration failed, no changes were made: {e}")
+                self.logger.error(f"Migration failed: {e}")
+                raise
+
+            indicators = self.load_economic_indicators()
+
+        print("=" * 60)
+        print("🎉 Ethiopian Banking & Economic Data Migration Completed Successfully!")
+        self.logger.info("Full migration completed successfully")
+        return {'indicators': indicators}
 
 if __name__ == "__main__":
     migration = EthiopianDataMigration()
