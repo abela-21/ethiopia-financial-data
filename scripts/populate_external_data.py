@@ -1,6 +1,10 @@
 """
 Populate external data sources and sample data for testing
 """
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from app import create_app
 from models import db, ExternalDataSource, DataIntegration, RealTimeQuote, CurrencyRate
 from datetime import datetime, timedelta

@@ -641,31 +641,19 @@ class BankingSectorManager {
     }
 
     async loadBankingOverview() {
+        // Show real figures only; '—' means no metric data has been loaded yet.
+        const unavailable = '—';
         try {
-            const data = await this.api.get('/api/banking/banking-sector/overview');
-            
-            if (data && !data.error && data.sector_statistics) {
-                const stats = data.sector_statistics;
-                
-                // Update overview cards with proper error handling
-                this.updateElement('total-banks-count', stats.total_banks || 18);
-                this.updateElement('total-assets', this.formatCurrency(stats.total_assets || 0));
-                this.updateElement('avg-car', `${(stats.average_car || 0).toFixed(2)}%`);
-                this.updateElement('avg-npl', `${(stats.average_npl_ratio || 0).toFixed(2)}%`);
-            } else {
-                // Set authentic default values for Ethiopian banking sector
-                this.updateElement('total-banks-count', '18');
-                this.updateElement('total-assets', '1.87T ETB');
-                this.updateElement('avg-car', '18.24%');
-                this.updateElement('avg-npl', '2.94%');
-            }
+            const data = await this.api.get('/banking/banking-sector/overview');
+            const stats = (data && !data.error && data.sector_statistics) || {};
+
+            this.updateElement('total-banks-count', stats.total_banks || unavailable);
+            this.updateElement('total-assets', stats.total_assets ? this.formatCurrency(stats.total_assets) : unavailable);
+            this.updateElement('avg-car', stats.average_car ? `${stats.average_car.toFixed(2)}%` : unavailable);
+            this.updateElement('avg-npl', stats.average_npl_ratio ? `${stats.average_npl_ratio.toFixed(2)}%` : unavailable);
         } catch (error) {
             console.error('Error loading banking overview:', error);
-            // Set authentic Ethiopian banking sector values
-            this.updateElement('total-banks-count', '18');
-            this.updateElement('total-assets', '1.87T ETB');
-            this.updateElement('avg-car', '18.24%');
-            this.updateElement('avg-npl', '2.94%');
+            ['total-banks-count', 'total-assets', 'avg-car', 'avg-npl'].forEach(id => this.updateElement(id, unavailable));
         }
     }
 

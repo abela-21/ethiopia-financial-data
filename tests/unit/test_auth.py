@@ -87,8 +87,53 @@ def test_admin_json_api_rejects_regular_user(user_client):
     assert resp.status_code in (302, 403)
 
 
-@pytest.mark.xfail(reason="Open redirect: login follows any ?next= URL, including external sites", strict=True)
-def test_login_next_param_does_not_redirect_offsite(client):
-    resp = client.post("/auth/login?next=https://evil.example.com/",
+@pytest.mark.parametrize("target", [
+    "https://evil.example.com/", "//evil.example.com/", "/\\evil.example.com/", "javascript:alert(1)",
+])
+def test_login_next_param_does_not_redirect_offsite(client, target):
+    resp = client.post(f"/auth/login?next={target}",
                        data={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD})
-    assert "evil.example.com" not in resp.headers.get("Location", "")
+    assert resp.status_code == 302
+    assert "evil.example.com" not in resp.headers["Location"]
+    assert not resp.headers["Location"].startswith("javascript:")
+
+
+def test_login_next_param_allows_local_path(client):
+    resp = client.post("/auth/login?next=/admin/manage-data",
+                       data={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD})
+    assert resp.headers["Location"].endswith("/admin/manage-data")
+
+
+def test_edit_profile_page_and_update(app):
+    c = app.test_client()
+    c.post("/auth/register", data={"first_name": "Ed", "last_name": "It", "email": "edit@test.local",
+                                   "password": "abcdef1", "confirm_password": "abcdef1"})
+    c.post("/auth/login", data={"email": "edit@test.local", "password": "abcdef1"})
+    assert c.get("/auth/profile/edit").status_code == 200
+
+    resp = c.post("/auth/profile/edit", data={"first_name": "Edited", "last_name": "Name"})
+    assert resp.status_code == 302
+    assert b"Edited" in c.get("/auth/profile").data
+
+
+def test_edit_profile_password_change(app):
+    c = app.test_client()
+    c.post("/auth/register", data={"first_name": "Pw", "last_name": "Change", "email": "pw@test.local",
+                                   "password": "abcdef1", "confirm_password": "abcdef1"})
+    c.post("/auth/login", data={"email": "pw@test.local", "password": "abcdef1"})
+
+    resp = c.post("/auth/profile/edit", data={"first_name": "Pw", "last_name": "Change",
+                                               "current_password": "wrong", "new_password": "newpass1"})
+    assert b"Current password is incorrect" in resp.data
+
+    resp = c.post("/auth/profile/edit", data={"first_name": "Pw", "last_name": "Change",
+                                               "current_password": "abcdef1", "new_password": "newpass1"})
+    assert resp.status_code == 302
+    fresh = app.test_client()
+    assert fresh.post("/auth/login", data={"email": "pw@test.local", "password": "newpass1"}).status_code == 302
+
+
+def test_edit_profile_rejects_blank_name(user_client):
+    resp = user_client.post("/auth/profile/edit", data={"first_name": "", "last_name": "X"})
+    assert resp.status_code == 200
+    assert b"required" in resp.data

@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, send_file
+from werkzeug.exceptions import HTTPException
 from flask_login import login_required, current_user
 from models import Company, Stock, Financial, MacroIndicators, Bank, ResearchDocument, EconomicSector, db
 from functools import wraps
@@ -129,6 +130,8 @@ def company_detail(company_id):
                              latest_stock=latest_stock,
                              stock_history=stock_history,
                              latest_financial=latest_financial)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in company_detail route: {str(e)}")
         flash('Error loading company details', 'error')
@@ -353,27 +356,36 @@ def admin_view_financial():
 
 @main_bp.route('/admin/data/refresh', methods=['POST'])
 @login_required
+@admin_required
 def admin_refresh_data():
-    """Refresh platform data from migration scripts"""
-    if not current_user.role == 'admin':
-        return jsonify({'error': 'Access denied'}), 403
-    
+    """
+    Reset banks, sectors and research documents to the seed data and refresh
+    today's indicators. Requires {"confirm": "RESET"} because admin edits to
+    those tables are replaced. Runs in one transaction; history is kept.
+    """
+    data = request.get_json(silent=True) or {}
+    if data.get('confirm') != 'RESET':
+        return jsonify({
+            'success': False,
+            'error': 'This resets banks, sectors and research documents to seed data. '
+                     'Send {"confirm": "RESET"} to proceed.'
+        }), 400
+
     try:
-        # Import and run data migration
-        from data_migration import EthiopianDataMigration
-        
-        migration = EthiopianDataMigration()
-        migration.run_full_migration()
-        
+        from scripts.data_migration import EthiopianDataMigration
+
+        result = EthiopianDataMigration().run_full_migration()
+        indicators = result.get('indicators') or {}
         return jsonify({
             'success': True,
-            'message': 'Data refresh completed successfully'
+            'message': 'Seed data reset completed successfully',
+            'indicators': indicators.get('message'),
         })
     except Exception as e:
         logger.error(f"Error in admin_refresh_data: {str(e)}")
         return jsonify({
             'success': False,
-            'error': f'Data refresh failed: {str(e)}'
+            'error': f'Data refresh failed, no changes were made: {str(e)}'
         }), 500
 
 @main_bp.route('/admin/data/banks')
@@ -680,6 +692,8 @@ def get_indicator_api(indicator_id):
             'indicator': indicator_data
         })
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error getting indicator {indicator_id}: {str(e)}")
         return jsonify({
@@ -799,6 +813,8 @@ def update_indicator_api(indicator_id):
             'message': 'Economic indicator updated successfully'
         })
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error updating indicator {indicator_id}: {str(e)}")
         db.session.rollback()
@@ -878,6 +894,8 @@ def get_financial_statement_api(statement_id):
             'statement': statement_data
         })
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in get_financial_statement_api: {str(e)}")
         return jsonify({
@@ -961,6 +979,8 @@ def update_financial_statement_api(statement_id):
             'message': 'Financial statement updated successfully'
         })
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in update_financial_statement_api: {str(e)}")
         db.session.rollback()
@@ -970,52 +990,239 @@ def update_financial_statement_api(statement_id):
         }), 500
 
 # Add New Record API endpoints
+def _missing_fields(data, fields):
+    """Names of required fields that are absent or blank."""
+    return [f for f in fields if not str(data.get(f) or '').strip()]
+
+
+def _parse_date(value, field):
+    try:
+        return datetime.strptime(value, '%Y-%m-%d').date()
+    except (TypeError, ValueError):
+        raise ValueError(f'{field} must be a date in YYYY-MM-DD format')
+
+
+def _optional_number(value, field, cast=float):
+    if value in (None, ''):
+        return None
+    try:
+        return cast(value)
+    except (TypeError, ValueError):
+        raise ValueError(f'{field} must be a number')
+
+
+def _bad_request(message):
+    return jsonify({'success': False, 'error': message}), 400
+
+
 @main_bp.route('/admin/api/companies', methods=['POST'])
 @login_required
 @admin_required
 def add_company_api():
     """API endpoint to add new company"""
+    data = request.get_json(silent=True) or {}
+    missing = _missing_fields(data, ['name', 'ticker_symbol', 'industry'])
+    if missing:
+        return _bad_request(f"Missing required fields: {', '.join(missing)}")
+
+    ticker = data['ticker_symbol'].strip().upper()
+    if Company.query.filter_by(ticker=ticker).first():
+        return _bad_request(f'A company with ticker {ticker} already exists')
+
     try:
-        from models import Company
-        data = request.get_json()
-        
-        # Use direct SQL to avoid constructor issues
-        from sqlalchemy import text
-        result = db.session.execute(
-            text("""
-                INSERT INTO company (name, ticker, sector, industry, shares_outstanding, description, created_at, updated_at)
-                VALUES (:name, :ticker, :sector, :industry, :shares_outstanding, :description, NOW(), NOW())
-                RETURNING id, name, ticker
-            """),
-            {
-                'name': data['name'],
-                'ticker': data.get('ticker_symbol'),
-                'sector': data.get('sector'),
-                'industry': data.get('industry'),
-                'shares_outstanding': data.get('shares_outstanding'),
-                'description': data.get('description')
-            }
+        company = Company(
+            name=data['name'].strip(),
+            ticker=ticker,
+            sector=data.get('sector'),
+            industry=data['industry'].strip(),
+            shares_outstanding=_optional_number(data.get('shares_outstanding'), 'shares_outstanding', int),
+            description=data.get('description'),
+            created_by=current_user.id,
         )
-        company_data = result.fetchone()
+        db.session.add(company)
         db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Company added successfully',
-            'company': {
-                'id': company_data.id,
-                'name': company_data.name,
-                'ticker_symbol': company_data.ticker
-            }
-        })
-        
+    except ValueError as e:
+        db.session.rollback()
+        return _bad_request(str(e))
     except Exception as e:
         logger.error(f"Error adding company: {str(e)}")
         db.session.rollback()
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+    return jsonify({
+        'success': True,
+        'message': 'Company added successfully',
+        'company': {'id': company.id, 'name': company.name, 'ticker_symbol': company.ticker}
+    })
+
+
+@main_bp.route('/admin/api/banks', methods=['POST'])
+@login_required
+@admin_required
+def add_bank_api():
+    """API endpoint to add a new bank"""
+    data = request.get_json(silent=True) or {}
+    missing = _missing_fields(data, ['name', 'license_number'])
+    if missing:
+        return _bad_request(f"Missing required fields: {', '.join(missing)}")
+
+    license_number = data['license_number'].strip()
+    if Bank.query.filter_by(license_number=license_number).first():
+        return _bad_request(f'A bank with license number {license_number} already exists')
+
+    try:
+        year = _optional_number(data.get('established_year'), 'established_year', int)
+        if year is not None and not 1800 <= year <= datetime.now().year:
+            raise ValueError('established_year is out of range')
+        bank = Bank(
+            name=data['name'].strip(),
+            license_number=license_number,
+            bank_type=data.get('bank_type') or None,
+            ownership_type=data.get('ownership_type') or None,
+            headquarters_location=data.get('headquarters') or None,
+            swift_code=(data.get('swift_code') or '').strip().upper() or None,
+            website_url=data.get('website_url') or None,
+            establishment_date=datetime(year, 1, 1).date() if year else None,
+        )
+        db.session.add(bank)
+        db.session.commit()
+    except ValueError as e:
+        db.session.rollback()
+        return _bad_request(str(e))
+    except Exception as e:
+        logger.error(f"Error adding bank: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+    return jsonify({'success': True, 'message': 'Bank added successfully',
+                    'bank': {'id': bank.id, 'name': bank.name}})
+
+
+@main_bp.route('/admin/api/research-documents', methods=['POST'])
+@login_required
+@admin_required
+def add_research_document_api():
+    """API endpoint to add a research document"""
+    data = request.get_json(silent=True) or {}
+    missing = _missing_fields(data, ['title', 'document_type', 'publication_date'])
+    if missing:
+        return _bad_request(f"Missing required fields: {', '.join(missing)}")
+
+    try:
+        # The table has no author/category columns; keep them as keywords so
+        # they are searchable and shown as tags in the research library.
+        keywords = [k for k in (data.get('category'), data.get('author') and f"Author: {data['author']}") if k]
+        document = ResearchDocument(
+            title=data['title'].strip(),
+            document_type=data['document_type'].strip(),
+            entity_type=data.get('entity_type') or 'research',
+            publication_date=_parse_date(data['publication_date'], 'publication_date'),
+            summary=data.get('summary') or None,
+            file_url=data.get('document_url') or None,
+            keywords=keywords,
+            language=data.get('language') or 'en',
+            download_count=0,
+        )
+        db.session.add(document)
+        db.session.commit()
+    except ValueError as e:
+        db.session.rollback()
+        return _bad_request(str(e))
+    except Exception as e:
+        logger.error(f"Error adding research document: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+    return jsonify({'success': True, 'message': 'Research document added successfully',
+                    'document': {'id': document.id, 'title': document.title}})
+
+
+@main_bp.route('/admin/api/listed-companies', methods=['POST'])
+@login_required
+@admin_required
+def add_listed_company_api():
+    """API endpoint to add a listed company"""
+    from models import ListedCompany
+    data = request.get_json(silent=True) or {}
+    missing = _missing_fields(data, ['name', 'ticker_symbol', 'sector', 'industry', 'listing_date'])
+    if missing:
+        return _bad_request(f"Missing required fields: {', '.join(missing)}")
+
+    ticker = data['ticker_symbol'].strip().upper()
+    if len(ticker) > 10:
+        return _bad_request('ticker_symbol must be 10 characters or less')
+    if ListedCompany.query.filter_by(ticker_symbol=ticker).first():
+        return _bad_request(f'A listed company with ticker {ticker} already exists')
+
+    try:
+        company = ListedCompany(
+            name=data['name'].strip(),
+            ticker_symbol=ticker,
+            sector=data['sector'].strip(),
+            industry=data['industry'].strip(),
+            listing_date=_parse_date(data['listing_date'], 'listing_date'),
+            market_cap=_optional_number(data.get('market_cap'), 'market_cap'),
+            description=data.get('description') or None,
+        )
+        db.session.add(company)
+        db.session.commit()
+    except ValueError as e:
+        db.session.rollback()
+        return _bad_request(str(e))
+    except Exception as e:
+        logger.error(f"Error adding listed company: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+    return jsonify({'success': True, 'message': 'Listed company added successfully',
+                    'company': {'id': company.id, 'name': company.name, 'ticker_symbol': company.ticker_symbol}})
+
+
+@main_bp.route('/admin/api/users', methods=['POST'])
+@login_required
+@admin_required
+def add_user_api():
+    """API endpoint for admins to create a user account"""
+    from models import User
+    from werkzeug.security import generate_password_hash
+    data = request.get_json(silent=True) or {}
+    missing = _missing_fields(data, ['first_name', 'last_name', 'email', 'username', 'password', 'role'])
+    if missing:
+        return _bad_request(f"Missing required fields: {', '.join(missing)}")
+
+    email = data['email'].strip().lower()
+    username = data['username'].strip()
+    role = data['role'].strip()
+    if role not in ('user', 'analyst', 'admin'):
+        return _bad_request('role must be one of: user, analyst, admin')
+    if '@' not in email:
+        return _bad_request('email is not valid')
+    if len(data['password']) < 8:
+        return _bad_request('password must be at least 8 characters')
+    if User.query.filter_by(email=email).first():
+        return _bad_request('A user with this email already exists')
+    if User.query.filter_by(username=username).first():
+        return _bad_request('This username is already taken')
+
+    try:
+        user = User(
+            first_name=data['first_name'].strip(),
+            last_name=data['last_name'].strip(),
+            email=email,
+            username=username,
+            password_hash=generate_password_hash(data['password']),
+            role=role,
+            active=True,
+        )
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        logger.error(f"Error adding user: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+    return jsonify({'success': True, 'message': 'User added successfully',
+                    'user': {'id': user.id, 'email': user.email, 'role': user.role}})
 
 @main_bp.route('/admin/api/companies', methods=['GET'])
 @login_required
@@ -1044,221 +1251,124 @@ def get_companies_api():
             'error': str(e)
         }), 500
 
+@main_bp.route('/admin/api/listed-companies', methods=['GET'])
+@login_required
+@admin_required
+def get_listed_companies_api():
+    """Listed companies for dropdowns (financial statements belong to these)"""
+    from models import ListedCompany
+    companies = ListedCompany.query.order_by(ListedCompany.name).all()
+    return jsonify({
+        'success': True,
+        'companies': [{'id': c.id, 'name': c.name, 'ticker_symbol': c.ticker_symbol} for c in companies]
+    })
+
+
+STATEMENT_TYPES = ('income_statement', 'balance_sheet', 'cash_flow', 'banking_metrics', 'financial_metrics')
+
+
 @main_bp.route('/admin/api/financial-statements', methods=['POST'])
 @login_required
 @admin_required
 def add_financial_statement_api():
     """API endpoint to add new financial statement"""
+    from models import FinancialStatement, ListedCompany
+    data = request.get_json(silent=True) or {}
+    missing = _missing_fields(data, ['company_id', 'statement_type', 'reporting_period', 'fiscal_year',
+                                     'period_start_date', 'period_end_date'])
+    if missing:
+        return _bad_request(f"Missing required fields: {', '.join(missing)}")
+    if data['statement_type'] not in STATEMENT_TYPES:
+        return _bad_request(f"statement_type must be one of: {', '.join(STATEMENT_TYPES)}")
+
     try:
-        from models import FinancialStatement
-        from datetime import datetime
-        data = request.get_json()
-        
-        # Use direct SQL for financial_statement table
-        from sqlalchemy import text
-        result = db.session.execute(
-            text("""
-                INSERT INTO financial_statement (company_id, statement_type, reporting_period, fiscal_year, 
-                                               period_start_date, period_end_date, revenue, net_income, 
-                                               total_assets, total_liabilities, currency, created_at)
-                VALUES (:company_id, :statement_type, :reporting_period, :fiscal_year, 
-                       :period_start_date, :period_end_date, :revenue, :net_income, 
-                       :total_assets, :total_liabilities, :currency, NOW())
-                RETURNING id, company_id, statement_type
-            """),
-            {
-                'company_id': data['company_id'],
-                'statement_type': data['statement_type'],
-                'reporting_period': data['reporting_period'],
-                'fiscal_year': data['fiscal_year'],
-                'period_start_date': data['period_start_date'],
-                'period_end_date': data['period_end_date'],
-                'revenue': data.get('revenue'),
-                'net_income': data.get('net_income'),
-                'total_assets': data.get('total_assets'),
-                'total_liabilities': data.get('total_liabilities'),
-                'currency': 'ETB'
-            }
+        company_id = _optional_number(data['company_id'], 'company_id', int)
+        if db.session.get(ListedCompany, company_id) is None:
+            return _bad_request('Listed company not found')
+        start = _parse_date(data['period_start_date'], 'period_start_date')
+        end = _parse_date(data['period_end_date'], 'period_end_date')
+        if end < start:
+            raise ValueError('period_end_date must be on or after period_start_date')
+        statement = FinancialStatement(
+            company_id=company_id,
+            statement_type=data['statement_type'],
+            reporting_period=data['reporting_period'].strip(),
+            fiscal_year=_optional_number(data['fiscal_year'], 'fiscal_year', int),
+            period_start_date=start,
+            period_end_date=end,
+            revenue=_optional_number(data.get('revenue'), 'revenue'),
+            net_income=_optional_number(data.get('net_income'), 'net_income'),
+            total_assets=_optional_number(data.get('total_assets'), 'total_assets'),
+            total_liabilities=_optional_number(data.get('total_liabilities'), 'total_liabilities'),
+            currency='ETB',
         )
-        statement_data = result.fetchone()
+        db.session.add(statement)
         db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Financial statement added successfully',
-            'statement': {
-                'id': statement_data.id,
-                'company_id': statement_data.company_id,
-                'statement_type': statement_data.statement_type
-            }
-        })
-        
+    except ValueError as e:
+        db.session.rollback()
+        return _bad_request(str(e))
     except Exception as e:
         logger.error(f"Error adding financial statement: {str(e)}")
         db.session.rollback()
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+    return jsonify({
+        'success': True,
+        'message': 'Financial statement added successfully',
+        'statement': {'id': statement.id, 'company_id': statement.company_id,
+                      'statement_type': statement.statement_type}
+    })
+
+
+INDICATOR_INPUT_FIELDS = ('gdp_growth', 'inflation_rate', 'unemployment_rate', 'etb_usd', 'interest_rate')
+
 
 @main_bp.route('/admin/api/economic-indicators', methods=['POST'])
 @login_required
 @admin_required
 def add_economic_indicator_api():
-    """API endpoint to add new economic indicator"""
+    """API endpoint to add a new economic indicator record (one per date)"""
+    data = request.get_json(silent=True) or {}
+    if _missing_fields(data, ['date']):
+        return _bad_request('Missing required fields: date')
+
     try:
-        # Use macro_indicators table directly with SQL
-        from datetime import datetime
-        data = request.get_json()
-        
-        # Use direct SQL for macro_indicators table
-        from sqlalchemy import text
-        result = db.session.execute(
-            text("""
-                INSERT INTO macro_indicators (date, gdp_growth, inflation_rate, unemployment_rate, created_at, updated_at)
-                VALUES (:date, :gdp_growth, :inflation_rate, :unemployment_rate, NOW(), NOW())
-                RETURNING id, date
-            """),
-            {
-                'date': data['date'],
-                'gdp_growth': data.get('gdp_growth'),
-                'inflation_rate': data.get('inflation_rate'),
-                'unemployment_rate': data.get('unemployment_rate')
-            }
-        )
-        indicator_data = result.fetchone()
+        indicator_date = _parse_date(data['date'], 'date')
+        values = {f: _optional_number(data.get(f), f) for f in INDICATOR_INPUT_FIELDS}
+    except ValueError as e:
+        return _bad_request(str(e))
+    if all(v is None for v in values.values()):
+        return _bad_request('Enter at least one indicator value')
+    if MacroIndicators.query.filter_by(date=indicator_date).first():
+        return _bad_request(f'Indicators for {indicator_date} already exist; edit that record instead')
+
+    try:
+        indicator = MacroIndicators(date=indicator_date, created_by=current_user.id, **values)
+        db.session.add(indicator)
         db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Economic indicator added successfully',
-            'indicator': {
-                'id': indicator_data.id,
-                'date': str(indicator_data.date)
-            }
-        })
-        
     except Exception as e:
         logger.error(f"Error adding economic indicator: {str(e)}")
         db.session.rollback()
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+    return jsonify({
+        'success': True,
+        'message': 'Economic indicator added successfully',
+        'indicator': {'id': indicator.id, 'date': indicator.date.isoformat()}
+    })
 
 @main_bp.route('/admin/api/refresh-data', methods=['POST'])
 @login_required
 @admin_required
 def refresh_data_api():
-    """API endpoint to refresh platform data"""
+    """Refresh today's economic indicators from external data (never deletes records)"""
+    from utils.indicator_refresh import refresh_macro_indicators
     try:
-        from datetime import datetime
-        from models import MacroIndicators
-        from sqlalchemy import text
-        
-        # Check if external data exists
-        external_count = db.session.execute(text("SELECT COUNT(*) FROM external_economic_data")).scalar()
-        
-        if external_count > 0:
-            # Use existing external data to populate macro indicators
-            with db.engine.connect() as conn:
-                gdp_growth = conn.execute(text("""
-                    SELECT value FROM external_economic_data 
-                    WHERE indicator_code = 'NY.GDP.MKTP.KD.ZG' 
-                    ORDER BY date DESC LIMIT 1
-                """)).scalar()
-                
-                inflation = conn.execute(text("""
-                    SELECT value FROM external_economic_data 
-                    WHERE indicator_code = 'FP.CPI.TOTL.ZG' 
-                    ORDER BY date DESC LIMIT 1
-                """)).scalar()
-                
-                unemployment = conn.execute(text("""
-                    SELECT value FROM external_economic_data 
-                    WHERE indicator_code = 'SL.UEM.TOTL.ZS' 
-                    ORDER BY date DESC LIMIT 1
-                """)).scalar()
-                
-                exchange_rate = conn.execute(text("""
-                    SELECT value FROM external_economic_data 
-                    WHERE indicator_code = 'PA.NUS.FCRF' 
-                    ORDER BY date DESC LIMIT 1
-                """)).scalar()
-                
-                exports = conn.execute(text("""
-                    SELECT value FROM external_economic_data 
-                    WHERE indicator_code = 'NE.EXP.GNFS.CD' 
-                    ORDER BY date DESC LIMIT 1
-                """)).scalar()
-                
-                imports = conn.execute(text("""
-                    SELECT value FROM external_economic_data 
-                    WHERE indicator_code = 'NE.IMP.GNFS.CD' 
-                    ORDER BY date DESC LIMIT 1
-                """)).scalar()
-                
-                fdi = conn.execute(text("""
-                    SELECT value FROM external_economic_data 
-                    WHERE indicator_code = 'BX.KLT.DINV.CD.WD' 
-                    ORDER BY date DESC LIMIT 1
-                """)).scalar()
-            
-            # Clear existing indicators for today
-            today = datetime.now().date()
-            db.session.execute(text("DELETE FROM macro_indicators WHERE date = :date"), {"date": today})
-            db.session.commit()
-            
-            # Create new indicator record
-            indicator = MacroIndicators()
-            indicator.date = today
-            indicator.gdp_growth = float(gdp_growth) if gdp_growth else None
-            indicator.inflation_rate = float(inflation) if inflation else None
-            indicator.unemployment_rate = float(unemployment) if unemployment else None
-            indicator.exports = float(exports) if exports else None
-            indicator.imports = float(imports) if imports else None
-            indicator.trade_balance = float(exports - imports) if exports and imports else None
-            indicator.fdi_inflow = float(fdi) if fdi else None
-            indicator.etb_usd = float(exchange_rate) if exchange_rate else None
-            
-            db.session.add(indicator)
-            db.session.commit()
-            
-            return jsonify({
-                'success': True,
-                'message': f'Economic indicators refreshed successfully from {external_count} external data records'
-            })
-        else:
-            # Fetch fresh data if none exists
-            from Data.enhanced_external_apis import EnhancedExternalDataIntegrator
-            integrator = EnhancedExternalDataIntegrator()
-            
-            # Fetch essential indicators only
-            essential_data = []
-            indicators = ['NY.GDP.MKTP.KD.ZG', 'FP.CPI.TOTL.ZG', 'PA.NUS.FCRF']
-            
-            for indicator_code in indicators:
-                try:
-                    data = integrator.fetch_world_bank_indicator(indicator_code)
-                    if data:
-                        essential_data.extend(data)
-                except Exception as e:
-                    logger.warning(f"Could not fetch {indicator_code}: {e}")
-            
-            if essential_data:
-                integrator.store_in_database(essential_data)
-                return jsonify({
-                    'success': True,
-                    'message': f'Fetched and stored {len(essential_data)} new external data records'
-                })
-            else:
-                return jsonify({
-                    'success': False,
-                    'error': 'No external data available and could not fetch new data'
-                }), 500
-        
+        result = refresh_macro_indicators(fetch=True)
+        if result['success']:
+            return jsonify(result)
+        return jsonify({**result, 'error': result['message']}), 503
     except Exception as e:
-        db.session.rollback()
         logger.error(f"Error refreshing data: {str(e)}")
         return jsonify({
             'success': False,

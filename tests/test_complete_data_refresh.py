@@ -2,6 +2,7 @@
 """
 Comprehensive test for data refresh functionality via web interface
 """
+import os
 import requests
 import json
 from datetime import datetime
@@ -17,7 +18,7 @@ def test_web_data_refresh():
     print("1. Logging in as admin...")
     login_data = {
         'email': 'admin@ethiopia-economic.com',
-        'password': 'EthiopiaAdmin2024!'
+        'password': os.environ.get("ADMIN_PASSWORD", "")
     }
     
     session = requests.Session()

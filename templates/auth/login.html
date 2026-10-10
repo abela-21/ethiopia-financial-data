@@ -19,6 +19,7 @@
 
                     <!-- Login Form -->
                     <form method="POST" action="{{ url_for('auth.login') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="mb-3">
                             <label for="email" class="form-label">Email Address</label>
                             <div class="input-group">
@@ -143,9 +144,10 @@ function togglePassword(inputId) {
 
 // Add enhanced form validation
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const usernameInput = document.getElementById('username');
+    const form = document.querySelector('form[action$="/auth/login"]');
+    const usernameInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
+    if (!form || !usernameInput || !passwordInput) return;
     
     form.addEventListener('submit', function(e) {
         let isValid = true;

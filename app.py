@@ -6,8 +6,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_caching import Cache
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 from datetime import timedelta
@@ -25,16 +24,24 @@ migrate = Migrate()
 jwt = JWTManager()
 cors = CORS()
 cache = Cache()
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
-)
+csrf = CSRFProtect()
+from utils.limiter import limiter
+
+def _check_secrets():
+    """Never run production with the hard-coded development secrets."""
+    missing = [name for name in ("SESSION_SECRET", "JWT_SECRET_KEY") if not os.environ.get(name)]
+    if not missing:
+        return
+    if os.environ.get("FLASK_ENV") == "production":
+        raise RuntimeError(f"Missing required secrets in production: {', '.join(missing)}")
+    logger.warning(f"Using insecure development defaults for: {', '.join(missing)}")
 
 def create_app():
     """Application factory pattern"""
     app = Flask(__name__)
     
     # Configuration
+    _check_secrets()
     app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///market.db")
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
@@ -52,6 +59,12 @@ def create_app():
     app.config["CACHE_TYPE"] = "simple"
     app.config["CACHE_DEFAULT_TIMEOUT"] = 300
     
+    # CSRF: tokens are tied to the session rather than expiring after an hour,
+    # so long-open admin pages keep working. WTF_CSRF_ENABLED=false disables it
+    # (only for local tooling such as the legacy live-server test scripts).
+    app.config["WTF_CSRF_ENABLED"] = os.environ.get("WTF_CSRF_ENABLED", "true").lower() != "false"
+    app.config["WTF_CSRF_TIME_LIMIT"] = None
+    
     # CORS Configuration
     app.config["CORS_HEADERS"] = "Content-Type"
     
@@ -63,6 +76,7 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
     cors.init_app(app)
+    csrf.init_app(app)
     
     # Initialize cache with app context
     with app.app_context():
@@ -100,6 +114,13 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/auth')
+    
+    # Token-authenticated API clients don't use the session cookie, so they
+    # don't need (and can't send) a CSRF token.
+    from api.company_routes import company_api
+    from auth_routes import issue_token
+    csrf.exempt(company_api)
+    csrf.exempt(issue_token)
     
     # Error handlers
     from utils.errors import register_error_handlers

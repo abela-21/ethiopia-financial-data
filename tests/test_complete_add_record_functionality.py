@@ -4,6 +4,7 @@ Comprehensive Test of All Add New Record Functionality
 Tests all modal interfaces and API endpoints with unique data
 """
 
+import os
 import requests
 import json
 import uuid
@@ -24,7 +25,7 @@ def test_complete_add_record_functionality():
         
         login_data = {
             'email': 'admin@ethiopia-economic.com',
-            'password': 'EthiopiaAdmin2024!'
+            'password': os.environ.get("ADMIN_PASSWORD", "")
         }
         
         login_response = session.post(f'{base_url}/auth/login', data=login_data)

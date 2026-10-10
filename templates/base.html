@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Ethiopia Capital Market Data Platform{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
@@ -16,6 +17,25 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <script>
+        // Send the CSRF token with every same-origin state-changing fetch().
+        (function () {
+            var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            var originalFetch = window.fetch;
+            window.fetch = function (resource, init) {
+                init = init || {};
+                var method = (init.method || (resource && resource.method) || 'GET').toUpperCase();
+                var url = new URL(typeof resource === 'string' ? resource : resource.url, window.location.href);
+                if (['GET', 'HEAD', 'OPTIONS'].indexOf(method) === -1 && url.origin === window.location.origin) {
+                    var headers = new Headers(init.headers || (resource instanceof Request ? resource.headers : {}));
+                    if (!headers.has('X-CSRFToken')) headers.set('X-CSRFToken', token);
+                    init.headers = headers;
+                }
+                return originalFetch.call(this, resource, init);
+            };
+        })();
+    </script>
     
     {% block extra_head %}{% endblock %}
 </head>

@@ -4,6 +4,7 @@ Provides downloadable financial metrics and statements for ESX-listed companies
 """
 
 from flask import Blueprint, jsonify, request, send_file
+from werkzeug.exceptions import HTTPException
 from datetime import datetime, date
 import pandas as pd
 import io
@@ -162,6 +163,8 @@ def get_company_metrics(company_id):
             }
         })
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error fetching company metrics: {e}")
         return jsonify({'error': 'Failed to fetch company metrics'}), 500
@@ -260,6 +263,8 @@ def get_company_statements(company_id):
             'fiscal_years_available': sorted(list(set(s.fiscal_year for s in statements)), reverse=True)
         })
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error fetching company statements: {e}")
         return jsonify({'error': 'Failed to fetch company statements'}), 500

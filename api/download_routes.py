@@ -4,19 +4,13 @@ Handles download tracking and user download history
 """
 
 from flask import Blueprint, request, jsonify
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from models import db, User
 from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Rate limiting
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
-)
+from utils.limiter import limiter
 
 download_bp = Blueprint('download', __name__, url_prefix='/downloads')
 

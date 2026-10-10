@@ -4,8 +4,6 @@ Handles complex company search with multiple filter criteria
 """
 
 from flask import Blueprint, request, jsonify
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from models import db, ListedCompany, CompanyFinancialMetric
 from sqlalchemy import func, desc, and_, or_, text
 from datetime import datetime
@@ -15,11 +13,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Rate limiting
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
-)
+from utils.limiter import limiter
 
 search_bp = Blueprint('search', __name__, url_prefix='/search')
 

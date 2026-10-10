@@ -1,26 +1,39 @@
+"""
+Load companies, financials, macro indicators and stock prices from the CSV files in Data/.
+
+Usage:
+    python Data/load_data.py            # load only into tables that are empty
+    python Data/load_data.py --reset    # delete company/financial/macro data first
+
+User accounts are never touched; create the admin with scripts/create_admin.py.
+"""
+import argparse
 import pandas as pd
 from datetime import datetime
 import sys
 from typing import Dict, Any
 import logging
 import os
+from sqlalchemy import func
 from sqlalchemy.sql import text
+
+DATA_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(DATA_DIR)
+sys.path.insert(0, PROJECT_ROOT)
 
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='/Users/abela/Downloads/Project X/Data/data_loading.log'
+    filename=os.path.join(DATA_DIR, 'data_loading.log')
 )
 
-# Dynamically add your project path so imports work correctly
-current_script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_script_dir)
-sys.path.append(project_root)
+from app import create_app, db
+from models import MacroIndicators, Company, Financial, Stock
 
-# Now these imports should work
-from app import create_app
-from api.models.models import db, MacroIndicators, Company, User, Financial # Import Financial model
+
+def data_file(name):
+    return os.path.join(DATA_DIR, name)
 
 # Global variable for the Flask app instance, will be initialized in main()
 app = None
@@ -109,24 +122,39 @@ def validate_macro_data(row: Dict[str, Any]) -> bool:
         return False
 
 def clear_existing_data():
-    """Clear all existing data from tables"""
+    """Delete company, financial and macro data (user accounts are kept)"""
     print("🗑️  Clearing existing data...")
     with app.app_context():
         try:
             # Order matters due to foreign key constraints
-            db.session.execute(text("DELETE FROM financials"))
-            db.session.execute(text("DELETE FROM company_news"))
-            db.session.execute(text("DELETE FROM macro_indicators"))
-            db.session.execute(text("DELETE FROM stock")) # Added stock table clear
-            db.session.execute(text("DELETE FROM company_audit")) # Added company_audit clear
-            db.session.execute(text("DELETE FROM company"))
-            db.session.execute(text("DELETE FROM user")) # User should be cleared last if other tables reference it via created_by/updated_by
+            for table in ("financials", "company_news", "stock", "company_audit",
+                          "watchlist_companies", "user_alerts", "macro_indicators", "company"):
+                db.session.execute(text(f"DELETE FROM {table}"))
             db.session.commit()
             print("✅ Existing data cleared successfully")
         except Exception as e:
             db.session.rollback()
             print(f"❌ Error clearing data: {e}")
             logging.error(f"Error clearing data: {e}")
+            raise
+
+
+def table_has_rows(model):
+    with app.app_context():
+        return db.session.query(model.id).first() is not None
+
+
+def reset_sequences():
+    """CSV rows use explicit ids; move Postgres sequences past them."""
+    with app.app_context():
+        if db.engine.dialect.name != 'postgresql':
+            return
+        for table in ("company", "financials", "macro_indicators", "stock"):
+            db.session.execute(text(
+                f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), "
+                f"COALESCE((SELECT MAX(id) FROM {table}), 1))"
+            ))
+        db.session.commit()
 
 
 def load_companies():
@@ -134,7 +162,7 @@ def load_companies():
     logging.info("Starting to load company data")
     print("📥 Loading companies...")
     try:
-        df = pd.read_csv("/users/abela/Downloads/Project X/Data/companies.csv")
+        df = pd.read_csv(data_file("companies.csv"))
         with app.app_context():
             for _, row in df.iterrows():
                 try:
@@ -181,7 +209,7 @@ def load_financials():
     logging.info("Starting financial data loading")
     print("📥 Loading financials...")
     try:
-        df = pd.read_csv("/users/abela/Downloads/Project X/Data/financials.csv")
+        df = pd.read_csv(data_file("financials.csv"))
         # Replace NaN with None for SQLAlchemy to handle NULLs
         df = df.where(pd.notna(df), None)
 
@@ -295,7 +323,7 @@ def load_macro_indicators():
     logging.info("Starting macro indicators data loading")
     print("📥 Loading macro indicators...")
     try:
-        df = pd.read_csv("/users/abela/Downloads/Project X/Data/macro_monthly.csv")
+        df = pd.read_csv(data_file("macro_monthly.csv"))
         # Replace NaN with None for SQLAlchemy to handle NULLs
         df = df.where(pd.notna(df), None)
         logging.info(f"Found {len(df)} macro indicator records to process")
@@ -371,165 +399,104 @@ def load_macro_indicators():
         logging.error(f"Unexpected error loading macro indicators: {e}")
         print(f"❌ Unexpected error loading macro indicators: {e}")
 
-def load_users():
-    """Load user data with comprehensive logging"""
-    logging.info("Starting user data loading")
-    print("📥 Loading users...")
+def load_stocks():
+    """Load daily stock prices (used by the Market page)"""
+    logging.info("Starting stock price loading")
+    print("📥 Loading stock prices...")
     try:
-        df = pd.read_csv("/users/abela/Downloads/Project X/Data/users.csv")
-        # Replace NaN with None for SQLAlchemy to handle NULLs
+        df = pd.read_csv(data_file("stocks.csv"), encoding="utf-8-sig")
         df = df.where(pd.notna(df), None)
-        logging.info(f"Found {len(df)} user records to process")
-
         with app.app_context():
-            for _, row_series in df.iterrows():
-                row = row_series.to_dict()
-                try:
-                    record = User(
-                        id=row["id"],
-                        username=row["username"],
-                        password=row["password"],
-                        email=row["email"],
-                        # Assuming role and is_active are handled by defaults or not in CSV
-                        # created_at=datetime.utcnow(), # If not in CSV, add
-                        # last_login=None # If not in CSV, add
-                    )
-                    db.session.add(record)
-                    logging.info(f"Added user: {row['username']}")
-                except KeyError as ke:
-                    logging.error(f"Missing column in users.csv for user {row.get('username')}: {ke}")
-                    print(f"❌ Missing column in users.csv for user {row.get('username')}: {ke}")
+            known = {cid for (cid,) in db.session.query(Company.id)}
+            skipped = 0
+            for row in df.to_dict("records"):
+                if int(row["company_id"]) not in known:
+                    skipped += 1
                     continue
-                except Exception as e:
-                    logging.error(f"Error adding user {row.get('username')}: {e}")
-                    print(f"❌ Error adding user {row.get('username')}: {e}")
-                    continue
-            try:
-                db.session.commit()
-                logging.info("Users committed successfully")
-                print("✅ Users loaded successfully")
-            except Exception as e:
-                db.session.rollback()
-                logging.error(f"Error committing users: {e}")
-                print(f"❌ Error committing users: {e}")
-    except FileNotFoundError:
-        logging.warning("users.csv not found, skipping User data import")
-        print("⚠️ users.csv not found, skipping User data import")
+                db.session.add(Stock(
+                    id=int(row["id"]),
+                    company_id=int(row["company_id"]),
+                    date=datetime.strptime(str(row["date"]), "%Y-%m-%d").date(),
+                    open=row["open"], high=row["high"], low=row["low"], close=row["close"],
+                    volume=int(row["volume"]) if row["volume"] is not None else None,
+                ))
+            db.session.commit()
+            print(f"✅ Stock prices loaded successfully ({len(df) - skipped} rows"
+                  + (f", {skipped} skipped for unknown companies)" if skipped else ")"))
     except Exception as e:
-        logging.error(f"Unexpected error loading users: {e}")
-        print(f"❌ Unexpected error loading users: {e}")
+        logging.error(f"Error loading stock prices: {e}")
+        print(f"❌ Error loading stock prices: {e}")
+
 
 def generate_enhanced_report():
-    """Generate comprehensive data quality report with additional metrics"""
-    print("\n📊 Enhanced Data Quality Report")
+    """Print a short data quality report (portable across databases)"""
+    print("\n📊 Data Quality Report")
     print("=" * 50)
 
+    def r(value):
+        return None if value is None else round(float(value), 2)
+
     with app.app_context():
-        # Sector Analysis
-        sector_stats = db.session.execute(text("""
-            SELECT sector,
-                   COUNT(*) as companies,
-                   COUNT(DISTINCT industry) as industries,
-                   GROUP_CONCAT(name) as company_names
-            FROM company
-            WHERE sector IS NOT NULL
-            GROUP BY sector
-            ORDER BY companies DESC
-        """)).fetchall()
-
         print("\n📊 Sector Distribution:")
-        for sector in sector_stats:
-            print(f"{sector[0]}:")
-            print(f"  Companies: {sector[1]}")
-            print(f"  Industries: {sector[2]}")
-
-        # Financial Health Metrics
-        fin_health = db.session.execute(text("""
-            SELECT
-                f.year,
-                COUNT(*) as records,
-                ROUND(AVG(revenue)/1000000, 2) as avg_revenue_m,
-                ROUND(AVG(return_on_equity), 2) as avg_roe,
-                ROUND(AVG(return_on_assets), 2) as avg_roa,
-                ROUND(AVG(current_ratio), 2) as avg_current_ratio,
-                ROUND(AVG(debt_to_equity), 2) as avg_debt_to_equity,
-                ROUND(AVG(profit_margin), 2) as avg_profit_margin,
-                ROUND(AVG(ebitda)/1000000, 2) as avg_ebitda_m -- Added EBITDA to report
-            FROM financials f
-            GROUP BY year
-            ORDER BY year DESC
-        """)).fetchall()
+        sectors = (db.session.query(Company.sector, func.count(Company.id),
+                                    func.count(func.distinct(Company.industry)))
+                   .filter(Company.sector.isnot(None))
+                   .group_by(Company.sector)
+                   .order_by(func.count(Company.id).desc())
+                   .all())
+        for sector, companies, industries in sectors:
+            print(f"{sector}: {companies} companies, {industries} industries")
 
         print("\n📈 Financial Trends by Year:")
-        for metric in fin_health:
-            print(f"\nYear {metric[0]}:")
-            print(f"  Number of Reports: {metric[1]}")
-            print(f"  Average Revenue: {metric[2]}M ETB")
-            print(f"  Return on Equity: {metric[3]}%")
-            print(f"  Return on Assets: {metric[4]}%")
-            print(f"  Current Ratio: {metric[5]}")
-            print(f"  Debt/Equity: {metric[6]}")
-            print(f"  Profit Margin: {metric[7]}%")
-            print(f"  Average EBITDA: {metric[8]}M ETB") # Display EBITDA
+        years = (db.session.query(Financial.year, func.count(Financial.id), func.avg(Financial.revenue),
+                                  func.avg(Financial.return_on_equity), func.avg(Financial.profit_margin))
+                 .group_by(Financial.year)
+                 .order_by(Financial.year.desc())
+                 .all())
+        for year, records, revenue, roe, margin in years:
+            avg_revenue_m = r(revenue / 1_000_000) if revenue is not None else None
+            print(f"Year {year}: {records} reports, avg revenue {avg_revenue_m}M ETB, "
+                  f"ROE {r(roe)}, profit margin {r(margin)}")
 
-        # Macro Economic Overview
-        macro_stats = db.session.execute(text("""
-            SELECT
-                strftime('%Y-%m', date) as month,
-                ROUND(AVG(gdp_growth), 2) as gdp_growth,
-                ROUND(AVG(inflation_rate), 2) as inflation,
-                ROUND(AVG(etb_usd), 2) as exchange_rate,
-                ROUND(AVG(npl_ratio), 2) as npl_ratio
-            FROM macro_indicators
-            GROUP BY strftime('%Y-%m', date)
-            ORDER BY date DESC
-            LIMIT 6
-        """)).fetchall()
+        print("\n🌍 Latest Macro Indicators:")
+        for row in MacroIndicators.query.order_by(MacroIndicators.date.desc()).limit(6):
+            print(f"{row.date}: GDP growth {row.gdp_growth}%, inflation {row.inflation_rate}%, "
+                  f"ETB/USD {row.etb_usd}, NPL {row.npl_ratio}%")
 
-        print("\n🌍 Recent Macro Trends (Last 6 Months):")
-        for macro in macro_stats:
-            print(f"\n{macro[0]}:")
-            print(f"  GDP Growth: {macro[1]}%")
-            print(f"  Inflation: {macro[2]}%")
-            print(f"  ETB/USD: {macro[3]}")
-            print(f"  NPL Ratio: {macro[4]}%")
-
-        # Data Quality Metrics
-        quality_stats = db.session.execute(text("""
-            SELECT
-                COUNT(DISTINCT company_id) as companies_with_data,
-                COUNT(DISTINCT year) as years_covered,
-                COUNT(*) as total_records
-            FROM financials
-        """)).fetchone()
-
+        companies_with_data = db.session.query(func.count(func.distinct(Financial.company_id))).scalar()
         print("\n📋 Data Coverage:")
-        print(f"Companies with Financial Data: {quality_stats[0]} of {db.session.query(Company).count()}") # Total companies
-        print(f"Years of Historical Data: {quality_stats[1]}")
-        print(f"Total Financial Records: {quality_stats[2]}")
+        print(f"Companies with Financial Data: {companies_with_data} of {Company.query.count()}")
+        print(f"Total Financial Records: {Financial.query.count()}")
 
-def main():
+def main(argv=None):
     """Main function to orchestrate data loading"""
     global app
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--reset", action="store_true",
+                        help="delete existing company, financial and macro data before loading")
+    args = parser.parse_args(argv)
+
     app = create_app()
 
     print("🚀 Starting data import...")
-    with app.app_context(): # Ensure all operations run within the app context
-        try:
-            # Create all tables if they don't exist
-            db.create_all()
-            logging.info("✅ Database tables ensured to exist.")
+    with app.app_context():
+        db.create_all()
 
-            clear_existing_data()
-            load_companies()
-            load_financials()
-            load_macro_indicators()
-            load_users()
-            print("✅ All data loaded successfully")
-            generate_enhanced_report()
-        except Exception as e:
-            logging.error(f"Data import failed: {e}")
-            print(f"❌ Data import failed: {e}")
+    if args.reset:
+        clear_existing_data()
+
+    steps = [(Company, load_companies), (Financial, load_financials),
+             (MacroIndicators, load_macro_indicators), (Stock, load_stocks)]
+    for model, loader in steps:
+        if table_has_rows(model):
+            print(f"⏭️  {model.__tablename__} already has data, skipping (use --reset to reload)")
+            continue
+        loader()
+
+    reset_sequences()
+    print("✅ Data loading finished")
+    generate_enhanced_report()
+
 
 if __name__ == "__main__":
     main()

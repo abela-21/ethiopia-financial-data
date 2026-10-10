@@ -2,6 +2,10 @@
 """
 Quick fix for economic indicators data persistence
 """
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from app import create_app, db
 from sqlalchemy import text
 from datetime import datetime

@@ -461,6 +461,83 @@ def get_user_alerts():
         current_app.logger.error(f"Error getting user alerts: {str(e)}")
         return jsonify({'status': 'error', 'message': 'Failed to load alerts'}), 500
 
+@dashboard_bp.route('/dashboard/alerts/<int:alert_id>', methods=['PUT'])
+@login_required
+def update_user_alert(alert_id):
+    """Enable/disable an alert or change its frequency"""
+    alert = UserAlert.query.filter_by(id=alert_id, user_id=current_user.id).first()
+    if not alert:
+        return jsonify({'status': 'error', 'message': 'Alert not found'}), 404
+
+    data = request.get_json(silent=True) or {}
+    if 'is_active' in data:
+        if not isinstance(data['is_active'], bool):
+            return jsonify({'status': 'error', 'message': 'is_active must be true or false'}), 400
+        alert.is_active = data['is_active']
+    if 'frequency' in data:
+        if data['frequency'] not in ('immediate', 'daily', 'weekly'):
+            return jsonify({'status': 'error', 'message': 'frequency must be immediate, daily or weekly'}), 400
+        alert.frequency = data['frequency']
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error updating alert: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'Failed to update alert'}), 500
+    return jsonify({'status': 'success', 'data': {'id': alert.id, 'is_active': alert.is_active,
+                                                   'frequency': alert.frequency}})
+
+@dashboard_bp.route('/dashboard/alerts/<int:alert_id>', methods=['DELETE'])
+@login_required
+def delete_user_alert(alert_id):
+    """Delete one of the current user's alerts"""
+    alert = UserAlert.query.filter_by(id=alert_id, user_id=current_user.id).first()
+    if not alert:
+        return jsonify({'status': 'error', 'message': 'Alert not found'}), 404
+    db.session.delete(alert)
+    db.session.commit()
+    return jsonify({'status': 'success', 'message': 'Alert deleted'})
+
+@dashboard_bp.route('/watchlist/add', methods=['POST'])
+@login_required
+def quick_add_to_watchlist():
+    """
+    Add a company to the user's default watchlist (created if needed).
+    Accepts {"company_id": <Company id>} or {"ticker": "<symbol>"}.
+    """
+    data = request.get_json(silent=True) or {}
+    company = None
+    if data.get('company_id'):
+        company = db.session.get(Company, data['company_id'])
+    elif data.get('ticker'):
+        company = Company.query.filter(db.func.upper(Company.ticker) == str(data['ticker']).upper()).first()
+    else:
+        return jsonify({'status': 'error', 'message': 'company_id or ticker is required'}), 400
+    if not company:
+        return jsonify({'status': 'error', 'message': 'This company is not available for watchlists yet'}), 404
+
+    try:
+        watchlist = (UserWatchlist.query.filter_by(user_id=current_user.id, is_default=True).first()
+                     or UserWatchlist.query.filter_by(user_id=current_user.id).order_by(UserWatchlist.id).first())
+        if not watchlist:
+            watchlist = UserWatchlist(user_id=current_user.id, name='My Watchlist', is_default=True)
+            db.session.add(watchlist)
+            db.session.flush()
+
+        if WatchlistCompany.query.filter_by(watchlist_id=watchlist.id, company_id=company.id).first():
+            return jsonify({'status': 'success', 'message': f'{company.name} is already in {watchlist.name}'})
+
+        db.session.add(WatchlistCompany(watchlist_id=watchlist.id, company_id=company.id))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error in quick add to watchlist: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'Failed to add company to watchlist'}), 500
+
+    return jsonify({'status': 'success', 'message': f'{company.name} added to {watchlist.name}',
+                    'watchlist_id': watchlist.id})
+
 @dashboard_bp.route('/dashboard/preferences')
 @login_required
 def get_user_preferences():

@@ -22,9 +22,7 @@ def _get_routes():
 
 
 # Known application bugs, kept visible as strict xfails.
-KNOWN_BROKEN = {
-    "/auth/profile/edit": "template auth/edit_profile.html does not exist",
-}
+KNOWN_BROKEN = {}
 
 
 def _params(routes):

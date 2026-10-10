@@ -56,13 +56,13 @@ This platform serves researchers, consultants, analysts, portfolio managers, and
 
 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/ethiopia-economic-platform.git
-cd ethiopia-economic-platform
+git clone https://github.com/abela-21/ethiopia-financial-data.git
+cd ethiopia-financial-data
 ```
 
-2. Install dependencies
+2. Install dependencies (from `pyproject.toml` / `uv.lock`)
 ```bash
-pip install -r requirements.txt
+uv sync            # or: pip install .
 ```
 
 3. Set up environment variables
@@ -73,8 +73,9 @@ cp .env.example .env
 
 4. Initialize the database
 ```bash
-python scripts/create_admin.py
-python scripts/data_migration.py
+python scripts/create_admin.py          # prompts for the admin password
+python scripts/data_migration.py        # banks, sectors, research documents
+python Data/load_data.py                # companies, financials, macro indicators from Data/*.csv
 ```
 
 5. Run the application
@@ -84,9 +85,29 @@ python main.py
 
 The application will be available at `http://localhost:5000`
 
-### Default Admin Credentials
-- **Email**: admin@ethiopia-economic.com
-- **Password**: EthiopiaAdmin2024!
+### Admin Account
+There is no default admin password. Create the admin account with:
+```bash
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='a-long-unique-password' python scripts/create_admin.py
+```
+If `ADMIN_PASSWORD` is not set, the script prompts for one (or generates and prints a random
+password when not run interactively). Passwords must be at least 12 characters.
+
+### Running the tests
+```bash
+pip install pytest
+pytest tests/unit                                          # SQLite
+TEST_DATABASE_URL=postgresql://user:pass@localhost/test_db pytest tests/unit
+```
+The `tests/test_*.py` files are older scripts that drive a running server.
+
+### API Tokens
+Token-authenticated endpoints (e.g. `POST /api/companies`) need a JWT:
+```bash
+curl -X POST http://localhost:5000/auth/token -H 'Content-Type: application/json' \
+     -d '{"email": "you@example.com", "password": "..."}'
+# then send:  Authorization: Bearer <access_token>
+```
 
 ## Project Structure
 

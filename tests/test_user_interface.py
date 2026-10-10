@@ -3,14 +3,15 @@
 Test the data management edit functionality from user interface perspective
 """
 
+import os
 import requests
 import json
 from urllib.parse import urljoin
 import time
 
 BASE_URL = "http://localhost:5000"
-ADMIN_EMAIL = "admin@ethiopia-economic.com"
-ADMIN_PASSWORD = "EthiopiaAdmin2024!"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@ethiopia-economic.com")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 def test_complete_user_workflow():
     """Test the complete user workflow for editing economic indicators"""

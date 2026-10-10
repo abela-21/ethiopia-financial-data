@@ -79,7 +79,7 @@ def _seed():
 
 @pytest.fixture(scope="session")
 def app():
-    flask_app.config.update(TESTING=True)
+    flask_app.config.update(TESTING=True, WTF_CSRF_ENABLED=False)
     limiter.enabled = False
     with flask_app.app_context():
         db.drop_all()

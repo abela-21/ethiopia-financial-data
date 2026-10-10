@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
+from werkzeug.exceptions import HTTPException
 from models import Company, CompanyAudit, db
-from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity, verify_jwt_in_request
 from utils.errors import APIError
 from utils.validators import validate_company_data
 from app import cache
@@ -126,6 +127,8 @@ def get_company_by_id(id):
     try:
         company = Company.query.get_or_404(id)
         return jsonify(serialize_company(company)), 200
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in get_company_by_id: {str(e)}")
         raise APIError(str(e))
@@ -135,9 +138,12 @@ def get_company_by_id(id):
 @limiter.limit("5/minute")
 def create_company():
     """Create new company"""
+    if get_jwt().get('role') != 'admin':
+        raise APIError("Admin privileges required", status_code=403)
+
     try:
-        data = request.get_json()
-        user_id = get_jwt_identity()
+        data = request.get_json(silent=True) or {}
+        user_id = int(get_jwt_identity())
 
         errors = validate_company_data(data)
         if errors:
@@ -176,6 +182,9 @@ def create_company():
 
         return jsonify(serialize_company(new_company)), 201
 
+    except APIError:
+        db.session.rollback()
+        raise
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error in create_company: {str(e)}")

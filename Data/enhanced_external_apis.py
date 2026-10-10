@@ -31,8 +31,11 @@ class EnhancedExternalDataIntegrator:
             'adb': 'https://data.adb.org/api/3/action'
         }
         
-    def get_world_bank_ethiopia_data(self, start_year=2015, end_year=2024):
-        """Fetch comprehensive World Bank data for Ethiopia"""
+    def get_world_bank_ethiopia_data(self, start_year=2015, end_year=2024, only=None):
+        """Fetch comprehensive World Bank data for Ethiopia.
+
+        `only` optionally restricts the fetch to a subset of indicator codes.
+        """
         
         # Key indicators for Ethiopia's economy
         indicators = {
@@ -57,6 +60,9 @@ class EnhancedExternalDataIntegrator:
             'AG.LND.ARBL.ZS': 'Arable land (% of land area)',
             'EG.USE.ELEC.KH.PC': 'Electric power consumption (kWh per capita)'
         }
+        
+        if only:
+            indicators = {code: name for code, name in indicators.items() if code in only}
         
         all_records = []
         

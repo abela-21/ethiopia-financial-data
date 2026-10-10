@@ -19,6 +19,7 @@
 
                         <!-- Registration Form -->
                         <form method="POST" action="{{ url_for('auth.register') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="row">
                                 <!-- First Name -->
                                 <div class="col-md-6 mb-3">
@@ -162,7 +163,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirm_password');
-    const form = document.querySelector('form');
+    const form = document.querySelector('form[action$="/auth/register"]');
 
     function validatePasswords() {
         if (password.value !== confirmPassword.value) {

@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from werkzeug.exceptions import HTTPException
 from models import Stock, Company
 from app import cache
 from utils.limiter import limiter
@@ -84,6 +85,8 @@ def get_stocks(company_id):
 
         return jsonify(response), 200
 
+    except HTTPException:
+        raise
     except APIError as e:
         logger.warning(f"API Error in get_stocks: {str(e)}")
         return jsonify({"error": str(e)}), e.status_code
@@ -117,6 +120,8 @@ def get_latest_stock(company_id):
 
         return jsonify(response), 200
 
+    except HTTPException:
+        raise
     except APIError as e:
         logger.warning(f"API Error in get_latest_stock: {str(e)}")
         return jsonify({"error": str(e)}), e.status_code
