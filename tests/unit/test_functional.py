@@ -459,3 +459,86 @@ def test_admin_create_indicator_saves_all_fields(admin_client, app):
 def test_admin_create_indicator_validation(admin_client, body, fragment):
     resp = admin_client.post("/admin/api/economic-indicators", json=body)
     assert resp.status_code == 400 and fragment in resp.get_json()["error"]
+
+
+# --------------------------------------------------------------------------- #
+# Regressions found in the browser end-to-end run
+# --------------------------------------------------------------------------- #
+
+def test_child_templates_only_use_blocks_defined_in_base():
+    """A block base.html doesn't render (e.g. 'scripts') silently drops the page's JS."""
+    tdir = os.path.join(ROOT, "templates")
+    base_blocks = set(re.findall(r"{%\s*block\s+(\w+)", open(os.path.join(tdir, "base.html")).read()))
+    bad = []
+    for dirpath, _, files in os.walk(tdir):
+        for f in files:
+            text = open(os.path.join(dirpath, f), encoding="utf-8").read()
+            if 'extends "base.html"' in text or "extends 'base.html'" in text:
+                bad += [f"{f}:{b}" for b in re.findall(r"{%\s*block\s+(\w+)", text) if b not in base_blocks]
+    assert bad == []
+
+
+def test_dashboard_greets_the_real_user(user_client):
+    html = user_client.get("/dashboard").get_data(as_text=True)
+    assert "Welcome back, Us!" in html
+
+
+def test_indicator_edit_with_blank_fields(admin_client, app):
+    from models import MacroIndicators
+    with app.app_context():
+        iid = MacroIndicators.query.order_by(MacroIndicators.date).first().id
+    body = {"exports": None, "imports": None, "interest_rate": 9.5, "gdp_growth": "", "etb_usd": "57.2"}
+    resp = admin_client.put(f"/admin/api/indicator/{iid}", json=body)
+    assert resp.status_code == 200, resp.get_data(as_text=True)
+    with app.app_context():
+        row = MacroIndicators.query.get(iid)
+        assert row.interest_rate == pytest.approx(9.5) and row.gdp_growth is None
+        assert row.etb_usd == pytest.approx(57.2)
+    assert admin_client.put(f"/admin/api/indicator/{iid}", json={"npl_ratio": "abc"}).status_code == 400
+    assert admin_client.put("/admin/api/indicator/999999", json={}).status_code == 404
+
+
+def test_indicator_edit_derives_trade_balance(admin_client, app):
+    from models import MacroIndicators
+    with app.app_context():
+        iid = MacroIndicators.query.order_by(MacroIndicators.date).first().id
+    admin_client.put(f"/admin/api/indicator/{iid}", json={"exports": 100, "imports": 160})
+    with app.app_context():
+        assert MacroIndicators.query.get(iid).trade_balance == pytest.approx(-60)
+
+
+@pytest.mark.parametrize("url,header", [
+    ("/api/download/companies?format=csv", "id,name,ticker"),
+    ("/api/download/macro_indicators?format=csv&variables=gdp_growth&variables=etb_usd", "date,gdp_growth,etb_usd"),
+    ("/api/download/financials?format=csv&variables=revenue", "company,company_id,year,period,revenue"),
+])
+def test_download_endpoints_csv(user_client, url, header):
+    resp = user_client.get(url)
+    assert resp.status_code == 200, resp.get_data(as_text=True)
+    assert resp.headers["Content-Disposition"].startswith("attachment")
+    assert resp.get_data(as_text=True).splitlines()[0].startswith(header)
+
+
+def test_download_excel_and_json(user_client):
+    assert user_client.get("/api/download/companies?format=excel").data[:2] == b"PK"
+    assert user_client.get("/api/download/companies?format=json").is_json
+
+
+@pytest.mark.parametrize("url,status", [
+    ("/api/download/companies?format=pdf", 400),
+    ("/api/download/macro_indicators?variables=nope", 400),
+    ("/api/download/macro_indicators?date_from=2025-01-01&date_to=2024-01-01", 400),
+    ("/api/download/macro_indicators?date_from=yesterday", 400),
+    ("/api/download/stocks/999999", 404),
+    ("/api/download/financials/999999", 404),
+    ("/api/download/companies?industry=NoSuchIndustry", 404),
+])
+def test_download_endpoint_errors(user_client, url, status):
+    assert user_client.get(url).status_code == status
+
+
+def test_downloads_require_login_and_are_recorded(client, user_client):
+    assert client.get("/api/download/companies").status_code in (302, 401)
+    user_client.get("/api/download/companies?format=csv")
+    history = user_client.get("/api/dashboard/download-history").get_json()
+    assert any(d["download_type"] == "companies" for d in history["data"]["downloads"])

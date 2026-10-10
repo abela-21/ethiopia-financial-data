@@ -123,11 +123,11 @@
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
                                         <label for="financialYearFrom" class="form-label">From Year</label>
-                                        <input type="number" class="form-control" id="financialYearFrom" name="year_from" min="2015" max="2024" placeholder="2020">
+                                        <input type="number" class="form-control" id="financialYearFrom" name="year_from" min="1990" max="2100" placeholder="2020">
                                     </div>
                                     <div class="col-md-6">
                                         <label for="financialYearTo" class="form-label">To Year</label>
-                                        <input type="number" class="form-control" id="financialYearTo" name="year_to" min="2015" max="2024" placeholder="2024">
+                                        <input type="number" class="form-control" id="financialYearTo" name="year_to" min="1990" max="2100" placeholder="2024">
                                     </div>
                                 </div>
                                 
@@ -136,33 +136,33 @@
                                     <div class="row g-2">
                                         <div class="col-md-6">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="Revenue" id="var_revenue">
+                                                <input class="form-check-input" type="checkbox" name="variables" value="revenue" id="var_revenue">
                                                 <label class="form-check-label" for="var_revenue">Revenue</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="Net_Income" id="var_net_income">
+                                                <input class="form-check-input" type="checkbox" name="variables" value="net_income" id="var_net_income">
                                                 <label class="form-check-label" for="var_net_income">Net Income</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="Total_Assets" id="var_total_assets">
+                                                <input class="form-check-input" type="checkbox" name="variables" value="total_assets" id="var_total_assets">
                                                 <label class="form-check-label" for="var_total_assets">Total Assets</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="Total_Equity" id="var_total_equity">
+                                                <input class="form-check-input" type="checkbox" name="variables" value="total_equity" id="var_total_equity">
                                                 <label class="form-check-label" for="var_total_equity">Total Equity</label>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="Operating_Cash_Flow" id="var_operating_cash">
+                                                <input class="form-check-input" type="checkbox" name="variables" value="operating_cash_flow" id="var_operating_cash">
                                                 <label class="form-check-label" for="var_operating_cash">Operating Cash Flow</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="Current_Ratio" id="var_current_ratio">
+                                                <input class="form-check-input" type="checkbox" name="variables" value="current_ratio" id="var_current_ratio">
                                                 <label class="form-check-label" for="var_current_ratio">Current Ratio</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="Return_on_Equity" id="var_roe">
+                                                <input class="form-check-input" type="checkbox" name="variables" value="return_on_equity" id="var_roe">
                                                 <label class="form-check-label" for="var_roe">Return on Equity</label>
                                             </div>
                                             <div class="form-check">
@@ -171,6 +171,18 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="financialPeriod" class="form-label">Period</label>
+                                    <select class="form-select" id="financialPeriod" name="period">
+                                        <option value="">All Periods</option>
+                                        <option value="Annual">Annual</option>
+                                        <option value="Q1">Q1</option>
+                                        <option value="Q2">Q2</option>
+                                        <option value="Q3">Q3</option>
+                                        <option value="Q4">Q4</option>
+                                    </select>
                                 </div>
                                 
                                 <div class="mb-3">
@@ -340,66 +352,6 @@
                     </div>
                 </div>
 
-                <!-- Financial Statements -->
-                <div class="col-lg-6 mb-4">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white border-0">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-calculator text-info me-2"></i>Financial Statements
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <p class="text-muted mb-3">Download comprehensive financial statements including income statements, balance sheets, and key ratios.</p>
-                            
-                            <form id="financialsForm" onsubmit="downloadFinancials(event)">
-                                <div class="mb-3">
-                                    <label for="financialCompany" class="form-label">Select Company</label>
-                                    <select class="form-select" id="financialCompany" name="company_id" required>
-                                        <option value="">Choose a company...</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <label for="financialYearFrom" class="form-label">From Year</label>
-                                        <input type="number" class="form-control" id="financialYearFrom" name="year_from" 
-                                               min="2000" max="2030" placeholder="e.g., 2020">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="financialYearTo" class="form-label">To Year</label>
-                                        <input type="number" class="form-control" id="financialYearTo" name="year_to" 
-                                               min="2000" max="2030" placeholder="e.g., 2023">
-                                    </div>
-                                </div>
-                                
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <label for="financialPeriod" class="form-label">Period</label>
-                                        <select class="form-select" id="financialPeriod" name="period">
-                                            <option value="">All Periods</option>
-                                            <option value="Annual">Annual</option>
-                                            <option value="Q1">Q1</option>
-                                            <option value="Q2">Q2</option>
-                                            <option value="Q3">Q3</option>
-                                            <option value="Q4">Q4</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="financialFormat" class="form-label">Format</label>
-                                        <select class="form-select" id="financialFormat" name="format">
-                                            <option value="csv">CSV</option>
-                                            <option value="excel">Excel</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <button type="submit" class="btn btn-info w-100">
-                                    <i class="fas fa-download me-2"></i>Download Financial Data
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Download Help -->
@@ -457,145 +409,14 @@
 
 {% block extra_scripts %}
 <script>
-// Load companies for dropdown selects
-document.addEventListener('DOMContentLoaded', function() {
-    loadCompaniesForDropdowns();
-});
-
-async function loadCompaniesForDropdowns() {
-    try {
-        const response = await fetch('/api/companies?per_page=1000');
-        if (response.ok) {
-            const data = await response.json();
-            populateCompanyDropdowns(data.companies);
-        }
-    } catch (error) {
-        console.error('Error loading companies:', error);
-    }
-}
-
-function populateCompanyDropdowns(companies) {
-    const stockSelect = document.getElementById('stockCompany');
-    const financialSelect = document.getElementById('financialCompany');
-    
-    companies.forEach(company => {
-        const option1 = new Option(`${company.name} (${company.ticker})`, company.id);
-        const option2 = new Option(`${company.name} (${company.ticker})`, company.id);
-        stockSelect.add(option1);
-        financialSelect.add(option2);
+// Keep "from" <= "to" on the date/year range inputs.
+[['macroDateFrom', 'macroDateTo'], ['stockDateFrom', 'stockDateTo'], ['financialYearFrom', 'financialYearTo']]
+    .forEach(([fromId, toId]) => {
+        const from = document.getElementById(fromId);
+        const to = document.getElementById(toId);
+        if (!from || !to) return;
+        from.addEventListener('change', () => { to.min = from.value; });
+        to.addEventListener('change', () => { from.max = to.value; });
     });
-}
-
-function downloadCompanies(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const params = new URLSearchParams(formData);
-    downloadFile(`/api/download/companies?${params}`);
-}
-
-function downloadMacro(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const params = new URLSearchParams();
-    
-    // Only add non-empty parameters
-    for (const [key, value] of formData.entries()) {
-        if (value.trim()) {
-            params.append(key, value);
-        }
-    }
-    
-    downloadFile(`/api/download/macro_indicators?${params}`);
-}
-
-function downloadStocks(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const companyId = formData.get('company_id');
-    
-    if (!companyId) {
-        alert('Please select a company');
-        return;
-    }
-    
-    const params = new URLSearchParams();
-    for (const [key, value] of formData.entries()) {
-        if (key !== 'company_id' && value.trim()) {
-            params.append(key, value);
-        }
-    }
-    
-    downloadFile(`/api/download/stocks/${companyId}?${params}`);
-}
-
-function downloadFinancials(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const companyId = formData.get('company_id');
-    
-    if (!companyId) {
-        alert('Please select a company');
-        return;
-    }
-    
-    const params = new URLSearchParams();
-    for (const [key, value] of formData.entries()) {
-        if (key !== 'company_id' && value.trim()) {
-            params.append(key, value);
-        }
-    }
-    
-    downloadFile(`/api/download/financials/${companyId}?${params}`);
-}
-
-function downloadFile(url) {
-    // Show loading modal
-    const modal = new bootstrap.Modal(document.getElementById('downloadModal'));
-    modal.show();
-    
-    // Create download link
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = '';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // Hide modal after a short delay
-    setTimeout(() => {
-        modal.hide();
-    }, 2000);
-}
-
-// Form validation
-document.getElementById('macroDateFrom').addEventListener('change', function() {
-    const toDate = document.getElementById('macroDateTo');
-    toDate.min = this.value;
-});
-
-document.getElementById('macroDateTo').addEventListener('change', function() {
-    const fromDate = document.getElementById('macroDateFrom');
-    fromDate.max = this.value;
-});
-
-document.getElementById('stockDateFrom').addEventListener('change', function() {
-    const toDate = document.getElementById('stockDateTo');
-    toDate.min = this.value;
-});
-
-document.getElementById('stockDateTo').addEventListener('change', function() {
-    const fromDate = document.getElementById('stockDateFrom');
-    fromDate.max = this.value;
-});
-
-document.getElementById('financialYearFrom').addEventListener('change', function() {
-    const toYear = document.getElementById('financialYearTo');
-    toYear.min = this.value;
-});
-
-document.getElementById('financialYearTo').addEventListener('change', function() {
-    const fromYear = document.getElementById('financialYearFrom');
-    fromYear.max = this.value;
-});
 </script>
 {% endblock %}

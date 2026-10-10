@@ -28,3 +28,7 @@ api_bp.register_blueprint(export_routes.export_bp, url_prefix='/export')
 # Register download tracking routes
 from . import download_routes
 api_bp.register_blueprint(download_routes.download_bp, name='download_tracking')
+
+# File downloads used by the Downloads page
+from . import data_download_routes
+api_bp.register_blueprint(data_download_routes.data_download_bp)

@@ -534,14 +534,7 @@ def search_companies_api():
 @login_required
 def dashboard():
     """User personalized dashboard"""
-    # Create a mock user context for testing
-    from flask import g
-    g.current_user = type('MockUser', (), {
-        'first_name': 'Test',
-        'email': 'test@example.com',
-        'is_authenticated': True
-    })()
-    return render_template('dashboard.html', current_user=g.current_user)
+    return render_template('dashboard.html')
 
 @main_bp.route('/search')
 @login_required
@@ -702,126 +695,67 @@ def get_indicator_api(indicator_id):
         }), 500
 
 
+# Every numeric MacroIndicators column an admin may edit.
+EDITABLE_INDICATOR_FIELDS = (
+    'gdp_growth', 'gdp_per_capita', 'inflation_rate', 'food_inflation', 'interest_rate', 'unemployment_rate',
+    'industrial_production', 'agricultural_production', 'exports', 'imports', 'trade_balance',
+    'current_account_balance', 'fdi_inflow', 'remittances', 'fx_reserves', 'etb_usd', 'etb_eur', 'etb_gbp',
+    'etb_jpy', 'etb_cny', 'total_deposits', 'total_loans', 'npl_ratio', 'loan_to_deposit', 'money_supply_m1',
+    'money_supply_m2', 'private_sector_credit', 'govt_revenue', 'govt_expenditure', 'budget_deficit',
+    'govt_debt', 'tax_revenue', 'coffee_price', 'gold_price', 'oil_price', 'wheat_price',
+)
+
+
 @main_bp.route('/admin/api/indicator/<int:indicator_id>', methods=['PUT'])
 @login_required
 @admin_required
 def update_indicator_api(indicator_id):
     """API endpoint to update economic indicator"""
+    indicator = db.session.get(MacroIndicators, indicator_id)
+    if indicator is None:
+        return jsonify({'success': False, 'error': 'Indicator not found'}), 404
+    data = request.get_json(silent=True) or {}
+
     try:
-        indicator = MacroIndicators.query.get_or_404(indicator_id)
-        data = request.get_json()
-        
-        # Update fields
-        if 'date' in data:
-            from datetime import datetime
-            indicator.date = datetime.strptime(data['date'], '%Y-%m-%d').date()
-            
-        # Core economic indicators
-        if 'gdp_growth' in data:
-            indicator.gdp_growth = data['gdp_growth']
-        if 'gdp_per_capita' in data:
-            indicator.gdp_per_capita = data['gdp_per_capita']
-        if 'inflation_rate' in data:
-            indicator.inflation_rate = data['inflation_rate']
-        if 'food_inflation' in data:
-            indicator.food_inflation = data['food_inflation']
-        if 'interest_rate' in data:
-            indicator.interest_rate = data['interest_rate']
-        if 'unemployment_rate' in data:
-            indicator.unemployment_rate = data['unemployment_rate']
-        if 'industrial_production' in data:
-            indicator.industrial_production = data['industrial_production']
-        if 'agricultural_production' in data:
-            indicator.agricultural_production = data['agricultural_production']
-            
-        # Trade and foreign exchange
-        if 'exports' in data:
-            indicator.exports = data['exports']
-        if 'imports' in data:
-            indicator.imports = data['imports']
-        if 'trade_balance' in data:
-            indicator.trade_balance = data['trade_balance']
-        if 'current_account_balance' in data:
-            indicator.current_account_balance = data['current_account_balance']
-        if 'fdi_inflow' in data:
-            indicator.fdi_inflow = data['fdi_inflow']
-        if 'remittances' in data:
-            indicator.remittances = data['remittances']
-        if 'fx_reserves' in data:
-            indicator.fx_reserves = data['fx_reserves']
-        if 'etb_usd' in data:
-            indicator.etb_usd = data['etb_usd']
-        if 'etb_eur' in data:
-            indicator.etb_eur = data['etb_eur']
-        if 'etb_gbp' in data:
-            indicator.etb_gbp = data['etb_gbp']
-        if 'etb_jpy' in data:
-            indicator.etb_jpy = data['etb_jpy']
-        if 'etb_cny' in data:
-            indicator.etb_cny = data['etb_cny']
-            
-        # Banking and monetary
-        if 'total_deposits' in data:
-            indicator.total_deposits = data['total_deposits']
-        if 'total_loans' in data:
-            indicator.total_loans = data['total_loans']
-        if 'npl_ratio' in data:
-            indicator.npl_ratio = data['npl_ratio']
-        if 'loan_to_deposit' in data:
-            indicator.loan_to_deposit = data['loan_to_deposit']
-        if 'money_supply_m1' in data:
-            indicator.money_supply_m1 = data['money_supply_m1']
-        if 'money_supply_m2' in data:
-            indicator.money_supply_m2 = data['money_supply_m2']
-        if 'private_sector_credit' in data:
-            indicator.private_sector_credit = data['private_sector_credit']
-            
-        # Government finances
-        if 'govt_revenue' in data:
-            indicator.govt_revenue = data['govt_revenue']
-        if 'govt_expenditure' in data:
-            indicator.govt_expenditure = data['govt_expenditure']
-        if 'budget_deficit' in data:
-            indicator.budget_deficit = data['budget_deficit']
-        if 'govt_debt' in data:
-            indicator.govt_debt = data['govt_debt']
-        if 'tax_revenue' in data:
-            indicator.tax_revenue = data['tax_revenue']
-            
-        # Commodities
-        if 'coffee_price' in data:
-            indicator.coffee_price = data['coffee_price']
-        if 'gold_price' in data:
-            indicator.gold_price = data['gold_price']
-        if 'oil_price' in data:
-            indicator.oil_price = data['oil_price']
-        if 'wheat_price' in data:
-            indicator.wheat_price = data['wheat_price']
-            
-        # Auto-calculate derived fields
-        if 'exports' in data and 'imports' in data:
-            indicator.trade_balance = indicator.exports - indicator.imports
-        if 'govt_revenue' in data and 'govt_expenditure' in data:
-            indicator.budget_deficit = indicator.govt_expenditure - indicator.govt_revenue
-        if 'total_loans' in data and 'total_deposits' in data and indicator.total_deposits:
-            indicator.loan_to_deposit = (indicator.total_loans / indicator.total_deposits) * 100
-        
+        if data.get('date'):
+            new_date = _parse_date(data['date'], 'date')
+            clash = MacroIndicators.query.filter(MacroIndicators.date == new_date,
+                                                 MacroIndicators.id != indicator.id).first()
+            if clash:
+                raise ValueError(f'Indicators for {new_date} already exist')
+            indicator.date = new_date
+
+        # Blank form fields arrive as null/"" and clear the value.
+        for field in EDITABLE_INDICATOR_FIELDS:
+            if field in data:
+                setattr(indicator, field, _optional_number(data[field], field))
+    except ValueError as e:
+        db.session.rollback()
+        return _bad_request(str(e))
+
+    # Derived fields, only when both inputs are present
+    if indicator.exports is not None and indicator.imports is not None and \
+            ('exports' in data or 'imports' in data):
+        indicator.trade_balance = indicator.exports - indicator.imports
+    if indicator.govt_revenue is not None and indicator.govt_expenditure is not None and \
+            ('govt_revenue' in data or 'govt_expenditure' in data):
+        indicator.budget_deficit = indicator.govt_expenditure - indicator.govt_revenue
+    if indicator.total_loans is not None and indicator.total_deposits and \
+            ('total_loans' in data or 'total_deposits' in data):
+        indicator.loan_to_deposit = (indicator.total_loans / indicator.total_deposits) * 100
+    indicator.updated_by = current_user.id
+
+    try:
         db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Economic indicator updated successfully'
-        })
-        
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"Error updating indicator {indicator_id}: {str(e)}")
         db.session.rollback()
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+    return jsonify({
+        'success': True,
+        'message': 'Economic indicator updated successfully'
+    })
 
 
 

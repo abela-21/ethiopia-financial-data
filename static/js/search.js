@@ -836,7 +836,7 @@ class AdvancedSearch {
             document.body.appendChild(link);
             link.click();
             link.remove();
-            URL.revokeObjectURL(link.href);
+            setTimeout(() => URL.revokeObjectURL(link.href), 10000);
         } catch (error) {
             this.showToast('Download failed', 'error');
         }
