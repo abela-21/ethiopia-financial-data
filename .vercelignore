@@ -1,0 +1,7 @@
+tests/
+docs/
+uv.lock
+pyproject.toml
+.replit
+Dockerfile
+docker-compose.yml
